@@ -193,7 +193,7 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
   const lCfg = SEASON_CONFIGS[pSeason]
 
   baseX = pWidth / 2
-  baseY = pHeight - 155  // remonté pour que les éléments au sol passent au-dessus de la kb-bar (~80px du bas)
+  baseY = pHeight - 100  // juste au-dessus de la kb-bar (~76px du bas) + marge confortable
 
   // Tronc : légère inclinaison organique
   const lTrunkLength = pHeight * 0.42 * lCfg.lengthMultiplier
