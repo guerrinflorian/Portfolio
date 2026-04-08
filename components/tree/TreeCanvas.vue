@@ -193,7 +193,7 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
   const lCfg = SEASON_CONFIGS[pSeason]
 
   baseX = pWidth / 2
-  baseY = pHeight - 78
+  baseY = pHeight - 62
 
   // Tronc : légère inclinaison organique
   const lTrunkLength = pHeight * 0.42 * lCfg.lengthMultiplier
