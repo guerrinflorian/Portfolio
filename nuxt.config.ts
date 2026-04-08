@@ -61,8 +61,9 @@ export default defineNuxtConfig({
     },
   },
 
-  // Nitro config pour la génération statique
+  // Nitro - preset Vercel + prerender
   nitro: {
+    preset: 'vercel',
     prerender: {
       routes: ['/'],
     },
