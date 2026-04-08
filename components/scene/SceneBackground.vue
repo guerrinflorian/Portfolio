@@ -270,4 +270,11 @@ onUnmounted(() => {
   height: 120px;
   display: block;
 }
+
+/* Sur mobile paysage (petit écran court), réduire la hauteur du sol */
+@media (max-height: 499px) {
+  .sol-svg {
+    height: 70px;
+  }
+}
 </style>

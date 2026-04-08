@@ -217,9 +217,9 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
 
   // Racines, herbe et éléments au sol (statiques, régénérées sur resize/saison)
   generateRoots(lRng)
-  generateGrass(lRng, pWidth)
+  generateGrass(lRng, pWidth, pHeight)
   generateLeaves(pSeason, lRng)
-  generateGroundElements(lRng, pWidth)
+  generateGroundElements(lRng, pWidth, pHeight)
 }
 
 // ─── Génération des racines ───────────────────────────────────────────────────
@@ -236,11 +236,13 @@ function generateRoots(pRng: SeededRandom): void {
 
 // ─── Génération de l'herbe ────────────────────────────────────────────────────
 
-function generateGrass(pRng: SeededRandom, pWidth: number): void {
-  const lM = 12  // marge bord
-  grass = Array.from({ length: 55 }, () => ({
-    offsetX:   lM + pRng.next() * (pWidth - lM * 2),  // position absolue X
-    height:    14 + pRng.next() * 18,
+function generateGrass(pRng: SeededRandom, pWidth: number, pHeight: number): void {
+  const lM     = 12  // marge bord
+  const lScale = Math.min(1, pHeight / 900)
+  const lCount = Math.max(20, Math.floor(pWidth / 24))  // densité proportionnelle à la largeur
+  grass = Array.from({ length: lCount }, () => ({
+    offsetX:   lM + pRng.next() * (pWidth - lM * 2),
+    height:    (14 + pRng.next() * 18) * lScale,
     restAngle: -Math.PI / 2 + (pRng.next() - 0.5) * 0.32,
     oscFreq:   1.4 + pRng.next() * 1.4,
     oscPhase:  pRng.next() * Math.PI * 2,
@@ -257,8 +259,9 @@ let gRocks:   GroundRock[]   = []
 let gFlowers: GroundFlower[] = []
 let gShrooms: GroundShroom[] = []
 
-function generateGroundElements(pRng: SeededRandom, pWidth: number): void {
+function generateGroundElements(pRng: SeededRandom, pWidth: number, pHeight: number): void {
   const lM            = 20  // marge bord
+  const lScale        = Math.min(1, pHeight / 900)  // proportionnel à la hauteur écran
   const lRockColors   = ['#8a7a68', '#7a6e60', '#968070', '#6e6255', '#b0a090']
   const lFlowerColors = ['#ff9eb5', '#ffe066', '#b8eaff', '#ffffff', '#ffb347', '#d4b0ff', '#ff6b6b', '#a8e6cf']
   const lShroomColors = ['#c0392b', '#e67e22', '#8b4513', '#a0522d', '#d35400']
@@ -270,28 +273,28 @@ function generateGroundElements(pRng: SeededRandom, pWidth: number): void {
 
   gRocks = Array.from({ length: lRockCount }, () => ({
     x:     lM + pRng.next() * (pWidth - lM * 2),
-    rx:    7 + pRng.next() * 15,
-    ry:    4 + pRng.next() * 9,
+    rx:    (7 + pRng.next() * 15) * lScale,
+    ry:    (4 + pRng.next() * 9)  * lScale,
     color: lRockColors[Math.floor(pRng.next() * lRockColors.length)]!,
   }))
 
   gFlowers = Array.from({ length: lFlowerCount }, () => ({
     x:          lM + pRng.next() * (pWidth - lM * 2),
-    height:     14 + pRng.next() * 22,
+    height:     (14 + pRng.next() * 22) * lScale,
     petalColor: lFlowerColors[Math.floor(pRng.next() * lFlowerColors.length)]!,
     phase:      pRng.next() * Math.PI * 2,
   }))
 
   gShrooms = Array.from({ length: lShroomCount }, () => ({
     x:        lM + pRng.next() * (pWidth - lM * 2),
-    stemH:    9 + pRng.next() * 11,
-    capR:     6 + pRng.next() * 8,
+    stemH:    (9 + pRng.next() * 11) * lScale,
+    capR:     (6 + pRng.next() * 8)  * lScale,
     capColor: lShroomColors[Math.floor(pRng.next() * lShroomColors.length)]!,
   }))
 }
 
-function drawGroundElements(pCtx: CanvasRenderingContext2D, pTimeS: number, pWidth: number): void {
-  if (pWidth < 768) return
+function drawGroundElements(pCtx: CanvasRenderingContext2D, pTimeS: number, pWidth: number, pHeight: number): void {
+  if (pWidth < 768 || pHeight < 500) return  // caché sur mobile portrait et paysage
 
   const lSpeed = physics.windState.value.currentSpeed
 
@@ -769,7 +772,7 @@ function render(pNow: number): void {
 
   drawRoots(ctx)
   drawGrass(ctx, lTimeS)
-  drawGroundElements(ctx, lTimeS, lW)
+  drawGroundElements(ctx, lTimeS, lW, lH)
   renderNode(ctx, treeRoot, null, 0, lTimeS)
 
   // Collecte les branches terminales pour l'émission de feuilles volantes
