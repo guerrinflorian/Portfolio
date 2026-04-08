@@ -23,7 +23,6 @@ const Constellation   = defineAsyncComponent(() => import('~/components/ui/Const
 const PixelBirds      = defineAsyncComponent(() => import('~/components/ui/PixelBirds.vue'))
 const CommitLog       = defineAsyncComponent(() => import('~/components/ui/CommitLog.vue'))
 const StatusBar       = defineAsyncComponent(() => import('~/components/ui/StatusBar.vue'))
-const CustomCursor    = defineAsyncComponent(() => import('~/components/ui/CustomCursor.vue'))
 const KeyboardHints   = defineAsyncComponent(() => import('~/components/ui/KeyboardHints.vue'))
 
 // ─── Modales - chargement asynchrone (code splitting) ────────────────────────
@@ -154,11 +153,6 @@ useHead({
     <!-- UI layer : barre de statut VS Code en bas -->
     <ClientOnly>
       <StatusBar />
-    </ClientOnly>
-
-    <!-- UI layer : curseur personnalisé (souris uniquement) -->
-    <ClientOnly>
-      <CustomCursor />
     </ClientOnly>
 
     <!-- UI layer : raccourcis clavier -->
