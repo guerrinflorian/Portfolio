@@ -193,7 +193,7 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
   const lCfg = SEASON_CONFIGS[pSeason]
 
   baseX = pWidth / 2
-  baseY = pHeight - 65
+  baseY = pHeight - 155  // remonté pour que les éléments au sol passent au-dessus de la kb-bar (~80px du bas)
 
   // Tronc : légère inclinaison organique
   const lTrunkLength = pHeight * 0.42 * lCfg.lengthMultiplier
@@ -237,8 +237,8 @@ function generateRoots(pRng: SeededRandom): void {
 // ─── Génération de l'herbe ────────────────────────────────────────────────────
 
 function generateGrass(pRng: SeededRandom): void {
-  grass = Array.from({ length: 22 }, () => ({
-    offsetX:   (pRng.next() - 0.5) * 240,
+  grass = Array.from({ length: 32 }, () => ({
+    offsetX:   (pRng.next() - 0.5) * 520,
     height:    14 + pRng.next() * 18,
     restAngle: -Math.PI / 2 + (pRng.next() - 0.5) * 0.32,
     oscFreq:   1.4 + pRng.next() * 1.4,
@@ -261,25 +261,25 @@ function generateGroundElements(pRng: SeededRandom): void {
   const lFlowerColors = ['#ff9eb5', '#ffe066', '#b8eaff', '#ffffff', '#ffb347', '#d4b0ff']
   const lShroomColors = ['#c0392b', '#e67e22', '#8b4513', '#a0522d']
 
-  gRocks = Array.from({ length: 5 }, () => ({
-    offsetX: (pRng.next() - 0.5) * 320,
-    rx:      9 + pRng.next() * 12,
-    ry:      5 + pRng.next() * 7,
+  gRocks = Array.from({ length: 11 }, () => ({
+    offsetX: (pRng.next() - 0.5) * 560,
+    rx:      8 + pRng.next() * 16,
+    ry:      5 + pRng.next() * 9,
     ry2:     0,
     color:   lRockColors[Math.floor(pRng.next() * lRockColors.length)]!,
   }))
 
-  gFlowers = Array.from({ length: 9 }, () => ({
-    offsetX:    (pRng.next() - 0.5) * 380,
-    height:     14 + pRng.next() * 16,
+  gFlowers = Array.from({ length: 18 }, () => ({
+    offsetX:    (pRng.next() - 0.5) * 580,
+    height:     15 + pRng.next() * 20,
     petalColor: lFlowerColors[Math.floor(pRng.next() * lFlowerColors.length)]!,
     phase:      pRng.next() * Math.PI * 2,
   }))
 
-  gShrooms = Array.from({ length: 3 }, () => ({
-    offsetX:  80 + pRng.next() * 200 * (pRng.next() < 0.5 ? 1 : -1),
-    stemH:    10 + pRng.next() * 8,
-    capR:     7 + pRng.next() * 6,
+  gShrooms = Array.from({ length: 6 }, () => ({
+    offsetX:  (60 + pRng.next() * 240) * (pRng.next() < 0.5 ? 1 : -1),
+    stemH:    10 + pRng.next() * 10,
+    capR:     7 + pRng.next() * 7,
     capColor: lShroomColors[Math.floor(pRng.next() * lShroomColors.length)]!,
   }))
 }
