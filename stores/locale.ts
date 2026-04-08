@@ -1,7 +1,7 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Store - langue active (FR / EN)
-// skipHydrate : Pinia ne serialise pas mLocale dans window.__NUXT__
-// donc le payload SSR ne peut pas ecraser la valeur lue dans localStorage
+// Toujours initialisé à 'fr' pour correspondre au HTML généré (pas de mismatch SSR)
+// La locale réelle est appliquée après montage via initLocale()
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -9,20 +9,19 @@ import { skipHydrate } from 'pinia'
 
 export type Locale = 'fr' | 'en'
 
-function calcInitialLocale(): Locale {
-  if (!import.meta.client) return 'fr'
-  const lSaved = localStorage.getItem('portfolio-locale')
-  return lSaved === 'en' ? 'en' : 'fr'
-}
-
 export const useLocaleStore = defineStore('locale', () => {
-  // Initialisé directement depuis localStorage - skipHydrate empeche l'ecrasement SSR
-  const mLocale = ref<Locale>(calcInitialLocale())
+  const mLocale = ref<Locale>('fr')
 
   function toggleLocale(): void {
     mLocale.value = mLocale.value === 'fr' ? 'en' : 'fr'
     localStorage.setItem('portfolio-locale', mLocale.value)
   }
 
-  return { mLocale: skipHydrate(mLocale), toggleLocale }
+  // Appelé après hydratation - lit localStorage sans provoquer de mismatch
+  function initLocale(): void {
+    const lSaved = localStorage.getItem('portfolio-locale')
+    if (lSaved === 'en') mLocale.value = 'en'
+  }
+
+  return { mLocale: skipHydrate(mLocale), toggleLocale, initLocale }
 })
