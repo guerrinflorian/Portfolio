@@ -15,7 +15,6 @@ import FloatingCode from '~/components/ui/FloatingCode.vue'
 import SonarPing from '~/components/ui/SonarPing.vue'
 import LangToggle from '~/components/ui/LangToggle.vue'
 import { useWeather } from '~/composables/useWeather'
-import { useLocaleStore } from '~/stores/locale'
 import { useLocale } from '~/composables/useLocale'
 
 // ─── Composants client-only (canvas, timers, stores réactifs) ─────────────────
@@ -39,7 +38,6 @@ const ModalContact    = defineAsyncComponent(() => import('~/components/modals/M
 // ─── Démarrage météo + locale ─────────────────────────────────────────────────
 
 useWeather()
-useLocaleStore().initLocale()
 const { t } = useLocale()
 
 // ─── Easter egg console ───────────────────────────────────────────────────────
