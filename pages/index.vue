@@ -63,7 +63,7 @@ onMounted(() => {
     'color: #64748b; font-size: 10px;'
   )
   console.log(
-    '\n%c → florian-guerrin.fr  |  florian@guerrin.fr\n',
+    '\n%c → florian-guerrin.fr  |  guerrinflorian@yahoo.com\n',
     'color: #22d3ee; font-weight: 700; font-size: 12px;'
   )
 })
