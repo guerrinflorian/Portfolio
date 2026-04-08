@@ -4,9 +4,12 @@
 
 import { computed } from 'vue'
 import { useWeatherStore } from '~/stores/weather'
+import { useLocale } from '~/composables/useLocale'
 import type { WeatherState } from '~/types/weather'
 
 const mWeatherStore = useWeatherStore()
+
+const { t } = useLocale()
 
 const mTemperature = computed(() => mWeatherStore.temperature)
 const mState   = computed(() => mWeatherStore.state)
@@ -74,7 +77,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
     class="weather-indicator"
     :class="{ 'opacity-50': mLoading }"
     role="status"
-    :aria-label="`Météo à Tressange : ${mTemperature}°C, ${mState}`"
+    :aria-label="t(`Météo à Tressange : ${mTemperature}°C`, `Weather in Tressange: ${mTemperature}°C`)"
     aria-live="polite"
   >
     <!-- Icône SVG -->
@@ -105,7 +108,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
     <span class="weather-separator" aria-hidden="true">·</span>
 
     <!-- Localisation -->
-    <span class="weather-city">Tressange</span>
+    <span class="weather-city">{{ t('Tressange', 'Tressange, FR') }}</span>
   </div>
 </template>
 

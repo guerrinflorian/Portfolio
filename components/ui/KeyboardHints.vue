@@ -2,12 +2,14 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Composant - raccourcis clavier affichés + gestion navigation modale
 
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useModalStore } from '~/stores/modal'
+import { useLocale } from '~/composables/useLocale'
 import type { ModalId } from '~/types/modal'
 
 const mStore   = useModalStore()
 const mVisible = ref(true)
+const { t }    = useLocale()
 
 // ─── Définition des raccourcis ────────────────────────────────────────────────
 
@@ -17,14 +19,14 @@ interface Shortcut {
   modal: ModalId
 }
 
-const mShortcuts: Shortcut[] = [
-  { key: 'P', label: 'Profil',      modal: 'profil'     },
-  { key: 'E', label: 'Expérience',  modal: 'experience' },
-  { key: 'D', label: 'Diplômes',    modal: 'diplomes'   },
-  { key: 'S', label: 'Stack',       modal: 'stack'      },
-  { key: 'J', label: 'Projets',     modal: 'projets'    },
-  { key: 'C', label: 'Contact',     modal: 'contact'    },
-]
+const mShortcuts = computed<Shortcut[]>(() => [
+  { key: 'P', label: t('Profil',      'Profile'),    modal: 'profil'     },
+  { key: 'E', label: t('Expérience',  'Experience'), modal: 'experience' },
+  { key: 'D', label: t('Diplômes',    'Education'),  modal: 'diplomes'   },
+  { key: 'S', label: 'Stack',                        modal: 'stack'      },
+  { key: 'J', label: t('Projets',     'Projects'),   modal: 'projets'    },
+  { key: 'C', label: 'Contact',                      modal: 'contact'    },
+])
 
 // ─── Gestionnaire clavier ─────────────────────────────────────────────────────
 
@@ -43,7 +45,7 @@ function mOnKeydown(e: KeyboardEvent): void {
     return
   }
 
-  const lShortcut = mShortcuts.find(lS => lS.key === lKey)
+  const lShortcut = mShortcuts.value.find(lS => lS.key === lKey)
   if (lShortcut) {
     e.preventDefault()
     mStore.open(lShortcut.modal)
@@ -74,7 +76,7 @@ onUnmounted(() => {
             <rect x="1" y="2" width="8" height="6" rx="1"/>
             <path d="M3 5h4M5 3v4"/>
           </svg>
-          Touches
+          {{ t('Touches', 'Keys') }}
         </span>
 
         <template v-for="(lS, lIdx) in mShortcuts" :key="lS.key">
@@ -90,7 +92,7 @@ onUnmounted(() => {
         </template>
 
         <span class="kb-sep" aria-hidden="true">·</span>
-        <span class="kb-hint">? pour revoir</span>
+        <span class="kb-hint">{{ t('? pour revoir', '? to show') }}</span>
       </div>
     </Transition>
   </Teleport>

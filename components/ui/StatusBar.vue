@@ -4,6 +4,7 @@
 
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useWeatherStore } from '~/stores/weather'
+import { useLocale } from '~/composables/useLocale'
 
 const weatherStore = useWeatherStore()
 
@@ -30,7 +31,9 @@ const mFormattedTime = computed(() => {
 
 // ─── Libellé météo ────────────────────────────────────────────────────────────
 
-const WEATHER_LABELS: Record<string, string> = {
+const { t, locale } = useLocale()
+
+const WEATHER_LABELS_FR: Record<string, string> = {
   clear:    'Ensoleillé',
   cloudy:   'Nuageux',
   overcast: 'Couvert',
@@ -40,8 +43,21 @@ const WEATHER_LABELS: Record<string, string> = {
   fog:      'Brouillard',
 }
 
-const mWeatherLabel = computed(() => WEATHER_LABELS[weatherStore.state] ?? weatherStore.state)
-const mTemp         = computed(() => weatherStore.loading ? '-' : `${weatherStore.temperature}°C`)
+const WEATHER_LABELS_EN: Record<string, string> = {
+  clear:    'Sunny',
+  cloudy:   'Cloudy',
+  overcast: 'Overcast',
+  rain:     'Rain',
+  snow:     'Snow',
+  storm:    'Storm',
+  fog:      'Fog',
+}
+
+const mWeatherLabel = computed(() => {
+  const lLabels = locale.value === 'fr' ? WEATHER_LABELS_FR : WEATHER_LABELS_EN
+  return lLabels[weatherStore.state] ?? weatherStore.state
+})
+const mTemp = computed(() => weatherStore.loading ? '-' : `${weatherStore.temperature}°C`)
 
 onMounted(() => {
   mClockTimer = setInterval(() => { mNow.value = new Date() }, 1000)
@@ -83,7 +99,7 @@ onUnmounted(() => {
     <!-- Partie centre : météo en direct (masquée sur mobile, déjà visible via WeatherIndicator) -->
     <div class="status-section status-section--center status-section--hide-mobile">
       <span class="status-item status-item--weather">
-        {{ mTemp }} · {{ mWeatherLabel }} · Tressange
+        {{ mTemp }} · {{ mWeatherLabel }} · {{ t('Tressange', 'Tressange, France') }}
       </span>
     </div>
 
