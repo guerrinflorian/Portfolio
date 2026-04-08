@@ -46,8 +46,20 @@ const { t } = useLocale()
       </div>
     </div>
 
-    <!-- Accroche -->
-    <div class="mb-5 space-y-2.5">
+    <!-- Intro conviviale -->
+    <div class="intro-block mb-5">
+      <p class="text-sm leading-relaxed" style="color: var(--modal-text)">
+        {{
+          t(
+            'Bonjour, je m\'appelle Florian. J\'habite à Tressange en Moselle, à cinq minutes de la frontière luxembourgeoise. D\'ailleurs, le petit indicateur météo en haut à droite affiche la température qu\'il fait chez moi en ce moment.',
+            'Hi, my name is Florian. I live in Tressange, Moselle, five minutes from the Luxembourg border. By the way, the small weather indicator in the top right shows the current temperature where I live.'
+          )
+        }}
+      </p>
+    </div>
+
+    <!-- Accroche pro -->
+    <div class="mb-5">
       <p class="text-sm leading-relaxed opacity-85" style="color: var(--modal-text)">
         {{
           t(
@@ -94,6 +106,14 @@ const { t } = useLocale()
 </template>
 
 <style scoped>
+.intro-block {
+  padding: 0.75rem 1rem;
+  background: rgba(59, 130, 246, 0.06);
+  border-left: 2px solid rgba(59, 130, 246, 0.35);
+  border-radius: 0 6px 6px 0;
+  opacity: 0.9;
+}
+
 .avatar-photo {
   width: 64px;
   height: 64px;

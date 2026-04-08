@@ -16,6 +16,7 @@ import SonarPing from '~/components/ui/SonarPing.vue'
 import LangToggle from '~/components/ui/LangToggle.vue'
 import { useWeather } from '~/composables/useWeather'
 import { useLocaleStore } from '~/stores/locale'
+import { useLocale } from '~/composables/useLocale'
 
 // ─── Composants client-only (canvas, timers, stores réactifs) ─────────────────
 
@@ -39,6 +40,7 @@ const ModalContact    = defineAsyncComponent(() => import('~/components/modals/M
 
 useWeather()
 useLocaleStore().initLocale()
+const { t } = useLocale()
 
 // ─── Easter egg console ───────────────────────────────────────────────────────
 
@@ -173,7 +175,7 @@ useHead({
 
     <!-- Instruction d'interaction - visible uniquement jusqu'à la première modale ouverte -->
     <div class="interaction-hint" aria-live="polite">
-      <p>Clique sur les branches de l'arbre</p>
+      <p>{{ t('Clique sur les branches de l\'arbre', 'Click on the tree branches') }}</p>
     </div>
 
   </main>
