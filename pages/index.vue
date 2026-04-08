@@ -68,15 +68,28 @@ onMounted(() => {
   )
 })
 
-// ─── SEO ──────────────────────────────────────────────────────────────────────
+// ─── SEO + Schema JSON-LD ─────────────────────────────────────────────────────
 
 useHead({
-  title: 'Florian Guerrin - Full-Stack Developer',
-  meta: [
+  script: [
     {
-      name: 'description',
-      content:
-        'Portfolio de Florian Guerrin, développeur Vue.js / TypeScript / SQL Server basé à Tressange, Moselle. Applications intranet industrielles, infrastructure VPS, projets créatifs.',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'Florian Guerrin',
+        jobTitle: 'Developpeur Full-Stack',
+        url: 'https://florian-guerrin.fr',
+        email: 'guerrinflorian@yahoo.com',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Tressange',
+          addressRegion: 'Moselle',
+          addressCountry: 'FR',
+        },
+        knowsAbout: ['Vue.js', 'TypeScript', 'SQL Server', 'Nuxt 3', 'Docker', 'Node.js'],
+        sameAs: ['https://github.com/guerrinflorian'],
+      }),
     },
   ],
 })

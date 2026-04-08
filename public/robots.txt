@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://florian-guerrin.fr/sitemap.xml
