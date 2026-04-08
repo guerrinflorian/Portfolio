@@ -1,18 +1,17 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Composable - accès à la locale active + helper t(fr, en)
 
-import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useLocaleStore } from '~/stores/locale'
 
 export function useLocale() {
   const lStore = useLocaleStore()
+  const { mLocale } = storeToRefs(lStore)
 
   // Retourne pFr ou pEn selon la langue active
   function t(pFr: string, pEn: string): string {
-    return lStore.mLocale === 'fr' ? pFr : pEn
+    return mLocale.value === 'fr' ? pFr : pEn
   }
 
-  const locale = computed(() => lStore.mLocale)
-
-  return { t, locale, toggleLocale: lStore.toggleLocale }
+  return { t, locale: mLocale, toggleLocale: lStore.toggleLocale }
 }

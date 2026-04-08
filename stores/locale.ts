@@ -1,26 +1,24 @@
 // Auteur : GUERRINF - Florian Guerrin
-// Store - langue active (FR / EN), persistée en localStorage
+// Store - langue active (FR / EN) via useCookie Nuxt (fonctionne SSR + client sans conflit)
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed } from 'vue'
 
 export type Locale = 'fr' | 'en'
 
 export const useLocaleStore = defineStore('locale', () => {
-  const mLocale = ref<Locale>('fr')
+  // useCookie est isomorphe : lu côté serveur et client sans hydratation conflictuelle
+  const mCookie = useCookie<Locale>('portfolio-locale', {
+    default: () => 'fr',
+    maxAge: 60 * 60 * 24 * 365, // 1 an
+    sameSite: 'lax',
+  })
+
+  const mLocale = computed(() => mCookie.value)
 
   function toggleLocale(): void {
-    mLocale.value = mLocale.value === 'fr' ? 'en' : 'fr'
-    if (import.meta.client) {
-      localStorage.setItem('portfolio-locale', mLocale.value)
-    }
+    mCookie.value = mCookie.value === 'fr' ? 'en' : 'fr'
   }
 
-  function initLocale(): void {
-    if (!import.meta.client) return
-    const lSaved = localStorage.getItem('portfolio-locale') as Locale | null
-    if (lSaved === 'fr' || lSaved === 'en') mLocale.value = lSaved
-  }
-
-  return { mLocale, toggleLocale, initLocale }
+  return { mLocale, toggleLocale }
 })
