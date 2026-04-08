@@ -5,16 +5,19 @@
 import { computed } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
+import { useLocale } from '~/composables/useLocale'
 
 const mStore = useModalStore()
 const mOuverte = computed({
   get: () => mStore.activeModal === 'passions',
   set: (lVal) => { if (!lVal) mStore.close() },
 })
+
+const { t } = useLocale()
 </script>
 
 <template>
-  <ModalBase v-model="mOuverte" title="Ce qui m'anime">
+  <ModalBase v-model="mOuverte" :title="t('Ce qui m\'anime', 'Outside of work')">
     <div class="passions-layout">
 
       <!-- Tennis -->
@@ -27,12 +30,16 @@ const mOuverte = computed({
           </svg>
           <div>
             <h3 class="passion-title">Tennis</h3>
-            <p class="passion-meta">3 ans et demi · pratique actuelle</p>
+            <p class="passion-meta">{{ t('3 ans et demi · pratique actuelle', '3.5 years · currently playing') }}</p>
           </div>
         </div>
         <p class="passion-text">
-          Mon sport depuis 3 ans et demi, je m'y suis mis tard mais j'accroche vraiment.
-          La partie mentale me plait autant que la technique - t'as pas le droit à l'erreur sur les points importants.
+          {{
+            t(
+              'Je m\'y suis mis sur le tard mais j\'accroche vraiment. La partie mentale me plait autant que la technique — sur les points importants, t\'as pas le droit à l\'erreur.',
+              'Started late but I\'m really hooked. The mental side interests me as much as the technique — on the big points, there\'s no room for mistakes.'
+            )
+          }}
         </p>
       </section>
 
@@ -46,13 +53,17 @@ const mOuverte = computed({
             <path d="M10 22 L16 8 L22 22 M12 18 h8" stroke="#3b82f6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <div>
-            <h3 class="passion-title">Parcours sportif</h3>
-            <p class="passion-meta">Football · Judo · Ping-pong</p>
+            <h3 class="passion-title">{{ t('Parcours sportif', 'Sports background') }}</h3>
+            <p class="passion-meta">{{ t('Football · Judo · Ping-pong', 'Football · Judo · Table tennis') }}</p>
           </div>
         </div>
         <p class="passion-text">
-          Du foot pendant 8 ans gamin, du judo un an et demi, un peu de ping-pong.
-          Le tennis c'est ce qui m'a le plus accroché jusqu'ici.
+          {{
+            t(
+              'Du foot pendant 8 ans gamin, du judo un an et demi, un peu de ping-pong. Le tennis c\'est ce qui m\'a le plus accroché jusqu\'ici.',
+              '8 years of football as a kid, a year and a half of judo, some table tennis. Tennis is what stuck the most.'
+            )
+          }}
         </p>
       </section>
 
@@ -66,13 +77,17 @@ const mOuverte = computed({
             <path d="M11 16h4M13 14v4M20 15h2M20 17h2" stroke="#6366f1" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
           <div>
-            <h3 class="passion-title">Jeux vidéo</h3>
+            <h3 class="passion-title">{{ t('Jeux vidéo', 'Gaming') }}</h3>
             <p class="passion-meta">RPG · Strategy · Tycoon</p>
           </div>
         </div>
         <p class="passion-text">
-          Surtout des RPG et des jeux de gestion. J'aime les jeux avec de la profondeur,
-          où t'as envie de comprendre comment tout fonctionne sous le capot.
+          {{
+            t(
+              'Surtout des RPG et des jeux de gestion. J\'aime les jeux avec de la profondeur, où t\'as envie de comprendre comment tout fonctionne sous le capot.',
+              'Mainly RPGs and management games. I like games with depth, where you want to understand how everything works under the hood.'
+            )
+          }}
         </p>
       </section>
 
@@ -90,12 +105,16 @@ const mOuverte = computed({
           </svg>
           <div>
             <h3 class="passion-title">Karting</h3>
-            <p class="passion-meta">Kart 2 temps · propriétaire</p>
+            <p class="passion-meta">{{ t('Kart 2 temps · propriétaire', '2-stroke kart · owner') }}</p>
           </div>
         </div>
         <p class="passion-text">
-          J'ai acheté mon propre kart 2 temps. Rouler et bricoler dessus, les deux me plaisent.
-          C'est un bon moyen de déconnecter complètement.
+          {{
+            t(
+              'J\'ai acheté mon propre kart 2 temps. Rouler et bricoler dessus, les deux me plaisent. C\'est un bon moyen de déconnecter complètement.',
+              'I bought my own 2-stroke kart. Driving it and working on it — I enjoy both. It\'s a great way to fully disconnect.'
+            )
+          }}
         </p>
       </section>
 
@@ -111,13 +130,17 @@ const mOuverte = computed({
             <circle cx="22" cy="18.5" r="1.5" fill="#10b981"/>
           </svg>
           <div>
-            <h3 class="passion-title">Auto-hébergement</h3>
+            <h3 class="passion-title">{{ t('Auto-hébergement', 'Self-hosting') }}</h3>
             <p class="passion-meta">VPS · Docker · Monitoring</p>
           </div>
         </div>
         <p class="passion-text">
-          J'ai mon VPS OVH que je gère moi-même, Docker, WireGuard pour le VPN, Grafana pour surveiller tout ça.
-          J'aime avoir la main sur toute la chaîne plutôt que de tout déléguer à un service tiers.
+          {{
+            t(
+              'J\'ai mon VPS OVH que je gère moi-même : Docker, WireGuard pour le VPN, Grafana pour surveiller tout ça. J\'aime avoir la main sur toute la chaîne plutôt que de tout déléguer à un service tiers.',
+              'I run my own OVH VPS: Docker, WireGuard for VPN, Grafana for monitoring. I like having control over the full stack rather than delegating everything to a third-party service.'
+            )
+          }}
         </p>
       </section>
 

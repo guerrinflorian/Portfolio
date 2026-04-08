@@ -7,7 +7,7 @@ import { useModalStore } from '~/stores/modal'
 import type { ModalId } from '~/types/modal'
 
 const mStore   = useModalStore()
-const mVisible = ref(false)
+const mVisible = ref(true)
 
 // ─── Définition des raccourcis ────────────────────────────────────────────────
 
@@ -51,25 +51,12 @@ function mOnKeydown(e: KeyboardEvent): void {
   }
 }
 
-// ─── Affichage initial bref ───────────────────────────────────────────────────
-
-let mTimer: ReturnType<typeof setTimeout> | null = null
-let mTimerInner: ReturnType<typeof setTimeout> | null = null
-
 onMounted(() => {
   document.addEventListener('keydown', mOnKeydown)
-
-  // Apparaît brièvement après le chargement de la scène
-  mTimer = setTimeout(() => {
-    mVisible.value = true
-    mTimerInner = setTimeout(() => { mVisible.value = false }, 4500)
-  }, 4000)
 })
 
 onUnmounted(() => {
   document.removeEventListener('keydown', mOnKeydown)
-  if (mTimer) clearTimeout(mTimer)
-  if (mTimerInner) clearTimeout(mTimerInner)
 })
 </script>
 
@@ -87,7 +74,7 @@ onUnmounted(() => {
             <rect x="1" y="2" width="8" height="6" rx="1"/>
             <path d="M3 5h4M5 3v4"/>
           </svg>
-          kbd
+          Touches
         </span>
 
         <template v-for="(lS, lIdx) in mShortcuts" :key="lS.key">
@@ -205,9 +192,23 @@ onUnmounted(() => {
   transform: translateX(-50%) translateY(6px);
 }
 
-/* ─── Mobile : masqué (pas de clavier) ──────────────────────────────────────── */
+/* ─── Mobile : on cache les touches, on garde les labels cliquables ─────────── */
 
 @media (max-width: 639px) {
-  .kb-bar { display: none; }
+  .kb-bar {
+    gap: 0.3rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .kb-prefix,
+  .kb-key,
+  .kb-hint {
+    display: none;
+  }
+
+  .kb-label {
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
 }
 </style>

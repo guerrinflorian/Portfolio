@@ -5,12 +5,15 @@
 import { computed } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
+import { useLocale } from '~/composables/useLocale'
 
 const mStore = useModalStore()
 const mOuverte = computed({
   get: () => mStore.activeModal === 'contact',
   set: (lVal) => { if (!lVal) mStore.close() },
 })
+
+const { t } = useLocale()
 
 // ─── Liens réels ──────────────────────────────────────────────────────────────
 
@@ -25,7 +28,12 @@ const PHONE        = '06 95 38 01 57'
     <!-- Intro -->
     <div class="mb-5">
       <p class="text-sm leading-relaxed opacity-80" style="color: var(--modal-text)">
-        Disponible pour des opportunités côté <strong>Moselle ou Luxembourg</strong>.
+        {{
+          t(
+            'Disponible pour des opportunités côté Moselle ou Luxembourg.',
+            'Open to opportunities in Moselle or Luxembourg.'
+          )
+        }}
       </p>
     </div>
 
@@ -57,7 +65,7 @@ const PHONE        = '06 95 38 01 57'
       </a>
 
       <!-- Téléphone -->
-      <a :href="`tel:+33695380157`" class="contact-link" aria-label="Appeler Florian Guerrin">
+      <a href="tel:+33695380157" class="contact-link" aria-label="Appeler Florian Guerrin">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
         </svg>
@@ -67,7 +75,7 @@ const PHONE        = '06 95 38 01 57'
 
     <!-- Localisation -->
     <p class="mt-5 text-xs opacity-45 text-center" style="color: var(--modal-text)">
-      Tressange · Moselle · 57710 · Frontière Luxembourg
+      {{ t('Tressange · Moselle · 57710 · Frontière Luxembourg', 'Tressange · Moselle · France · Luxembourg border') }}
     </p>
   </ModalBase>
 </template>

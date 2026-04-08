@@ -13,7 +13,9 @@ import DotGrid from '~/components/ui/DotGrid.vue'
 import ScanLines from '~/components/ui/ScanLines.vue'
 import FloatingCode from '~/components/ui/FloatingCode.vue'
 import SonarPing from '~/components/ui/SonarPing.vue'
+import LangToggle from '~/components/ui/LangToggle.vue'
 import { useWeather } from '~/composables/useWeather'
+import { useLocaleStore } from '~/stores/locale'
 
 // ─── Composants client-only (canvas, timers, stores réactifs) ─────────────────
 
@@ -34,9 +36,10 @@ const ModalProjets    = defineAsyncComponent(() => import('~/components/modals/M
 const ModalPassions   = defineAsyncComponent(() => import('~/components/modals/ModalPassions.vue'))
 const ModalContact    = defineAsyncComponent(() => import('~/components/modals/ModalContact.vue'))
 
-// ─── Démarrage météo ──────────────────────────────────────────────────────────
+// ─── Démarrage météo + locale ─────────────────────────────────────────────────
 
 useWeather()
+useLocaleStore().initLocale()
 
 // ─── Easter egg console ───────────────────────────────────────────────────────
 
@@ -140,6 +143,9 @@ useHead({
     <!-- UI layer : indicateur météo coin haut droit -->
     <WeatherIndicator />
 
+    <!-- UI layer : bouton langue FR / EN -->
+    <LangToggle />
+
     <!-- UI layer : journal de commits coin haut gauche -->
     <ClientOnly>
       <CommitLog />
@@ -171,9 +177,9 @@ useHead({
       <ModalContact />
     </ClientOnly>
 
-    <!-- Instruction d'interaction - disparaît automatiquement -->
+    <!-- Instruction d'interaction - visible uniquement jusqu'à la première modale ouverte -->
     <div class="interaction-hint" aria-live="polite">
-      <p>Clique sur les points lumineux de l'arbre</p>
+      <p>Clique sur les branches de l'arbre</p>
     </div>
 
   </main>
@@ -192,7 +198,7 @@ useHead({
 /* Hint d'interaction - au-dessus de la status bar */
 .interaction-hint {
   position: fixed;
-  bottom: 3.25rem;    /* au-dessus de la StatusBar (26px) */
+  bottom: 5.5rem;    /* au-dessus de la kb-bar + StatusBar */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
@@ -209,12 +215,12 @@ useHead({
   pointer-events: none;
   animation:
     fadeIn  1s ease 2s   both,
-    fadeOut 1s ease 8s   both;
+    fadeOut 1s ease 10s  both;
 }
 
 @media (max-width: 639px) {
   .interaction-hint {
-    bottom: 2.5rem;
+    bottom: 4.5rem;
     font-size: 0.72rem;
     padding: 0.4rem 1rem;
   }
