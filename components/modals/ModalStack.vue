@@ -1,0 +1,195 @@
+<script setup lang="ts">
+// Auteur : GUERRINF - Florian Guerrin
+// Modale - Stack technique avec barres de compétence animées GSAP
+
+import { computed, ref, watch, nextTick } from 'vue'
+import ModalBase from './ModalBase.vue'
+import { useModalStore } from '~/stores/modal'
+import type { Skill, SkillCategory, SkillContext } from '~/types/modal'
+
+const mStore = useModalStore()
+const mOuverte = computed({
+  get: () => mStore.activeModal === 'stack',
+  set: (lVal) => { if (!lVal) mStore.close() },
+})
+
+// ─── Données compétences (niveaux réels issus du dossier) ─────────────────────
+
+const mCompetences: Skill[] = [
+  // Frontend
+  { name: 'Vue 2',                  level: 95, category: 'front',   context: 'prod'   },
+  { name: 'Vue 3 / Pinia / Router', level: 75, category: 'front',   context: 'prod'   },
+  { name: 'HTML / CSS',             level: 85, category: 'front',   context: 'prod'   },
+  { name: 'TypeScript',             level: 70, category: 'front',   context: 'prod'   },
+  { name: 'DevExtreme',             level: 80, category: 'front',   context: 'prod'   },
+  { name: 'React',                  level: 65, category: 'front',   context: 'projet' },
+  { name: 'Angular',                level: 50, category: 'front',   context: 'projet' },
+
+  // Back & BDD
+  { name: 'SQL Server / T-SQL',     level: 60, category: 'back',    context: 'prod'   },
+  { name: 'Node.js / Fastify',      level: 65, category: 'back',    context: 'projet' },
+  { name: 'VB.NET / ASP.NET',       level: 50, category: 'back',    context: 'prod'   },
+  { name: 'Webservices REST',       level: 65, category: 'back',    context: 'prod'   },
+  { name: 'PostgreSQL',             level: 35, category: 'back',    context: 'projet' },
+
+  // DevOps & Outils
+  { name: 'GitHub / Git',           level: 80, category: 'outils',  context: 'prod'   },
+  { name: 'TFS / TFVC',             level: 75, category: 'outils',  context: 'prod'   },
+  { name: 'Docker / Compose',       level: 55, category: 'outils',  context: 'prod'   },
+  { name: 'Linux (admin VPS)',       level: 50, category: 'outils',  context: 'prod'   },
+  { name: 'Nginx / Caddy / Kong',   level: 45, category: 'outils',  context: 'prod'   },
+  { name: 'WireGuard VPN',          level: 40, category: 'outils',  context: 'prod'   },
+
+  // Créatif & divers
+  { name: 'Canvas API / GSAP',      level: 55, category: 'creatif', context: 'projet' },
+  { name: 'Phaser.js',              level: 35, category: 'creatif', context: 'projet' },
+  { name: 'Flutter',                level: 30, category: 'creatif', context: 'projet' },
+  { name: 'Python (scripts)',       level: 30, category: 'creatif', context: 'projet' },
+]
+
+// ─── Config badge contexte ────────────────────────────────────────────────────
+
+const mContextConfig: Record<SkillContext, { label: string; color: string }> = {
+  prod:   { label: 'En prod',   color: '#22c55e' },
+  projet: { label: 'En projet', color: '#60a5fa' },
+}
+
+// ─── Groupes d'affichage ─────────────────────────────────────────────────────
+
+interface SkillGroup {
+  id: SkillCategory
+  label: string
+  color: string
+  skills: Skill[]
+}
+
+const mGroupes: SkillGroup[] = [
+  { id: 'front',   label: 'Frontend',         color: '#3b82f6', skills: mCompetences.filter(c => c.category === 'front') },
+  { id: 'back',    label: 'Back & BDD',        color: '#10b981', skills: mCompetences.filter(c => c.category === 'back') },
+  { id: 'outils',  label: 'DevOps & Outils',   color: '#f59e0b', skills: mCompetences.filter(c => c.category === 'outils') },
+  { id: 'creatif', label: 'Créatif & Divers',  color: '#ec4899', skills: mCompetences.filter(c => c.category === 'creatif') },
+]
+
+// ─── Animation GSAP des barres ────────────────────────────────────────────────
+
+const mBarreRefs = ref<HTMLElement[]>([])
+
+function enregistrerBarre(pEl: Element | null): void {
+  if (pEl instanceof HTMLElement) mBarreRefs.value.push(pEl)
+}
+
+watch(
+  () => mOuverte.value,
+  async (lNewVal) => {
+    if (!lNewVal || !import.meta.client) return
+    mBarreRefs.value = []
+    await nextTick()
+    await new Promise<void>((lResolve) => setTimeout(lResolve, 350))
+    const { gsap } = await import('gsap')
+    gsap.fromTo(
+      mBarreRefs.value,
+      { width: '0%' },
+      {
+        width: (lIndex) => {
+          const lBarre = mBarreRefs.value[lIndex]
+          return lBarre?.dataset['level'] ? `${lBarre.dataset['level']}%` : '0%'
+        },
+        duration: 0.7,
+        ease: 'power2.out',
+        stagger: 0.04,
+      }
+    )
+  }
+)
+</script>
+
+<template>
+  <ModalBase v-model="mOuverte" title="Stack technique">
+    <div class="stack-grid">
+      <div v-for="lGroupe in mGroupes" :key="lGroupe.id" class="skill-group">
+        <h3 class="skill-group-title" :style="{ color: lGroupe.color }">
+          {{ lGroupe.label }}
+        </h3>
+        <div class="space-y-3">
+          <div v-for="lSkill in lGroupe.skills" :key="lSkill.name" class="skill-item">
+            <div class="skill-header">
+              <div class="skill-name-row">
+                <span class="skill-name" style="color: var(--modal-text)">{{ lSkill.name }}</span>
+                <span
+                  class="skill-context-badge"
+                  :style="{ color: mContextConfig[lSkill.context].color, borderColor: mContextConfig[lSkill.context].color }"
+                >{{ mContextConfig[lSkill.context].label }}</span>
+              </div>
+              <span class="skill-level" :style="{ color: lGroupe.color }">{{ lSkill.level }}%</span>
+            </div>
+            <div
+              class="skill-bar-track"
+              role="progressbar"
+              :aria-valuenow="lSkill.level"
+              :aria-valuemin="0"
+              :aria-valuemax="100"
+              :aria-label="lSkill.name"
+            >
+              <div
+                :ref="(el) => enregistrerBarre(el as Element | null)"
+                class="skill-bar-fill"
+                :data-level="lSkill.level"
+                :style="{ background: `linear-gradient(to right, ${lGroupe.color}cc, ${lGroupe.color})` }"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ModalBase>
+</template>
+
+<style scoped>
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+}
+
+@media (max-width: 520px) {
+  .stack-grid { grid-template-columns: 1fr; }
+}
+
+.skill-group-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.875rem;
+}
+
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.375rem;
+}
+
+.skill-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.skill-name  { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
+.skill-level { font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+.skill-context-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 99px;
+  border: 1px solid;
+  opacity: 0.85;
+  background: transparent;
+  white-space: nowrap;
+}
+</style>
