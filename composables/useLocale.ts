@@ -8,7 +8,6 @@ export function useLocale() {
   const lStore = useLocaleStore()
   const { mLocale } = storeToRefs(lStore)
 
-  // Retourne pFr ou pEn selon la langue active
   function t(pFr: string, pEn: string): string {
     return mLocale.value === 'fr' ? pFr : pEn
   }
