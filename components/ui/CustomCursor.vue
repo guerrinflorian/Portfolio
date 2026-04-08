@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // Auteur : GUERRINF - Florian Guerrin
-// Curseur personnalisé — mix-blend-mode: exclusion (toujours visible sur tout fond)
-// Position via manipulation DOM directe pour fluidité maximale (0 lag Vue)
+// Curseur personnalisé — réticule 4 coins, translate3d GPU, sans mix-blend-mode
 
 import { ref, onMounted, onUnmounted } from 'vue'
 
@@ -10,20 +9,16 @@ const mVisible  = ref(false)
 const mHover    = ref(false)
 const mClicking = ref(false)
 
-// ─── Position : DOM direct, pas de réactivité Vue ─────────────────────────────
-
 let mLastTarget: EventTarget | null = null
 
 function mOnMove(e: MouseEvent): void {
   if (mRootRef.value) {
-    mRootRef.value.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`
+    // translate3d force la couche GPU — 0 lag de composition
+    mRootRef.value.style.transform = `translate3d(${e.clientX}px,${e.clientY}px,0)`
   }
   if (!mVisible.value) mVisible.value = true
-
-  // Réinitialise le click si le bouton a été relâché hors fenêtre
   if (e.buttons === 0 && mClicking.value) mClicking.value = false
 
-  // Détection hover — recalcul uniquement si la cible change
   if (e.target !== mLastTarget) {
     mLastTarget = e.target
     const lTarget = e.target as HTMLElement
@@ -39,7 +34,7 @@ function mOnDown(): void   { mClicking.value = true  }
 function mOnUp(): void     { mClicking.value = false }
 
 onMounted(() => {
-  document.addEventListener('mousemove',  mOnMove)
+  document.addEventListener('mousemove',  mOnMove,  { passive: true })
   document.addEventListener('mouseleave', mOnLeave)
   document.addEventListener('mouseenter', mOnEnter)
   document.addEventListener('mousedown',  mOnDown)
@@ -65,11 +60,17 @@ onUnmounted(() => {
         'cursor-root--hover':    mHover && !mClicking,
         'cursor-root--clicking': mClicking,
       }"
-      style="transform: translate(-200px, -200px)"
+      style="transform: translate3d(-200px,-200px,0)"
       aria-hidden="true"
     >
-      <!-- Anneau externe -->
-      <div class="cursor-ring" />
+      <!-- Coin haut-gauche -->
+      <div class="cursor-corner cursor-tl" />
+      <!-- Coin haut-droit -->
+      <div class="cursor-corner cursor-tr" />
+      <!-- Coin bas-gauche -->
+      <div class="cursor-corner cursor-bl" />
+      <!-- Coin bas-droit -->
+      <div class="cursor-corner cursor-br" />
       <!-- Point central -->
       <div class="cursor-dot" />
     </div>
@@ -77,89 +78,91 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/*
-  mix-blend-mode: exclusion → formule : A + B - 2AB
-  Pour blanc (A=1) : résultat = 1 - B (complément du fond)
-  Résultat : toujours contrasté, quelle que soit la couleur du fond.
-*/
+/* Origine = position exacte du curseur (div 0×0) */
 .cursor-root {
   position: fixed;
   top: 0;
   left: 0;
+  width: 0;
+  height: 0;
   pointer-events: none;
   z-index: 99999;
   will-change: transform;
-  mix-blend-mode: exclusion;
-  /* Pas de transition sur transform — suivi immédiat de la souris */
+  /* Pas de mix-blend-mode — pas de recomposition GPU */
 }
 
-.cursor-root--hidden .cursor-dot,
-.cursor-root--hidden .cursor-ring {
+/* ─── Masqué ─────────────────────────────────────────────────────────────────── */
+
+.cursor-root--hidden .cursor-corner,
+.cursor-root--hidden .cursor-dot {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-/* ─── Anneau ─────────────────────────────────────────────────────────────────── */
+/* ─── Coins : L inversés ─────────────────────────────────────────────────────── */
 
-.cursor-ring {
+.cursor-corner {
   position: absolute;
-  width: 36px;
-  height: 36px;
-  border: 1.5px solid #ffffff;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-color: rgba(255, 255, 255, 0.88);
+  border-style: solid;
   transition:
-    width        0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-    height       0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-    border-color 0.2s ease,
-    border-width 0.2s ease,
-    opacity      0.2s ease;
+    top    0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    left   0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    right  0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    bottom 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 0.18s ease,
+    opacity 0.2s ease;
 }
+
+/* État normal : coins écartés à ±16px du centre */
+.cursor-tl { top: -17px; left: -17px; border-width: 1.5px 0 0 1.5px; }
+.cursor-tr { top: -17px; left:   8px; border-width: 1.5px 1.5px 0 0; }
+.cursor-bl { top:   8px; left: -17px; border-width: 0 0 1.5px 1.5px; }
+.cursor-br { top:   8px; left:   8px; border-width: 0 1.5px 1.5px 0; }
 
 /* ─── Point central ──────────────────────────────────────────────────────────── */
 
 .cursor-dot {
   position: absolute;
-  width: 5px;
-  height: 5px;
-  background: #ffffff;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition:
-    width  0.15s ease,
-    height 0.15s ease,
-    opacity 0.2s ease;
-}
-
-/* ─── Hover : anneau élargi avec ressort (cubic-bezier springy) ──────────────── */
-
-.cursor-root--hover .cursor-ring {
-  width: 52px;
-  height: 52px;
-  border-width: 1px;
-}
-
-.cursor-root--hover .cursor-dot {
   width: 3px;
   height: 3px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  top: -1.5px;
+  left: -1.5px;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-/* ─── Click : anneau compressé et point disparu ──────────────────────────────── */
+/* ─── Hover : coins qui se referment + teinte bleue ─────────────────────────── */
 
-.cursor-root--clicking .cursor-ring {
-  width: 18px;
-  height: 18px;
-  border-width: 2.5px;
+.cursor-root--hover .cursor-tl { top: -11px; left: -11px; border-color: rgba(96, 165, 250, 0.95); }
+.cursor-root--hover .cursor-tr { top: -11px; left:   2px; border-color: rgba(96, 165, 250, 0.95); }
+.cursor-root--hover .cursor-bl { top:   2px; left: -11px; border-color: rgba(96, 165, 250, 0.95); }
+.cursor-root--hover .cursor-br { top:   2px; left:   2px; border-color: rgba(96, 165, 250, 0.95); }
+
+.cursor-root--hover .cursor-dot {
+  background: rgba(96, 165, 250, 0.95);
+}
+
+/* ─── Click : coins très serrés + flash ─────────────────────────────────────── */
+
+.cursor-root--clicking .cursor-tl { top: -6px; left: -6px; border-color: rgba(255, 255, 255, 1); }
+.cursor-root--clicking .cursor-tr { top: -6px; left:  -3px; border-color: rgba(255, 255, 255, 1); }
+.cursor-root--clicking .cursor-bl { top: -3px; left: -6px; border-color: rgba(255, 255, 255, 1); }
+.cursor-root--clicking .cursor-br { top: -3px; left: -3px; border-color: rgba(255, 255, 255, 1); }
+
+.cursor-root--clicking .cursor-corner {
   transition:
-    width  0.1s ease,
-    height 0.1s ease,
-    border-width 0.1s ease;
+    top    0.08s ease,
+    left   0.08s ease,
+    border-color 0.08s ease;
 }
 
 .cursor-root--clicking .cursor-dot {
-  width: 2px;
-  height: 2px;
-  transition: width 0.1s ease, height 0.1s ease;
+  transform: scale(1.8);
+  background: white;
 }
 
 /* ─── Tactile : masqué ───────────────────────────────────────────────────────── */

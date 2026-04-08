@@ -5,6 +5,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
+import { useLocale } from '~/composables/useLocale'
 import type { Skill, SkillCategory } from '~/types/modal'
 
 const mStore = useModalStore()
@@ -13,7 +14,9 @@ const mOuverte = computed({
   set: (lVal) => { if (!lVal) mStore.close() },
 })
 
-// ─── Données compétences (niveaux réels issus du dossier) ─────────────────────
+const { t } = useLocale()
+
+// ─── Données compétences ──────────────────────────────────────────────────────
 
 const mCompetences: Skill[] = [
   // Frontend
@@ -26,10 +29,10 @@ const mCompetences: Skill[] = [
   { name: 'Angular',                level: 50, category: 'front',   context: 'projet' },
 
   // Back & BDD
-  { name: 'SQL Server',              level: 60, category: 'back',    context: 'prod'   },
+  { name: 'SQL Server',             level: 60, category: 'back',    context: 'prod'   },
   { name: 'Node.js / Fastify',      level: 65, category: 'back',    context: 'projet' },
   { name: 'VB.NET / ASP.NET',       level: 50, category: 'back',    context: 'prod'   },
-  { name: 'Webservices REST',       level: 65, category: 'back',    context: 'prod'   },
+  { name: 'Webservices REST',        level: 65, category: 'back',    context: 'prod'   },
   { name: 'PostgreSQL',             level: 35, category: 'back',    context: 'projet' },
 
   // DevOps & Outils
@@ -47,7 +50,7 @@ const mCompetences: Skill[] = [
   { name: 'Python (scripts)',       level: 30, category: 'creatif', context: 'projet' },
 ]
 
-// ─── Groupes d'affichage ─────────────────────────────────────────────────────
+// ─── Groupes d'affichage ──────────────────────────────────────────────────────
 
 interface SkillGroup {
   id: SkillCategory
@@ -56,12 +59,12 @@ interface SkillGroup {
   skills: Skill[]
 }
 
-const mGroupes: SkillGroup[] = [
-  { id: 'front',   label: 'Frontend',         color: '#3b82f6', skills: mCompetences.filter(c => c.category === 'front') },
-  { id: 'back',    label: 'Back & BDD',        color: '#10b981', skills: mCompetences.filter(c => c.category === 'back') },
-  { id: 'outils',  label: 'DevOps & Outils',   color: '#f59e0b', skills: mCompetences.filter(c => c.category === 'outils') },
-  { id: 'creatif', label: 'Créatif & Divers',  color: '#ec4899', skills: mCompetences.filter(c => c.category === 'creatif') },
-]
+const mGroupes = computed<SkillGroup[]>(() => [
+  { id: 'front',   label: t('Frontend', 'Frontend'),               color: '#3b82f6', skills: mCompetences.filter(c => c.category === 'front') },
+  { id: 'back',    label: t('Back & BDD', 'Back-end & DB'),        color: '#10b981', skills: mCompetences.filter(c => c.category === 'back') },
+  { id: 'outils',  label: t('DevOps & Outils', 'DevOps & Tools'),  color: '#f59e0b', skills: mCompetences.filter(c => c.category === 'outils') },
+  { id: 'creatif', label: t('Créatif & Divers', 'Creative & Misc'), color: '#ec4899', skills: mCompetences.filter(c => c.category === 'creatif') },
+])
 
 // ─── Animation GSAP des barres ────────────────────────────────────────────────
 
@@ -97,7 +100,7 @@ watch(
 </script>
 
 <template>
-  <ModalBase v-model="mOuverte" title="Stack technique">
+  <ModalBase v-model="mOuverte" :title="t('Stack technique', 'Tech Stack')">
     <div class="stack-grid">
       <div v-for="lGroupe in mGroupes" :key="lGroupe.id" class="skill-group">
         <h3 class="skill-group-title" :style="{ color: lGroupe.color }">

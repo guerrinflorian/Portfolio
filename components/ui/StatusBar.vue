@@ -72,7 +72,7 @@ onUnmounted(() => {
         <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true" class="status-icon">
           <path fill-rule="evenodd" d="M6 1a4 4 0 014 4c0 2.8-4 6.5-4 6.5S2 7.8 2 5a4 4 0 014-4zm0 2a2 2 0 100 4 2 2 0 000-4z" clip-rule="evenodd"/>
         </svg>
-        49.3897°N · 6.0731°E
+        48.5041°N · 5.3568°E
       </span>
 
       <span class="status-sep status-sep--hide-mobile">·</span>

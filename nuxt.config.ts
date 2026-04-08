@@ -76,8 +76,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       openMeteoUrl: 'https://api.open-meteo.com/v1/forecast',
-      latitude: '49.3897',
-      longitude: '6.0731',
+      latitude: '48.5041',
+      longitude: '5.3568',
     },
   },
 

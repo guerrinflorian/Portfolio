@@ -13,18 +13,18 @@ interface CodeSnippet {
 }
 
 const mSnippets: CodeSnippet[] = [
-  { text: 'const app = createApp(App)',            x:  3, y:  8, speed: 22, delay:  0, opacity: 0.065 },
-  { text: 'SELECT * FROM cmdrail.orders',          x: 68, y: 14, speed: 28, delay:  4, opacity: 0.055 },
-  { text: 'v-if="isLoaded" :key="nodeId"',         x: 15, y: 42, speed: 18, delay:  8, opacity: 0.06  },
-  { text: 'useWeather()',                          x: 82, y: 28, speed: 30, delay:  2, opacity: 0.07  },
-  { text: 'const { windState } = useTreePhysics()',x:  5, y: 68, speed: 24, delay: 11, opacity: 0.05  },
-  { text: 'gsap.timeline().to(panel, { opacity: 1 })', x: 55, y:  6, speed: 26, delay:  6, opacity: 0.06 },
-  { text: 'EXEC sp_GetCommandesRail @statut = N\'EN_COURS\'', x: 72, y: 55, speed: 20, delay: 14, opacity: 0.05 },
-  { text: 'computed(() => weatherStore.windSpeed)', x: 28, y: 22, speed: 32, delay:  1, opacity: 0.065 },
-  { text: 'defineProps<{ modelValue: boolean }>()', x: 10, y: 82, speed: 19, delay: 16, opacity: 0.055 },
-  { text: 'watch(() => store.state, syncScene)',    x: 80, y: 75, speed: 27, delay:  9, opacity: 0.06  },
-  { text: 'makeNode(0, angle, length, 1.0, rng)',  x: 42, y: 88, speed: 23, delay:  5, opacity: 0.05  },
-  { text: '@click.prevent="modal.open(\'profil\')"', x: 60, y: 42, speed: 25, delay: 12, opacity: 0.065 },
+  { text: 'const app = createApp(App)',            x:  3, y:  8, speed: 22, delay:  0, opacity: 0.13 },
+  { text: 'SELECT * FROM cmdrail.orders',          x: 68, y: 14, speed: 28, delay:  4, opacity: 0.11 },
+  { text: 'v-if="isLoaded" :key="nodeId"',         x: 15, y: 42, speed: 18, delay:  8, opacity: 0.12 },
+  { text: 'useWeather()',                          x: 82, y: 28, speed: 30, delay:  2, opacity: 0.14 },
+  { text: 'const { windState } = useTreePhysics()',x:  5, y: 68, speed: 24, delay: 11, opacity: 0.10 },
+  { text: 'gsap.timeline().to(panel, { opacity: 1 })', x: 55, y:  6, speed: 26, delay:  6, opacity: 0.12 },
+  { text: 'EXEC sp_GetCommandesRail @statut = N\'EN_COURS\'', x: 72, y: 55, speed: 20, delay: 14, opacity: 0.10 },
+  { text: 'computed(() => weatherStore.windSpeed)', x: 28, y: 22, speed: 32, delay:  1, opacity: 0.13 },
+  { text: 'defineProps<{ modelValue: boolean }>()', x: 10, y: 82, speed: 19, delay: 16, opacity: 0.11 },
+  { text: 'watch(() => store.state, syncScene)',    x: 80, y: 75, speed: 27, delay:  9, opacity: 0.12 },
+  { text: 'makeNode(0, angle, length, 1.0, rng)',  x: 42, y: 88, speed: 23, delay:  5, opacity: 0.10 },
+  { text: '@click.prevent="modal.open(\'profil\')"', x: 60, y: 42, speed: 25, delay: 12, opacity: 0.13 },
 ]
 </script>
 

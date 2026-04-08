@@ -5,16 +5,19 @@
 import { computed } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
+import { useLocale } from '~/composables/useLocale'
 
 const mStore = useModalStore()
 const mOuverte = computed({
   get: () => mStore.activeModal === 'profil',
   set: (lVal) => { if (!lVal) mStore.close() },
 })
+
+const { t } = useLocale()
 </script>
 
 <template>
-  <ModalBase v-model="mOuverte" title="Florian Guerrin">
+  <ModalBase v-model="mOuverte" :title="t('Florian Guerrin', 'Florian Guerrin')">
     <!-- Avatar photo + intro -->
     <div class="flex items-start gap-5 mb-6">
       <img
@@ -28,17 +31,17 @@ const mOuverte = computed({
           Full-Stack Developer
         </p>
         <p class="text-sm opacity-55 mt-0.5" style="color: var(--modal-text)">
-          23 ans · Tressange, Moselle (57710)
+          {{ t('23 ans · Tressange, Moselle', '23 · Tressange, Moselle, France') }}
         </p>
         <p class="text-xs opacity-50 mt-0.5 flex items-center gap-1" style="color: var(--modal-text)">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M6 1a4 4 0 014 4c0 2.8-4 6.5-4 6.5S2 7.8 2 5a4 4 0 014-4zm0 2a2 2 0 100 4 2 2 0 000-4z" clip-rule="evenodd"/>
           </svg>
-          Frontière luxembourgeoise · 5 min du Grand-Duché
+          {{ t('Frontière luxembourgeoise · 5 min du Grand-Duché', 'Luxembourg border · 5 min from the Grand Duchy') }}
         </p>
         <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
           <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" aria-hidden="true" />
-          Ouvert aux opportunités Moselle / Luxembourg
+          {{ t('Ouvert aux opportunités Moselle / Luxembourg', 'Open to opportunities in Moselle / Luxembourg') }}
         </div>
       </div>
     </div>
@@ -46,8 +49,12 @@ const mOuverte = computed({
     <!-- Accroche -->
     <div class="mb-5 space-y-2.5">
       <p class="text-sm leading-relaxed opacity-85" style="color: var(--modal-text)">
-        J'aime bien comprendre comment les choses fonctionnent, que ce soit du code, un système ou une archi.
-        Je me débrouille toujours pour trouver une solution, même sur des trucs que je connais pas encore.
+        {{
+          t(
+            'Le développement m\'attire depuis mes premières lignes de code. Ce qui me motive vraiment, c\'est de comprendre comment les choses fonctionnent sous le capot — un système, une archi, un truc que j\'ai jamais vu. J\'essaie de rester à jour sur les nouveautés du métier : je teste, je lis, j\'expérimente sur des projets perso. Le web bouge vite, et j\'aime ça.',
+            'Development got me hooked since my very first lines of code. What drives me is understanding how things work under the hood — a system, an architecture, something I\'ve never seen before. I try to stay on top of what\'s new: I test things, read, experiment on personal projects. The web moves fast, and I like that.'
+          )
+        }}
       </p>
     </div>
 
@@ -57,11 +64,11 @@ const mOuverte = computed({
     <div class="profil-grid mt-4">
       <!-- Langues -->
       <div>
-        <h3 class="section-label">Langues</h3>
+        <h3 class="section-label">{{ t('Langues', 'Languages') }}</h3>
         <div class="space-y-1.5 text-sm" style="color: var(--modal-text)">
-          <div><span class="opacity-80">Français</span> <span class="opacity-40 text-xs">Natif</span></div>
-          <div><span class="opacity-80">Anglais</span> <span class="opacity-40 text-xs">B2</span></div>
-          <div><span class="opacity-80">Allemand</span> <span class="opacity-40 text-xs">B1</span></div>
+          <div><span class="opacity-80">{{ t('Français', 'French') }}</span> <span class="opacity-40 text-xs">{{ t('Natif', 'Native') }}</span></div>
+          <div><span class="opacity-80">{{ t('Anglais', 'English') }}</span> <span class="opacity-40 text-xs">B2</span></div>
+          <div><span class="opacity-80">{{ t('Allemand', 'German') }}</span> <span class="opacity-40 text-xs">B1</span></div>
         </div>
       </div>
 
@@ -76,7 +83,7 @@ const mOuverte = computed({
 
       <!-- Liens -->
       <div>
-        <h3 class="section-label">Profils</h3>
+        <h3 class="section-label">{{ t('Profils', 'Profiles') }}</h3>
         <div class="space-y-1 text-xs" style="color: var(--modal-text)">
           <a href="https://github.com/guerrinflorian" target="_blank" rel="noopener" class="profile-link">GitHub</a>
           <a href="https://linkedin.com/in/florian-guerrin-43a138295" target="_blank" rel="noopener" class="profile-link">LinkedIn</a>

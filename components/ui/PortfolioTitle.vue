@@ -55,7 +55,7 @@ onUnmounted(() => { if (mTimerLoop) clearTimeout(mTimerLoop) })
   letter-spacing: 0.28em;
   line-height: 0.95;
   font-family: var(--font-sans);
-  color: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.16);
   text-align: center;
 }
 
@@ -117,7 +117,7 @@ onUnmounted(() => { if (mTimerLoop) clearTimeout(mTimerLoop) })
 }
 
 .portfolio-title-firstname {
-  color: rgba(255, 255, 255, 0.038);
+  color: rgba(255, 255, 255, 0.11);
   margin-top: 0.06em;
 }
 
@@ -126,7 +126,7 @@ onUnmounted(() => { if (mTimerLoop) clearTimeout(mTimerLoop) })
   font-weight: 600;
   letter-spacing: 0.65em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.32);
   font-family: var(--font-mono);
   margin-top: 0.9em;
   text-align: center;
