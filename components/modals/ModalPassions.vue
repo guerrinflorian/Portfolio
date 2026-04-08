@@ -31,8 +31,8 @@ const mOuverte = computed({
           </div>
         </div>
         <p class="passion-text">
-          Mon sport actuel. Ce qui m'attire : la dimension mentale et stratégique.
-          Chaque échange est un jeu de décisions sous pression - pas si différent du code.
+          Mon sport depuis 3 ans et demi, je m'y suis mis tard mais j'accroche vraiment.
+          La partie mentale me plait autant que la technique - t'as pas le droit à l'erreur sur les points importants.
         </p>
       </section>
 
@@ -51,9 +51,8 @@ const mOuverte = computed({
           </div>
         </div>
         <p class="passion-text">
-          Football pendant 8 ans jusqu'à 15 ans - l'apprentissage du collectif.
-          Judo 1 an et demi en enfance - la rigueur et la chute maîtrisée.
-          Tennis de table 1 an - la précision et la réactivité.
+          Du foot pendant 8 ans gamin, du judo un an et demi, un peu de ping-pong.
+          Le tennis c'est ce qui m'a le plus accroché jusqu'ici.
         </p>
       </section>
 
@@ -72,9 +71,31 @@ const mOuverte = computed({
           </div>
         </div>
         <p class="passion-text">
-          Les jeux qui cachent une mécanique propre sous un vernis accessible -
-          RPG, tycoons, systèmes de progression. J'aime disséquer comment les boucles
-          de gameplay sont conçues, c'est de la conception logicielle par un autre nom.
+          Surtout des RPG et des jeux de gestion. J'aime les jeux avec de la profondeur,
+          où t'as envie de comprendre comment tout fonctionne sous le capot.
+        </p>
+      </section>
+
+      <div class="passion-divider" aria-hidden="true" />
+
+      <!-- Kart -->
+      <section class="passion-section">
+        <div class="passion-header">
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true" class="passion-icon">
+            <circle cx="16" cy="16" r="13" stroke="#ef4444" stroke-width="1.8" fill="#ef4444" fill-opacity="0.1"/>
+            <ellipse cx="10" cy="20" rx="3" ry="2" stroke="#ef4444" stroke-width="1.4" fill="none"/>
+            <ellipse cx="22" cy="20" rx="3" ry="2" stroke="#ef4444" stroke-width="1.4" fill="none"/>
+            <path d="M13 20 h6 M10 18 L12 13 h8 l2 5" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M16 13 v-3" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <div>
+            <h3 class="passion-title">Karting</h3>
+            <p class="passion-meta">Kart 2 temps · propriétaire</p>
+          </div>
+        </div>
+        <p class="passion-text">
+          J'ai acheté mon propre kart 2 temps. Rouler et bricoler dessus, les deux me plaisent.
+          C'est un bon moyen de déconnecter complètement.
         </p>
       </section>
 
@@ -95,9 +116,8 @@ const mOuverte = computed({
           </div>
         </div>
         <p class="passion-text">
-          Zéro service cloud externe, tout tourne chez moi.
-          VPS OVH dockerisé, accès VPN WireGuard, Prometheus + Grafana pour tout surveiller.
-          La satisfaction de maîtriser toute la chaîne, du hardware au DNS.
+          J'ai mon VPS OVH que je gère moi-même, Docker, WireGuard pour le VPN, Grafana pour surveiller tout ça.
+          J'aime avoir la main sur toute la chaîne plutôt que de tout déléguer à un service tiers.
         </p>
       </section>
 

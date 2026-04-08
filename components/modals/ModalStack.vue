@@ -5,7 +5,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
-import type { Skill, SkillCategory, SkillContext } from '~/types/modal'
+import type { Skill, SkillCategory } from '~/types/modal'
 
 const mStore = useModalStore()
 const mOuverte = computed({
@@ -26,7 +26,7 @@ const mCompetences: Skill[] = [
   { name: 'Angular',                level: 50, category: 'front',   context: 'projet' },
 
   // Back & BDD
-  { name: 'SQL Server / T-SQL',     level: 60, category: 'back',    context: 'prod'   },
+  { name: 'SQL Server',              level: 60, category: 'back',    context: 'prod'   },
   { name: 'Node.js / Fastify',      level: 65, category: 'back',    context: 'projet' },
   { name: 'VB.NET / ASP.NET',       level: 50, category: 'back',    context: 'prod'   },
   { name: 'Webservices REST',       level: 65, category: 'back',    context: 'prod'   },
@@ -46,13 +46,6 @@ const mCompetences: Skill[] = [
   { name: 'Flutter',                level: 30, category: 'creatif', context: 'projet' },
   { name: 'Python (scripts)',       level: 30, category: 'creatif', context: 'projet' },
 ]
-
-// ─── Config badge contexte ────────────────────────────────────────────────────
-
-const mContextConfig: Record<SkillContext, { label: string; color: string }> = {
-  prod:   { label: 'En prod',   color: '#22c55e' },
-  projet: { label: 'En projet', color: '#60a5fa' },
-}
 
 // ─── Groupes d'affichage ─────────────────────────────────────────────────────
 
@@ -113,13 +106,7 @@ watch(
         <div class="space-y-3">
           <div v-for="lSkill in lGroupe.skills" :key="lSkill.name" class="skill-item">
             <div class="skill-header">
-              <div class="skill-name-row">
-                <span class="skill-name" style="color: var(--modal-text)">{{ lSkill.name }}</span>
-                <span
-                  class="skill-context-badge"
-                  :style="{ color: mContextConfig[lSkill.context].color, borderColor: mContextConfig[lSkill.context].color }"
-                >{{ mContextConfig[lSkill.context].label }}</span>
-              </div>
+              <span class="skill-name" style="color: var(--modal-text)">{{ lSkill.name }}</span>
               <span class="skill-level" :style="{ color: lGroupe.color }">{{ lSkill.level }}%</span>
             </div>
             <div
@@ -170,26 +157,6 @@ watch(
   margin-bottom: 0.375rem;
 }
 
-.skill-name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-}
-
 .skill-name  { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
 .skill-level { font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
-
-.skill-context-badge {
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.1rem 0.4rem;
-  border-radius: 99px;
-  border: 1px solid;
-  opacity: 0.85;
-  background: transparent;
-  white-space: nowrap;
-}
 </style>

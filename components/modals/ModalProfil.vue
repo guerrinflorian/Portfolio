@@ -46,15 +46,15 @@ const mOuverte = computed({
     <!-- Accroche -->
     <div class="mb-5 space-y-2.5">
       <p class="text-sm leading-relaxed opacity-85" style="color: var(--modal-text)">
-        Passionné par la <strong>conception logicielle</strong> et l'usage productif de l'IA.
-        Curieux par nature, je trouve toujours une solution - même quand je ne connais pas encore la réponse.
+        J'aime bien comprendre comment les choses fonctionnent, que ce soit du code, un système ou une archi.
+        Je me débrouille toujours pour trouver une solution, même sur des trucs que je connais pas encore.
       </p>
     </div>
 
     <div class="separator" />
 
     <!-- Grille infos -->
-    <div class="grid grid-cols-3 gap-4 mt-4">
+    <div class="profil-grid mt-4">
       <!-- Langues -->
       <div>
         <h3 class="section-label">Langues</h3>
@@ -66,9 +66,9 @@ const mOuverte = computed({
       </div>
 
       <!-- Contact rapide -->
-      <div>
+      <div class="contact-col">
         <h3 class="section-label">Contact</h3>
-        <div class="space-y-1 text-xs opacity-75" style="color: var(--modal-text)">
+        <div class="space-y-1 text-xs opacity-75 contact-info" style="color: var(--modal-text)">
           <p>guerrinflorian@yahoo.com</p>
           <p>06 95 38 01 57</p>
         </div>
@@ -112,12 +112,35 @@ const mOuverte = computed({
   color: var(--modal-text);
 }
 
+.profil-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .profil-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .contact-col {
+    grid-column: 1 / -1;
+  }
+}
+
+.contact-info p {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
 .profile-link {
   display: block;
   font-size: 0.78rem;
   color: #3b82f6;
   text-decoration: none;
   opacity: 0.85;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .profile-link:hover {
