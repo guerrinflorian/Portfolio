@@ -11,10 +11,10 @@ import type { Season } from '~/types/weather'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const DEPTH_THICKNESS  = [28, 9, 5.5, 3, 1.8]  // épaisseur par profondeur
-const DEPTH_CURVATURE  = [0,  0.14, 0.17, 0.20, 0.22]  // courbure bezier par profondeur
-const DEPTH_LENGTH_DECAY = 0.62                 // décroissance longueur par niveau
-const WIND_INHERIT_FACTOR = 0.52               // transmission du vent parent→enfant
+const DEPTH_THICKNESS  = [34, 12, 7, 4, 2.2]   // épaisseur par profondeur
+const DEPTH_CURVATURE  = [0,  0.15, 0.19, 0.22, 0.24]  // courbure bezier par profondeur
+const DEPTH_LENGTH_DECAY = 0.65                // décroissance longueur par niveau
+const WIND_INHERIT_FACTOR = 0.52              // transmission du vent parent→enfant
 
 // ─── Générateur pseudo-aléatoire déterministe ────────────────────────────────
 
@@ -167,13 +167,13 @@ function makeNode(
 function addChildren(pParent: TreeNode, pCfg: SeasonConfig, pDepth: number, pRng: SeededRandom): void {
   if (pDepth > 4) return
 
-  // 2 enfants par branche par défaut, 3 pour les niveaux intermédiaires
-  const lCount = pDepth <= 2 ? (pRng.next() < 0.4 ? 3 : 2) : 2
+  // 2 ou 3 enfants selon la profondeur
+  const lCount = pDepth <= 3 ? (pRng.next() < 0.55 ? 3 : 2) : 2
 
-  // parentT : les enfants partent en cours de branche (pas forcément à l'extrémité)
+  // parentT : les enfants partent en cours de branche
   const lParentTs = lCount === 2
-    ? [0.60 + pRng.next() * 0.10, 0.80 + pRng.next() * 0.12]
-    : [0.55 + pRng.next() * 0.08, 0.72 + pRng.next() * 0.08, 0.88 + pRng.next() * 0.08]
+    ? [0.58 + pRng.next() * 0.10, 0.78 + pRng.next() * 0.12]
+    : [0.52 + pRng.next() * 0.08, 0.70 + pRng.next() * 0.08, 0.86 + pRng.next() * 0.08]
 
   for (let lI = 0; lI < lCount; lI++) {
     const lSide      = lI % 2 === 0 ? -1 : 1
@@ -196,29 +196,30 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
   baseY = pHeight - 65
 
   // Tronc : légère inclinaison organique
-  const lTrunkLength = pHeight * 0.33 * lCfg.lengthMultiplier
+  const lTrunkLength = pHeight * 0.42 * lCfg.lengthMultiplier
   const lLean        = (lRng.next() - 0.5) * 0.06  // ±3.4°
   const lTrunkAngle  = -Math.PI / 2 + lLean
 
   treeRoot = makeNode(0, lTrunkAngle, lTrunkLength, 1.0, lRng)
 
-  // 5 branches principales à différentes hauteurs du tronc (parentT)
-  const lMainParentTs   = [0.50, 0.60, 0.70, 0.79, 0.87]
-  const lMainDeviations = [-0.58, 0.62, -0.50, 0.56, -0.68]
+  // 7 branches principales à différentes hauteurs du tronc
+  const lMainParentTs   = [0.44, 0.54, 0.63, 0.71, 0.78, 0.85, 0.91]
+  const lMainDeviations = [-0.60, 0.64, -0.52, 0.58, -0.66, 0.54, -0.48]
 
   for (let lI = 0; lI < lMainParentTs.length; lI++) {
     const lAngle  = lTrunkAngle + (lMainDeviations[lI] ?? 0.5) + (lRng.next() - 0.5) * 0.08
-    const lLength = lTrunkLength * (0.46 + lRng.next() * 0.10) * lCfg.lengthMultiplier
+    const lLength = lTrunkLength * (0.44 + lRng.next() * 0.12) * lCfg.lengthMultiplier
 
     const lBranch = makeNode(1, lAngle, lLength, lMainParentTs[lI] ?? 0.7, lRng)
     addChildren(lBranch, lCfg, 2, lRng)
     treeRoot.children.push(lBranch)
   }
 
-  // Racines et herbe (statiques, régénérées une seule fois)
+  // Racines, herbe et éléments au sol (statiques, régénérées sur resize/saison)
   generateRoots(lRng)
   generateGrass(lRng)
   generateLeaves(pSeason, lRng)
+  generateGroundElements(lRng)
 }
 
 // ─── Génération des racines ───────────────────────────────────────────────────
@@ -236,13 +237,143 @@ function generateRoots(pRng: SeededRandom): void {
 // ─── Génération de l'herbe ────────────────────────────────────────────────────
 
 function generateGrass(pRng: SeededRandom): void {
-  grass = Array.from({ length: 14 }, () => ({
-    offsetX:   (pRng.next() - 0.5) * 150,
-    height:    13 + pRng.next() * 14,
-    restAngle: -Math.PI / 2 + (pRng.next() - 0.5) * 0.28,
-    oscFreq:   1.5 + pRng.next() * 1.2,
+  grass = Array.from({ length: 22 }, () => ({
+    offsetX:   (pRng.next() - 0.5) * 240,
+    height:    14 + pRng.next() * 18,
+    restAngle: -Math.PI / 2 + (pRng.next() - 0.5) * 0.32,
+    oscFreq:   1.4 + pRng.next() * 1.4,
     oscPhase:  pRng.next() * Math.PI * 2,
   }))
+}
+
+// ─── Types et génération des éléments au sol ──────────────────────────────────
+
+interface GroundRock   { offsetX: number; ry: number; rx: number; ry2: number; color: string }
+interface GroundFlower { offsetX: number; height: number; petalColor: string; phase: number }
+interface GroundShroom { offsetX: number; stemH: number; capR: number; capColor: string }
+
+let gRocks:   GroundRock[]   = []
+let gFlowers: GroundFlower[] = []
+let gShrooms: GroundShroom[] = []
+
+function generateGroundElements(pRng: SeededRandom): void {
+  const lRockColors   = ['#8a7a68', '#7a6e60', '#968070', '#6e6255']
+  const lFlowerColors = ['#ff9eb5', '#ffe066', '#b8eaff', '#ffffff', '#ffb347', '#d4b0ff']
+  const lShroomColors = ['#c0392b', '#e67e22', '#8b4513', '#a0522d']
+
+  gRocks = Array.from({ length: 5 }, () => ({
+    offsetX: (pRng.next() - 0.5) * 320,
+    rx:      9 + pRng.next() * 12,
+    ry:      5 + pRng.next() * 7,
+    ry2:     0,
+    color:   lRockColors[Math.floor(pRng.next() * lRockColors.length)]!,
+  }))
+
+  gFlowers = Array.from({ length: 9 }, () => ({
+    offsetX:    (pRng.next() - 0.5) * 380,
+    height:     14 + pRng.next() * 16,
+    petalColor: lFlowerColors[Math.floor(pRng.next() * lFlowerColors.length)]!,
+    phase:      pRng.next() * Math.PI * 2,
+  }))
+
+  gShrooms = Array.from({ length: 3 }, () => ({
+    offsetX:  80 + pRng.next() * 200 * (pRng.next() < 0.5 ? 1 : -1),
+    stemH:    10 + pRng.next() * 8,
+    capR:     7 + pRng.next() * 6,
+    capColor: lShroomColors[Math.floor(pRng.next() * lShroomColors.length)]!,
+  }))
+}
+
+function drawGroundElements(pCtx: CanvasRenderingContext2D, pTimeS: number, pWidth: number): void {
+  // Desktop uniquement
+  if (pWidth < 768) return
+
+  const lSpeed = physics.windState.value.currentSpeed
+
+  // Rochers
+  for (const lR of gRocks) {
+    const lX = baseX + lR.offsetX
+    const lY = baseY + 8
+    pCtx.save()
+    const lGrad = pCtx.createRadialGradient(lX - lR.rx * 0.3, lY - lR.ry * 0.3, 1, lX, lY, lR.rx)
+    lGrad.addColorStop(0, 'rgba(255,255,255,0.18)')
+    lGrad.addColorStop(1, lR.color)
+    pCtx.beginPath()
+    pCtx.ellipse(lX, lY, lR.rx, lR.ry, 0.15, 0, Math.PI * 2)
+    pCtx.fillStyle = lGrad
+    pCtx.fill()
+    pCtx.restore()
+  }
+
+  // Fleurs
+  for (const lF of gFlowers) {
+    const lX     = baseX + lF.offsetX
+    const lBaseY = baseY + 4
+    const lSwing = Math.sin(pTimeS * 1.1 + lF.phase) * (lSpeed / 70) * 0.22
+    const lAngle = -Math.PI / 2 + lSwing
+
+    // Tige
+    pCtx.save()
+    pCtx.strokeStyle = 'rgba(60,140,40,0.7)'
+    pCtx.lineWidth   = 1.5
+    pCtx.lineCap     = 'round'
+    pCtx.beginPath()
+    pCtx.moveTo(lX, lBaseY)
+    const lTipX = lX + Math.cos(lAngle) * lF.height
+    const lTipY = lBaseY + Math.sin(lAngle) * lF.height
+    pCtx.lineTo(lTipX, lTipY)
+    pCtx.stroke()
+
+    // Petale
+    pCtx.beginPath()
+    pCtx.arc(lTipX, lTipY, 3.5, 0, Math.PI * 2)
+    pCtx.fillStyle = lF.petalColor
+    pCtx.globalAlpha = 0.88
+    pCtx.fill()
+
+    // Centre jaune
+    pCtx.beginPath()
+    pCtx.arc(lTipX, lTipY, 1.5, 0, Math.PI * 2)
+    pCtx.fillStyle = '#f6e05e'
+    pCtx.globalAlpha = 1
+    pCtx.fill()
+    pCtx.restore()
+  }
+
+  // Champignons
+  for (const lS of gShrooms) {
+    const lX     = baseX + lS.offsetX
+    const lBaseY = baseY + 6
+    const lTopY  = lBaseY - lS.stemH
+
+    // Tige
+    pCtx.save()
+    pCtx.strokeStyle = 'rgba(230,210,180,0.85)'
+    pCtx.lineWidth   = 4
+    pCtx.lineCap     = 'round'
+    pCtx.beginPath()
+    pCtx.moveTo(lX, lBaseY)
+    pCtx.lineTo(lX, lTopY)
+    pCtx.stroke()
+
+    // Chapeau (demi-ellipse)
+    pCtx.beginPath()
+    pCtx.ellipse(lX, lTopY, lS.capR, lS.capR * 0.55, 0, Math.PI, 0, true)
+    pCtx.fillStyle = lS.capColor
+    pCtx.globalAlpha = 0.9
+    pCtx.fill()
+
+    // Points blancs sur le chapeau
+    pCtx.fillStyle = 'rgba(255,255,255,0.75)'
+    pCtx.globalAlpha = 0.8
+    pCtx.beginPath()
+    pCtx.arc(lX - lS.capR * 0.35, lTopY - lS.capR * 0.2, 1.5, 0, Math.PI * 2)
+    pCtx.fill()
+    pCtx.beginPath()
+    pCtx.arc(lX + lS.capR * 0.3, lTopY - lS.capR * 0.28, 1.2, 0, Math.PI * 2)
+    pCtx.fill()
+    pCtx.restore()
+  }
 }
 
 // ─── Génération des feuilles ──────────────────────────────────────────────────
@@ -265,7 +396,7 @@ function generateLeaves(pSeason: Season, pRng: SeededRandom): void {
   for (const lNode of lTerminals) {
     if (pRng.next() > lCfg.foliageDensity) continue
 
-    const lCount = 5 + Math.floor(pRng.next() * 4)  // 5–8 feuilles par cluster
+    const lCount = 8 + Math.floor(pRng.next() * 7)  // 8–14 feuilles par cluster
     for (let lI = 0; lI < lCount; lI++) {
       const lUseBud = lCfg.season === 'spring' && pRng.next() < 0.28
       const lPalette = lUseBud ? lCfg.budColors : lCfg.leafColors
@@ -273,10 +404,10 @@ function generateLeaves(pSeason: Season, pRng: SeededRandom): void {
 
       leaves.push({
         nodeId:   lNode.id,
-        dx:       (pRng.next() - 0.5) * 28,  // ±14px
-        dy:       (pRng.next() - 0.5) * 28,
-        w:        9 + pRng.next() * 8,
-        h:        5 + pRng.next() * 6,
+        dx:       (pRng.next() - 0.5) * 42,  // ±21px
+        dy:       (pRng.next() - 0.5) * 42,
+        w:        13 + pRng.next() * 11,
+        h:        7 + pRng.next() * 8,
         angle:    pRng.next() * Math.PI,
         colorIdx: lColorIdx,
         alpha:    0.72 + pRng.next() * 0.28,
@@ -316,7 +447,7 @@ function drawTaperedTrunk(
 
   for (let lI = 0; lI <= STEPS; lI++) {
     const lT    = lI / STEPS
-    const lHalf = (28 + (12 - 28) * lT) / 2  // 28 → 12 px
+    const lHalf = (34 + (14 - 34) * lT) / 2  // 34 → 14 px
     const lPt   = lPts[lI]!
     const lNext = lI < STEPS ? lPts[lI + 1]! : lPts[lI - 1]!
     const lDx   = lI < STEPS ? lNext.x - lPt.x : lPt.x - lPts[lI - 1]!.x
@@ -642,6 +773,7 @@ function render(pNow: number): void {
 
   drawRoots(ctx)
   drawGrass(ctx, lTimeS)
+  drawGroundElements(ctx, lTimeS, lW)
   renderNode(ctx, treeRoot, null, 0, lTimeS)
 
   // Collecte les branches terminales pour l'émission de feuilles volantes
