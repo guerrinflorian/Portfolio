@@ -217,9 +217,9 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
 
   // Racines, herbe et éléments au sol (statiques, régénérées sur resize/saison)
   generateRoots(lRng)
-  generateGrass(lRng)
+  generateGrass(lRng, pWidth)
   generateLeaves(pSeason, lRng)
-  generateGroundElements(lRng)
+  generateGroundElements(lRng, pWidth)
 }
 
 // ─── Génération des racines ───────────────────────────────────────────────────
@@ -236,9 +236,10 @@ function generateRoots(pRng: SeededRandom): void {
 
 // ─── Génération de l'herbe ────────────────────────────────────────────────────
 
-function generateGrass(pRng: SeededRandom): void {
-  grass = Array.from({ length: 32 }, () => ({
-    offsetX:   (pRng.next() - 0.5) * 520,
+function generateGrass(pRng: SeededRandom, pWidth: number): void {
+  const lM = 12  // marge bord
+  grass = Array.from({ length: 55 }, () => ({
+    offsetX:   lM + pRng.next() * (pWidth - lM * 2),  // position absolue X
     height:    14 + pRng.next() * 18,
     restAngle: -Math.PI / 2 + (pRng.next() - 0.5) * 0.32,
     oscFreq:   1.4 + pRng.next() * 1.4,
@@ -248,58 +249,61 @@ function generateGrass(pRng: SeededRandom): void {
 
 // ─── Types et génération des éléments au sol ──────────────────────────────────
 
-interface GroundRock   { offsetX: number; ry: number; rx: number; ry2: number; color: string }
-interface GroundFlower { offsetX: number; height: number; petalColor: string; phase: number }
-interface GroundShroom { offsetX: number; stemH: number; capR: number; capColor: string }
+interface GroundRock   { x: number; rx: number; ry: number; color: string }
+interface GroundFlower { x: number; height: number; petalColor: string; phase: number }
+interface GroundShroom { x: number; stemH: number; capR: number; capColor: string }
 
 let gRocks:   GroundRock[]   = []
 let gFlowers: GroundFlower[] = []
 let gShrooms: GroundShroom[] = []
 
-function generateGroundElements(pRng: SeededRandom): void {
-  const lRockColors   = ['#8a7a68', '#7a6e60', '#968070', '#6e6255']
-  const lFlowerColors = ['#ff9eb5', '#ffe066', '#b8eaff', '#ffffff', '#ffb347', '#d4b0ff']
-  const lShroomColors = ['#c0392b', '#e67e22', '#8b4513', '#a0522d']
+function generateGroundElements(pRng: SeededRandom, pWidth: number): void {
+  const lM            = 20  // marge bord
+  const lRockColors   = ['#8a7a68', '#7a6e60', '#968070', '#6e6255', '#b0a090']
+  const lFlowerColors = ['#ff9eb5', '#ffe066', '#b8eaff', '#ffffff', '#ffb347', '#d4b0ff', '#ff6b6b', '#a8e6cf']
+  const lShroomColors = ['#c0392b', '#e67e22', '#8b4513', '#a0522d', '#d35400']
 
-  gRocks = Array.from({ length: 11 }, () => ({
-    offsetX: (pRng.next() - 0.5) * 560,
-    rx:      8 + pRng.next() * 16,
-    ry:      5 + pRng.next() * 9,
-    ry2:     0,
-    color:   lRockColors[Math.floor(pRng.next() * lRockColors.length)]!,
+  // Nombre d'éléments proportionnel à la largeur (1 tous les ~90px)
+  const lRockCount   = Math.max(10, Math.floor(pWidth / 90))
+  const lFlowerCount = Math.max(18, Math.floor(pWidth / 55))
+  const lShroomCount = Math.max(8,  Math.floor(pWidth / 160))
+
+  gRocks = Array.from({ length: lRockCount }, () => ({
+    x:     lM + pRng.next() * (pWidth - lM * 2),
+    rx:    7 + pRng.next() * 15,
+    ry:    4 + pRng.next() * 9,
+    color: lRockColors[Math.floor(pRng.next() * lRockColors.length)]!,
   }))
 
-  gFlowers = Array.from({ length: 18 }, () => ({
-    offsetX:    (pRng.next() - 0.5) * 580,
-    height:     15 + pRng.next() * 20,
+  gFlowers = Array.from({ length: lFlowerCount }, () => ({
+    x:          lM + pRng.next() * (pWidth - lM * 2),
+    height:     14 + pRng.next() * 22,
     petalColor: lFlowerColors[Math.floor(pRng.next() * lFlowerColors.length)]!,
     phase:      pRng.next() * Math.PI * 2,
   }))
 
-  gShrooms = Array.from({ length: 6 }, () => ({
-    offsetX:  (60 + pRng.next() * 240) * (pRng.next() < 0.5 ? 1 : -1),
-    stemH:    10 + pRng.next() * 10,
-    capR:     7 + pRng.next() * 7,
+  gShrooms = Array.from({ length: lShroomCount }, () => ({
+    x:        lM + pRng.next() * (pWidth - lM * 2),
+    stemH:    9 + pRng.next() * 11,
+    capR:     6 + pRng.next() * 8,
     capColor: lShroomColors[Math.floor(pRng.next() * lShroomColors.length)]!,
   }))
 }
 
 function drawGroundElements(pCtx: CanvasRenderingContext2D, pTimeS: number, pWidth: number): void {
-  // Desktop uniquement
   if (pWidth < 768) return
 
   const lSpeed = physics.windState.value.currentSpeed
 
   // Rochers
   for (const lR of gRocks) {
-    const lX = baseX + lR.offsetX
-    const lY = baseY + 8
     pCtx.save()
-    const lGrad = pCtx.createRadialGradient(lX - lR.rx * 0.3, lY - lR.ry * 0.3, 1, lX, lY, lR.rx)
+    const lY    = baseY + 8
+    const lGrad = pCtx.createRadialGradient(lR.x - lR.rx * 0.3, lY - lR.ry * 0.3, 1, lR.x, lY, lR.rx)
     lGrad.addColorStop(0, 'rgba(255,255,255,0.18)')
     lGrad.addColorStop(1, lR.color)
     pCtx.beginPath()
-    pCtx.ellipse(lX, lY, lR.rx, lR.ry, 0.15, 0, Math.PI * 2)
+    pCtx.ellipse(lR.x, lY, lR.rx, lR.ry, 0.15, 0, Math.PI * 2)
     pCtx.fillStyle = lGrad
     pCtx.fill()
     pCtx.restore()
@@ -307,34 +311,30 @@ function drawGroundElements(pCtx: CanvasRenderingContext2D, pTimeS: number, pWid
 
   // Fleurs
   for (const lF of gFlowers) {
-    const lX     = baseX + lF.offsetX
     const lBaseY = baseY + 4
     const lSwing = Math.sin(pTimeS * 1.1 + lF.phase) * (lSpeed / 70) * 0.22
     const lAngle = -Math.PI / 2 + lSwing
+    const lTipX  = lF.x + Math.cos(lAngle) * lF.height
+    const lTipY  = lBaseY + Math.sin(lAngle) * lF.height
 
-    // Tige
     pCtx.save()
     pCtx.strokeStyle = 'rgba(60,140,40,0.7)'
     pCtx.lineWidth   = 1.5
     pCtx.lineCap     = 'round'
     pCtx.beginPath()
-    pCtx.moveTo(lX, lBaseY)
-    const lTipX = lX + Math.cos(lAngle) * lF.height
-    const lTipY = lBaseY + Math.sin(lAngle) * lF.height
+    pCtx.moveTo(lF.x, lBaseY)
     pCtx.lineTo(lTipX, lTipY)
     pCtx.stroke()
 
-    // Petale
     pCtx.beginPath()
     pCtx.arc(lTipX, lTipY, 3.5, 0, Math.PI * 2)
-    pCtx.fillStyle = lF.petalColor
+    pCtx.fillStyle   = lF.petalColor
     pCtx.globalAlpha = 0.88
     pCtx.fill()
 
-    // Centre jaune
     pCtx.beginPath()
     pCtx.arc(lTipX, lTipY, 1.5, 0, Math.PI * 2)
-    pCtx.fillStyle = '#f6e05e'
+    pCtx.fillStyle   = '#f6e05e'
     pCtx.globalAlpha = 1
     pCtx.fill()
     pCtx.restore()
@@ -342,35 +342,31 @@ function drawGroundElements(pCtx: CanvasRenderingContext2D, pTimeS: number, pWid
 
   // Champignons
   for (const lS of gShrooms) {
-    const lX     = baseX + lS.offsetX
     const lBaseY = baseY + 6
     const lTopY  = lBaseY - lS.stemH
 
-    // Tige
     pCtx.save()
     pCtx.strokeStyle = 'rgba(230,210,180,0.85)'
     pCtx.lineWidth   = 4
     pCtx.lineCap     = 'round'
     pCtx.beginPath()
-    pCtx.moveTo(lX, lBaseY)
-    pCtx.lineTo(lX, lTopY)
+    pCtx.moveTo(lS.x, lBaseY)
+    pCtx.lineTo(lS.x, lTopY)
     pCtx.stroke()
 
-    // Chapeau (demi-ellipse)
     pCtx.beginPath()
-    pCtx.ellipse(lX, lTopY, lS.capR, lS.capR * 0.55, 0, Math.PI, 0, true)
-    pCtx.fillStyle = lS.capColor
+    pCtx.ellipse(lS.x, lTopY, lS.capR, lS.capR * 0.55, 0, Math.PI, 0, true)
+    pCtx.fillStyle   = lS.capColor
     pCtx.globalAlpha = 0.9
     pCtx.fill()
 
-    // Points blancs sur le chapeau
-    pCtx.fillStyle = 'rgba(255,255,255,0.75)'
+    pCtx.fillStyle   = 'rgba(255,255,255,0.75)'
     pCtx.globalAlpha = 0.8
     pCtx.beginPath()
-    pCtx.arc(lX - lS.capR * 0.35, lTopY - lS.capR * 0.2, 1.5, 0, Math.PI * 2)
+    pCtx.arc(lS.x - lS.capR * 0.35, lTopY - lS.capR * 0.2, 1.5, 0, Math.PI * 2)
     pCtx.fill()
     pCtx.beginPath()
-    pCtx.arc(lX + lS.capR * 0.3, lTopY - lS.capR * 0.28, 1.2, 0, Math.PI * 2)
+    pCtx.arc(lS.x + lS.capR * 0.3, lTopY - lS.capR * 0.28, 1.2, 0, Math.PI * 2)
     pCtx.fill()
     pCtx.restore()
   }
@@ -610,7 +606,7 @@ function drawGrass(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
     const lSwing = Math.sin(pTimeS * lBlade.oscFreq + lBlade.oscPhase) * (lSpeed / 60) * 0.35
     const lAngle = lBlade.restAngle + lSwing
 
-    const lBx = baseX + lBlade.offsetX
+    const lBx = lBlade.offsetX   // position absolue X
     const lBy = baseY + 6
     const lEx = lBx + Math.cos(lAngle) * lBlade.height
     const lEy = lBy + Math.sin(lAngle) * lBlade.height
