@@ -6,7 +6,10 @@ import { ref, computed } from 'vue'
 import ModalBase from './ModalBase.vue'
 import Tag from '../ui/Tag.vue'
 import { useModalStore } from '~/stores/modal'
+import { useLocale } from '~/composables/useLocale'
 import type { Project, ProjectStatus, ProjectCategorie } from '~/types/modal'
+
+const { t, locale: mLocale } = useLocale()
 
 const mStore = useModalStore()
 const mOuverte = computed({
@@ -66,8 +69,8 @@ function mRetourListe(): void {
 // Titre dynamique selon la vue
 const mTitreModal = computed(() =>
   mDetailId.value
-    ? (mProjets.find(lP => lP.id === mDetailId.value)?.titre ?? 'Projet')
-    : 'Projets personnels'
+    ? (mProjets.value.find(lP => lP.id === mDetailId.value)?.titre ?? t('Projet', 'Project'))
+    : t('Projets personnels', 'Personal Projects')
 )
 
 // ─── Lightbox ─────────────────────────────────────────────────────────────────
@@ -274,23 +277,177 @@ const mDetailBricoloc: ProjectDetail = {
   screenshots: [],
 }
 
-// ─── Map id → détail ──────────────────────────────────────────────────────────
+// ─── Données détail EN — Nippon Kempo ─────────────────────────────────────────
 
-const mDetailsMap: Record<string, ProjectDetail> = {
-  'nippon-kempo': mDetailNipponKempo,
-  'tower-defense': mDetailTowerDefense,
-  'negosud': mDetailNegoSud,
-  'bricoloc': mDetailBricoloc,
+const mDetailNipponKempoEn: ProjectDetail = {
+  descriptionLongue:
+    'Offline desktop application to fully manage Nippon Kempo tournaments. ' +
+    'Praised by the CESI jury and used in production by the real sports association.',
+  contexte:
+    'Nippon Kempo is a Japanese martial art combining strikes, throws and immobilizations, ' +
+    'practiced as regulated fights with specific protective gear.',
+  equipe: mDetailNipponKempo.equipe,
+  stockage:
+    'IndexedDB + Replicache — all data stored locally. ' +
+    'Zero server, zero internet connection required.',
+  technos: [
+    { label: 'Vue 3',          detail: 'Composition API',    color: '#4ade80' },
+    { label: 'Electron',       detail: 'Desktop app',        color: '#60a5fa' },
+    { label: 'Vuestic UI',     detail: 'UI Framework',       color: '#a78bfa' },
+    { label: 'IndexedDB',      detail: 'Local storage',      color: '#fbbf24' },
+    { label: 'Replicache',     detail: 'Offline sync',       color: '#fb923c' },
+    { label: 'ApexCharts',     detail: 'Charts & stats',     color: '#f472b6' },
+    { label: 'Material Icons', detail: 'Icons',              color: '#94a3b8' },
+    { label: 'GitHub',         detail: 'Versioning',         color: '#e2e8f0' },
+  ],
+  features: [
+    { icon: '🔐', titre: 'Authentication',         detail: 'Password-secured access.' },
+    { icon: '🏆', titre: 'Tournament management',  detail: 'Create, edit and manage multiple tournaments.' },
+    { icon: '📂', titre: 'Advanced categories',    detail: 'Round-robin pools or elimination brackets.' },
+    { icon: '👥', titre: 'Participants',            detail: 'Manual creation, linked to categories.' },
+    { icon: '📥', titre: 'CSV Import / Export',    detail: 'Quick import and export of participants.' },
+    { icon: '⚔️',  titre: 'Match management',       detail: 'Scores, fouls, regulatory and additional timer.' },
+    { icon: '📺', titre: 'Projectable scoreboard', detail: 'Real-time display on a secondary screen.' },
+    { icon: '📊', titre: 'Statistics',             detail: 'Performance per participant and per category.' },
+    { icon: '🔧', titre: 'Auto-generation',        detail: 'Tournament structure based on category type.' },
+    { icon: '📄', titre: 'PDF Export',             detail: 'Results, rankings and structure as PDF.' },
+  ],
+  screenshots: [
+    { src: '/images/projets/nippon-kempo/tournament-create.png',     caption: 'Tournament creation',              alt: 'Tournament creation screen' },
+    { src: '/images/projets/nippon-kempo/categorie-create.png',      caption: 'Category management',              alt: 'Category creation and setup' },
+    { src: '/images/projets/nippon-kempo/import-export-players.png', caption: 'Participant CSV import/export',    alt: 'Participant import export interface' },
+    { src: '/images/projets/nippon-kempo/bracket-view.png',          caption: 'Elimination bracket',             alt: 'Elimination bracket view' },
+    { src: '/images/projets/nippon-kempo/poule-view.png',            caption: 'Pool view',                       alt: 'Pool organisation and tracking' },
+    { src: '/images/projets/nippon-kempo/fight-result.png',          caption: 'Match result entry',              alt: 'Score entry interface' },
+    { src: '/images/projets/nippon-kempo/scoreboard-admin.png',      caption: 'Real-time scoreboard',            alt: 'Projectable scoreboard' },
+    { src: '/images/projets/nippon-kempo/export-pdf-poule.png',      caption: 'PDF results export',              alt: 'PDF pool results export' },
+    { src: '/images/projets/nippon-kempo/classement.png',            caption: 'Overall ranking',                 alt: 'Overall ranking view' },
+    { src: '/images/projets/nippon-kempo/stats-tournament.png',      caption: 'Tournament statistics',           alt: 'Charts and tournament stats' },
+  ],
 }
 
-const mDetailCourant = computed<ProjectDetail | null>(() =>
-  mDetailId.value ? (mDetailsMap[mDetailId.value] ?? null) : null
-)
+// ─── Données détail EN — Tower Defense ────────────────────────────────────────
 
-// ─── Projets réels ────────────────────────────────────────────────────────────
+const mDetailTowerDefenseEn: ProjectDetail = {
+  descriptionLongue:
+    'Multiplayer Tower Defense web game developed as a passion project, to play with friends. ' +
+    'Built in spare time, not deployed to production.',
+  technos: [
+    { label: 'Vue 3',        detail: 'Composition API',  color: '#4ade80' },
+    { label: 'Phaser.js',    detail: '2D game engine',   color: '#60a5fa' },
+    { label: 'Node.js',      detail: 'Backend server',   color: '#fbbf24' },
+    { label: 'PostgreSQL',   detail: 'Database',         color: '#38bdf8' },
+    { label: 'GitHub',       detail: 'Versioning',       color: '#e2e8f0' },
+  ],
+  features: [
+    { icon: '🔐', titre: 'Authentication',    detail: 'Secure login to access the game.' },
+    { icon: '🗺️', titre: '8+ maps',           detail: 'More than 8 distinct maps with different designs.' },
+    { icon: '🗼', titre: 'Tower placement',    detail: 'Strategic placement of defensive towers.' },
+    { icon: '⚡', titre: 'Hero upgrades',      detail: 'Hero upgrade system as levels progress.' },
+    { icon: '🌊', titre: 'Enemy waves',        detail: 'Progressive enemies with increasing difficulty.' },
+    { icon: '🏆', titre: 'Victory screen',    detail: 'Summary and score at the end of the game.' },
+  ],
+  screenshots: [
+    { src: '/images/projets/towerdefense/auth.png',         caption: 'Authentication',     alt: 'Login screen' },
+    { src: '/images/projets/towerdefense/main-screen.png',  caption: 'Main screen',        alt: 'Game main menu' },
+    { src: '/images/projets/towerdefense/levels.png',       caption: 'Level selection',    alt: 'Level choice' },
+    { src: '/images/projets/towerdefense/map-1-game.png',   caption: 'Map 1 - in game',    alt: 'Gameplay on map 1' },
+    { src: '/images/projets/towerdefense/map-2.png',        caption: 'Map 2',              alt: 'Map 2 preview' },
+    { src: '/images/projets/towerdefense/map-3.png',        caption: 'Map 3',              alt: 'Map 3 preview' },
+    { src: '/images/projets/towerdefense/hero-upgrade.png', caption: 'Hero upgrades',      alt: 'Hero upgrade interface' },
+    { src: '/images/projets/towerdefense/success.png',      caption: 'Victory screen',     alt: 'Success screen at end of game' },
+  ],
+}
 
-const mProjets: Project[] = [
-  // ── École ──────────────────────────────────────────────────────────────────
+// ─── Données détail EN — NegoSud ──────────────────────────────────────────────
+
+const mDetailNegoSudEn: ProjectDetail = {
+  descriptionLongue:
+    'Complete desktop application for wine stock management. ' +
+    'End-of-Bachelor\'s-year-2 project: wine management, families, suppliers, orders, inventories and dashboard.',
+  contexte:
+    'NegoSud is a desktop application for wine trading. ' +
+    'It covers the full stock lifecycle: product creation, supplier management, inventories and order tracking.',
+  equipe: mDetailNegoSud.equipe,
+  stockage: 'Local relational database via Axios + internal REST API. Persistent data on the workstation.',
+  technos: [
+    { label: 'Quasar 2',     detail: 'Vue 3 Framework',   color: '#00b4ff' },
+    { label: 'Vue 3',        detail: 'Composition API',   color: '#4ade80' },
+    { label: 'Electron',     detail: 'Desktop app',       color: '#60a5fa' },
+    { label: 'Axios',        detail: 'HTTP requests',     color: '#fbbf24' },
+    { label: 'ApexCharts',   detail: 'Charts & stats',    color: '#f472b6' },
+    { label: 'Vue Router',   detail: 'SPA Navigation',    color: '#a78bfa' },
+    { label: 'Lordicon',     detail: 'Animated icons',    color: '#fb923c' },
+    { label: 'GitHub',       detail: 'Versioning',        color: '#e2e8f0' },
+  ],
+  features: [
+    { icon: '🍷', titre: 'Wine management',      detail: 'Create, edit and delete wines with photos and families.' },
+    { icon: '📦', titre: 'Stock management',      detail: 'Real-time quantity tracking per product and location.' },
+    { icon: '🏭', titre: 'Supplier management',   detail: 'Full creation and management of suppliers.' },
+    { icon: '📋', titre: 'Supplier orders',       detail: 'Create, track and receive orders.' },
+    { icon: '📊', titre: 'Inventories',           detail: 'Conduct inventories with automatically calculated discrepancies.' },
+    { icon: '🏷️', titre: 'Wine families',         detail: 'Classification by family, type, appellation and vintage.' },
+    { icon: '📈', titre: 'Dashboard',             detail: 'Dashboard with ApexCharts graphs: stocks, movements, alerts.' },
+    { icon: '🖼️', titre: 'Image management',      detail: 'Add and view photos for each product.' },
+  ],
+  screenshots: [],
+}
+
+// ─── Données détail EN — Bricoloc ─────────────────────────────────────────────
+
+const mDetailBricolocEn: ProjectDetail = {
+  descriptionLongue:
+    'Collaborative software architecture project: complete overhaul of the information system ' +
+    'of a fictitious online tool rental company. 20-minute oral presentation to a jury + individual report of about ten pages.',
+  contexte:
+    'BricoLoc is a tool rental platform existing since 2013, whose IS had degenerated into a "big ball of mud": ' +
+    'Java EE 6 monolith, oversized Oracle 11g database, nightly CSV batch stock synchronization, ' +
+    'VB.NET WCF services with lost source code, and an unidentified Red Hat VirtualBox VM still active on the network. ' +
+    'The goal: design a new cloud-native architecture to replace everything.',
+  equipe: mDetailBricoloc.equipe,
+  technos: [
+    { label: 'AWS',           detail: 'Target cloud provider',     color: '#f59e0b' },
+    { label: 'Spring Boot 3', detail: 'Backend microservices',     color: '#6ade80' },
+    { label: 'Next.js 14',    detail: 'React frontend',            color: '#e2e8f0' },
+    { label: 'PostgreSQL',    detail: 'Chosen DBMS (vs Oracle)',   color: '#38bdf8' },
+    { label: 'Kafka MSK',     detail: 'Event message bus',         color: '#fb923c' },
+    { label: 'Docker',        detail: 'Containerization',          color: '#60a5fa' },
+  ],
+  features: [
+    { icon: '🔍', titre: 'Existing IS diagnosis',           detail: 'Identification and analysis of weaknesses: technical debt, costs, operational risks.' },
+    { icon: '📋', titre: '10 non-functional requirements',  detail: 'Definition of NFRs: performance, scalability, security, availability, maintainability...' },
+    { icon: '🧩', titre: '8 identified microservices',      detail: 'Logical decomposition of the business domain into independent, deployable microservices.' },
+    { icon: '⚖️', titre: '6 weighted decision matrices',    detail: 'Justification of technology decisions: cloud, DBMS, message bus, frontend.' },
+    { icon: '🔄', titre: 'Strangler Fig migration',         detail: 'Progressive 5-phase migration plan over 15 months to avoid big bang deployment.' },
+    { icon: '📝', titre: 'Individual report',               detail: 'Report of ~10 pages covering the diagnosis, NFRs, architectural style and decision matrices.' },
+  ],
+  screenshots: [],
+}
+
+// ─── Map id → détail (réactive à la locale) ───────────────────────────────────
+
+const mDetailCourant = computed<ProjectDetail | null>(() => {
+  if (!mDetailId.value) return null
+  const lMapFr: Record<string, ProjectDetail> = {
+    'nippon-kempo': mDetailNipponKempo,
+    'tower-defense': mDetailTowerDefense,
+    'negosud': mDetailNegoSud,
+    'bricoloc': mDetailBricoloc,
+  }
+  const lMapEn: Record<string, ProjectDetail> = {
+    'nippon-kempo': mDetailNipponKempoEn,
+    'tower-defense': mDetailTowerDefenseEn,
+    'negosud': mDetailNegoSudEn,
+    'bricoloc': mDetailBricolocEn,
+  }
+  const lMap = mLocale.value === 'fr' ? lMapFr : lMapEn
+  return lMap[mDetailId.value] ?? null
+})
+
+// ─── Projets réels (réactifs à la locale) ─────────────────────────────────────
+
+const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
+  // ── École ────────────────────────────────────────────────────────────────
   {
     id: 'bricoloc',
     titre: 'BricoLoc - Refonte SI',
@@ -324,7 +481,7 @@ const mProjets: Project[] = [
     tags: ['Quasar 2', 'Vue 3', 'Electron', 'Axios', 'ApexCharts'],
     detail: 'negosud',
   },
-  // ── Perso ──────────────────────────────────────────────────────────────────
+  // ── Perso ────────────────────────────────────────────────────────────────
   {
     id: 'vps',
     titre: 'Infrastructure VPS OVH',
@@ -367,7 +524,85 @@ const mProjets: Project[] = [
     tags: ['Vue 3', 'Phaser.js', 'PostgreSQL', 'Node.js'],
     detail: 'tower-defense',
   },
-]
+] : [
+  // ── School ───────────────────────────────────────────────────────────────
+  {
+    id: 'bricoloc',
+    titre: 'BricoLoc - IS Overhaul',
+    type: 'IS Architecture - Master Level CESI',
+    categorie: 'ecole',
+    status: 'archived',
+    description:
+      'Complete overhaul of a fictitious tool rental company\'s information system. Diagnosis of the existing monolith, decomposition into 8 microservices, Strangler Fig migration plan, technology decision matrices.',
+    tags: ['AWS', 'Spring Boot 3', 'Next.js 14', 'PostgreSQL', 'Kafka'],
+    detail: 'bricoloc',
+  },
+  {
+    id: 'nippon-kempo',
+    titre: 'Nippon Kempo App',
+    type: 'CESI Bachelor\'s Year 3 Project',
+    categorie: 'ecole',
+    status: 'live',
+    description:
+      'Complete offline desktop application for managing Nippon Kempo tournaments. Praised by the CESI jury, used in production by the real sports association.',
+    tags: ['Vue 3', 'Electron', 'IndexedDB', 'ApexCharts', 'Vuestic UI'],
+    detail: 'nippon-kempo',
+  },
+  {
+    id: 'negosud',
+    titre: 'NegoSud',
+    type: 'CESI Bachelor\'s Year 2 Project',
+    categorie: 'ecole',
+    status: 'archived',
+    description:
+      'Complete desktop application for wine stock management. Families, suppliers, orders, inventories, dashboard with charts. End-of-Bachelor\'s-year-2 project.',
+    tags: ['Quasar 2', 'Vue 3', 'Electron', 'Axios', 'ApexCharts'],
+    detail: 'negosud',
+  },
+  // ── Personal ─────────────────────────────────────────────────────────────
+  {
+    id: 'vps',
+    titre: 'OVH VPS Infrastructure',
+    type: 'Personal Project',
+    categorie: 'perso',
+    status: 'live',
+    description:
+      'Fully Dockerized OVH VPS, WireGuard VPN access. In production for personal use: family intranet, photo storage, OTP password manager, self-hosted Supabase, Prometheus + Grafana monitoring.',
+    tags: ['Docker', 'WireGuard', 'Nginx', 'Supabase', 'Prometheus', 'Grafana'],
+  },
+  {
+    id: 'portfolio',
+    titre: 'florian-guerrin.fr',
+    type: 'Portfolio',
+    categorie: 'perso',
+    status: 'live',
+    description:
+      'This portfolio. Generative tree, real-time Open-Meteo weather, Canvas API, day/night/seasons sky, 7 GSAP modals. Nuxt 3 + strict TypeScript.',
+    tags: ['Nuxt 3', 'Vue 3', 'TypeScript', 'Canvas API', 'GSAP', 'Open-Meteo'],
+    url: 'https://florian-guerrin.fr',
+  },
+  {
+    id: 'messagerie',
+    titre: 'E2E Encrypted Messaging',
+    type: 'Personal Project',
+    categorie: 'perso',
+    status: 'archived',
+    description:
+      'Personal test project (2023) to understand and implement end-to-end encryption: key exchanges, message encryption, real-time WebSocket. Goal: learn, not deploy to production.',
+    tags: ['Node.js', 'WebSocket', 'Cryptography', 'Vue 3'],
+  },
+  {
+    id: 'tower-defense',
+    titre: 'Tower Defense Web',
+    type: 'Personal Project',
+    categorie: 'perso',
+    status: 'archived',
+    description:
+      'Web Tower Defense game built with Vue 3 and Phaser.js. Created for fun and to play with friends, not deployed to production.',
+    tags: ['Vue 3', 'Phaser.js', 'PostgreSQL', 'Node.js'],
+    detail: 'tower-defense',
+  },
+])
 
 // ─── Groupes par catégorie ────────────────────────────────────────────────────
 
@@ -380,16 +615,16 @@ interface ProjetGroupe {
 
 const mGroupes = computed<ProjetGroupe[]>(() => [
   {
-    label: 'Projets d\'école',
+    label: t('Projets d\'école', 'School Projects'),
     icon: '🎓',
     accentClass: 'groupe--ecole',
-    projets: mProjets.filter(lP => lP.categorie === 'ecole'),
+    projets: mProjets.value.filter(lP => lP.categorie === 'ecole'),
   },
   {
-    label: 'Projets personnels',
+    label: t('Projets personnels', 'Personal Projects'),
     icon: '🖥️',
     accentClass: 'groupe--perso',
-    projets: mProjets.filter(lP => lP.categorie === 'perso'),
+    projets: mProjets.value.filter(lP => lP.categorie === 'perso'),
   },
 ])
 
@@ -400,12 +635,12 @@ interface StatusConfig {
   variant: 'amber' | 'blue' | 'green' | 'default'
 }
 
-const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
-  dev:      { label: 'En développement', variant: 'amber' },
-  ongoing:  { label: 'En cours',         variant: 'blue' },
-  live:     { label: 'Live / Production', variant: 'green' },
-  archived: { label: 'Archivé',          variant: 'default' },
-}
+const mStatusConfig = computed<Record<ProjectStatus, StatusConfig>>(() => ({
+  dev:      { label: t('En développement', 'In Development'),  variant: 'amber' },
+  ongoing:  { label: t('En cours',         'In Progress'),     variant: 'blue' },
+  live:     { label: 'Live / Production',                      variant: 'green' },
+  archived: { label: t('Archivé',          'Archived'),        variant: 'default' },
+}))
 </script>
 
 <template>
@@ -464,13 +699,13 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
                   v-if="lProjet.detail"
                   class="project-link project-link--detail"
                   @click="mOuvrirDetail(lProjet.id)"
-                  :aria-label="`Découvrir ${lProjet.titre}`"
+                  :aria-label="`${t('Découvrir', 'Discover')} ${lProjet.titre}`"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="5" cy="5" r="3.5"/>
                     <path d="M8 8l2.5 2.5"/>
                   </svg>
-                  Découvrir le projet
+                  {{ t('Découvrir le projet', 'Discover the project') }}
                 </button>
 
                 <!-- Lien externe -->
@@ -480,12 +715,12 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
                   target="_blank"
                   rel="noopener noreferrer"
                   class="project-link"
-                  :aria-label="`Voir ${lProjet.titre}`"
+                  :aria-label="`${t('Voir', 'View')} ${lProjet.titre}`"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
                     <path d="M7 1h4v4M11 1L5 7M3 2H1v9h9V9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  Voir le projet
+                  {{ t('Voir le projet', 'View the project') }}
                 </a>
               </article>
             </div>
@@ -502,15 +737,15 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 11L4 7l5-4"/>
           </svg>
-          Tous les projets
+          {{ t('Tous les projets', 'All projects') }}
         </button>
 
         <!-- Badges -->
         <div class="detail-badges">
-          <span v-if="mDetailId === 'nippon-kempo'" class="detail-badge detail-badge--gold">⭐ Félicitée par le jury CESI</span>
-          <span v-if="mDetailId === 'nippon-kempo'" class="detail-badge detail-badge--green">✅ En production</span>
-          <span v-if="mDetailId === 'negosud'"      class="detail-badge detail-badge--gold">🎓 Projet Bac+2 CESI</span>
-          <span v-if="mDetailId === 'bricoloc'"     class="detail-badge detail-badge--gold">🎓 Projet Bac+5 CESI</span>
+          <span v-if="mDetailId === 'nippon-kempo'" class="detail-badge detail-badge--gold">⭐ {{ t('Félicitée par le jury CESI', 'Awarded by the CESI jury') }}</span>
+          <span v-if="mDetailId === 'nippon-kempo'" class="detail-badge detail-badge--green">✅ {{ t('En production', 'In production') }}</span>
+          <span v-if="mDetailId === 'negosud'"      class="detail-badge detail-badge--gold">🎓 {{ t('Projet Bac+2 CESI', 'CESI Bachelor\'s Year 2 Project') }}</span>
+          <span v-if="mDetailId === 'bricoloc'"     class="detail-badge detail-badge--gold">🎓 {{ t('Projet Bac+5 CESI', 'CESI Master\'s Level Project') }}</span>
         </div>
 
         <!-- Description longue -->
@@ -520,17 +755,17 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
         <!-- Équipe + Stockage -->
         <div v-if="mDetailCourant.equipe || mDetailCourant.stockage" class="detail-grid-2">
           <div v-if="mDetailCourant.equipe" class="detail-card">
-            <h4 class="detail-card__title">👥 Équipe</h4>
+            <h4 class="detail-card__title">👥 {{ t('Équipe', 'Team') }}</h4>
             <ul class="detail-team">
               <li v-for="lM in mDetailCourant.equipe" :key="lM.nom" class="detail-team__item">
                 <span class="detail-team__dot" />
                 {{ lM.nom }}
-                <span v-if="lM.moi" class="detail-team__me">moi</span>
+                <span v-if="lM.moi" class="detail-team__me">{{ t('moi', 'me') }}</span>
               </li>
             </ul>
           </div>
           <div v-if="mDetailCourant.stockage" class="detail-card">
-            <h4 class="detail-card__title">🗄️ Stockage</h4>
+            <h4 class="detail-card__title">🗄️ {{ t('Stockage', 'Storage') }}</h4>
             <p class="detail-card__text">{{ mDetailCourant.stockage }}</p>
           </div>
         </div>
@@ -556,7 +791,7 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
 
         <!-- Fonctionnalités -->
         <div class="detail-section">
-          <h4 class="detail-section__title">Fonctionnalités</h4>
+          <h4 class="detail-section__title">{{ t('Fonctionnalités', 'Features') }}</h4>
           <div class="detail-feat-grid">
             <div v-for="lF in mDetailCourant.features" :key="lF.titre" class="detail-feat-item">
               <span class="detail-feat-icon">{{ lF.icon }}</span>
@@ -570,14 +805,14 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
 
         <!-- Galerie -->
         <div v-if="mDetailCourant.screenshots.length > 0" class="detail-section">
-          <h4 class="detail-section__title">Captures d'écran</h4>
+          <h4 class="detail-section__title">{{ t('Captures d\'écran', 'Screenshots') }}</h4>
           <div class="detail-gallery">
             <button
               v-for="(lS, lIdx) in mDetailCourant.screenshots"
               :key="lS.src"
               class="detail-gallery__item"
               @click="mOuvrirLightbox(lIdx)"
-              :aria-label="`Agrandir : ${lS.caption}`"
+              :aria-label="`${t('Agrandir', 'Enlarge')}: ${lS.caption}`"
             >
               <img :src="lS.src" :alt="lS.alt" class="detail-gallery__img" loading="lazy" />
               <div class="detail-gallery__caption">{{ lS.caption }}</div>
@@ -603,13 +838,13 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
           role="dialog"
           aria-modal="true"
         >
-          <button class="lb-close" @click="mFermerLightbox" aria-label="Fermer">
+          <button class="lb-close" @click="mFermerLightbox" :aria-label="t('Fermer', 'Close')">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
               <path d="M14 4L4 14M4 4l10 10"/>
             </svg>
           </button>
 
-          <button class="lb-nav lb-nav--prev" @click="mLightboxPrev" aria-label="Précédent">
+          <button class="lb-nav lb-nav--prev" @click="mLightboxPrev" :aria-label="t('Précédent', 'Previous')">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M11 14L5 9l6-5"/>
             </svg>
@@ -627,7 +862,7 @@ const mStatusConfig: Record<ProjectStatus, StatusConfig> = {
             </p>
           </div>
 
-          <button class="lb-nav lb-nav--next" @click="mLightboxNext" aria-label="Suivant">
+          <button class="lb-nav lb-nav--next" @click="mLightboxNext" :aria-label="t('Suivant', 'Next')">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M7 4l6 5-6 5"/>
             </svg>
