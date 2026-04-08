@@ -51,8 +51,8 @@ const { t } = useLocale()
       <p class="text-sm leading-relaxed opacity-85" style="color: var(--modal-text)">
         {{
           t(
-            'Le développement m\'attire depuis mes premières lignes de code. Ce qui me motive vraiment, c\'est de comprendre comment les choses fonctionnent sous le capot — un système, une archi, un truc que j\'ai jamais vu. J\'essaie de rester à jour sur les nouveautés du métier : je teste, je lis, j\'expérimente sur des projets perso. Le web bouge vite, et j\'aime ça.',
-            'Development got me hooked since my very first lines of code. What drives me is understanding how things work under the hood — a system, an architecture, something I\'ve never seen before. I try to stay on top of what\'s new: I test things, read, experiment on personal projects. The web moves fast, and I like that.'
+            'Le développement m\'attire depuis mes premières lignes de code. Ce qui me motive vraiment, c\'est de comprendre comment les choses fonctionnent sous le capot. Un système, une archi, un truc que j\'ai jamais vu. J\'essaie de rester à jour sur les nouveautés du métier : je teste, je lis, j\'expérimente sur des projets perso. Le web bouge vite, et j\'aime ça.',
+            'Development got me hooked since my very first lines of code. What drives me is understanding how things work under the hood. A system, an architecture, something I\'ve never seen before. I try to stay on top of what\'s new: I test things, read, experiment on personal projects. The web moves fast, and I like that.'
           )
         }}
       </p>
