@@ -1,24 +1,28 @@
 // Auteur : GUERRINF - Florian Guerrin
-// Store - langue active (FR / EN) via useCookie Nuxt (fonctionne SSR + client sans conflit)
+// Store - langue active (FR / EN)
+// skipHydrate : Pinia ne serialise pas mLocale dans window.__NUXT__
+// donc le payload SSR ne peut pas ecraser la valeur lue dans localStorage
 
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
+import { ref } from 'vue'
+import { skipHydrate } from 'pinia'
 
 export type Locale = 'fr' | 'en'
 
-export const useLocaleStore = defineStore('locale', () => {
-  // useCookie est isomorphe : lu côté serveur et client sans hydratation conflictuelle
-  const mCookie = useCookie<Locale>('portfolio-locale', {
-    default: () => 'fr',
-    maxAge: 60 * 60 * 24 * 365, // 1 an
-    sameSite: 'lax',
-  })
+function calcInitialLocale(): Locale {
+  if (!import.meta.client) return 'fr'
+  const lSaved = localStorage.getItem('portfolio-locale')
+  return lSaved === 'en' ? 'en' : 'fr'
+}
 
-  const mLocale = computed(() => mCookie.value)
+export const useLocaleStore = defineStore('locale', () => {
+  // Initialisé directement depuis localStorage - skipHydrate empeche l'ecrasement SSR
+  const mLocale = ref<Locale>(calcInitialLocale())
 
   function toggleLocale(): void {
-    mCookie.value = mCookie.value === 'fr' ? 'en' : 'fr'
+    mLocale.value = mLocale.value === 'fr' ? 'en' : 'fr'
+    localStorage.setItem('portfolio-locale', mLocale.value)
   }
 
-  return { mLocale, toggleLocale }
+  return { mLocale: skipHydrate(mLocale), toggleLocale }
 })
