@@ -36,8 +36,8 @@ const { t } = useLocale()
         <p class="passion-text">
           {{
             t(
-              'Je m\'y suis mis sur le tard mais j\'accroche vraiment. La partie mentale me plait autant que la technique — sur les points importants, t\'as pas le droit à l\'erreur.',
-              'Started late but I\'m really hooked. The mental side interests me as much as the technique — on the big points, there\'s no room for mistakes.'
+              'Je m\'y suis mis sur le tard mais j\'accroche vraiment. La partie mentale me plait autant que la technique. Sur les points importants, t\'as pas le droit à l\'erreur.',
+              'Started late but I\'m really hooked. The mental side interests me as much as the technique. On the big points, there\'s no room for mistakes.'
             )
           }}
         </p>
@@ -112,7 +112,7 @@ const { t } = useLocale()
           {{
             t(
               'J\'ai acheté mon propre kart 2 temps. Rouler et bricoler dessus, les deux me plaisent. C\'est un bon moyen de déconnecter complètement.',
-              'I bought my own 2-stroke kart. Driving it and working on it — I enjoy both. It\'s a great way to fully disconnect.'
+              'I bought my own 2-stroke kart. I enjoy both driving it and working on it. It\'s a great way to fully disconnect.'
             )
           }}
         </p>
