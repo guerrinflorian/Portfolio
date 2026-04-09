@@ -116,7 +116,10 @@ const mPlaneOpacity = computed(() =>
               <span>{{ Math.round(lPlane.heading) }}°</span>
               <span class="tooltip-sub">{{ calcVerticalLabel(lPlane.verticalRate) }}</span>
             </div>
-            <div class="tooltip-country">{{ lPlane.country }}</div>
+            <div class="tooltip-country">
+              <span v-if="lPlane.registration">{{ lPlane.registration }}</span>
+              <span v-if="lPlane.type"> · {{ lPlane.type }}</span>
+            </div>
           </div>
         </Transition>
       </div>

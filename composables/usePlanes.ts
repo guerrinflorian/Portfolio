@@ -1,5 +1,5 @@
 // Auteur : GUERRINF - Florian Guerrin
-// Composable - avions en temps réel via OpenSky Network (zone Moselle/Luxembourg)
+// Composable - avions en temps réel via adsb.fi (CORS-compatible navigateur)
 
 import { ref, onMounted, onUnmounted } from 'vue'
 
@@ -8,51 +8,51 @@ import { ref, onMounted, onUnmounted } from 'vue'
 export interface Plane {
   icao24:       string
   callsign:     string
-  country:      string
+  registration: string
+  type:         string
   longitude:    number
   latitude:     number
-  altitude:     number    // mètres (baro)
+  altitude:     number    // mètres
   velocity:     number    // m/s
   heading:      number    // degrés, sens horaire depuis le nord
   verticalRate: number    // m/s (positif = montée)
 }
 
-type OpenSkyStateVector = [
-  string,          // 0: icao24
-  string | null,   // 1: callsign
-  string,          // 2: origin_country
-  number | null,   // 3: time_position
-  number,          // 4: last_contact
-  number | null,   // 5: longitude
-  number | null,   // 6: latitude
-  number | null,   // 7: baro_altitude
-  boolean,         // 8: on_ground
-  number,          // 9: velocity
-  number | null,   // 10: true_track
-  number | null,   // 11: vertical_rate
-  number[] | null, // 12: sensors
-  number | null,   // 13: geo_altitude
-  string | null,   // 14: squawk
-  boolean,         // 15: spi
-  number           // 16: position_source
-]
+interface AdsbFiAircraft {
+  hex:       string
+  flight?:   string
+  r?:        string           // immatriculation
+  t?:        string           // type OACI (ex: A320)
+  lat?:      number
+  lon?:      number
+  alt_baro?: number | 'ground'
+  gs?:       number           // knots
+  track?:    number
+  baro_rate?: number          // feet/min
+}
 
-interface OpenSkyResponse {
-  time:   number
-  states: OpenSkyStateVector[] | null
+interface AdsbFiResponse {
+  ac:    AdsbFiAircraft[]
+  ctime: number
 }
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-// Zone couverte : Moselle + Luxembourg + marges
-const LAMIN  = 48.8
-const LOMIN  = 5.0
-const LAMAX  = 50.5
-const LOMAX  = 7.5
+// Centre : Moselle (Metz), rayon 200 km couvre Luxembourg + Saarbrücken + Nancy
+const LAT_CENTER = 49.4167
+const LON_CENTER = 6.0000
+const RADIUS_KM  = 200
 
-const REFRESH_MS  = 60_000   // 60s - limite API anonyme OpenSky
-const CACHE_KEY   = 'planes_cache'
-const CACHE_TTL   = 55_000   // légèrement sous le refresh pour éviter les doublons
+const REFRESH_MS = 60_000   // 60s
+const CACHE_KEY  = 'planes_cache'
+const CACHE_TTL  = 55_000
+
+// ─── Conversions ──────────────────────────────────────────────────────────────
+
+function calcFtToM(pFt: number): number  { return pFt * 0.3048 }
+function calcKtToMs(pKt: number): number { return pKt * 0.5144 }
+
+// ─── Composable ───────────────────────────────────────────────────────────────
 
 export function usePlanes() {
   const mPlanes  = ref<Plane[]>([])
@@ -67,7 +67,7 @@ export function usePlanes() {
     mError.value   = null
 
     try {
-      // Cache sessionStorage pour éviter de dépasser le quota anonyme
+      // Cache sessionStorage pour respecter le quota API
       const lCached = sessionStorage.getItem(CACHE_KEY)
       if (lCached) {
         const lParsed = JSON.parse(lCached) as { ts: number; data: Plane[] }
@@ -78,37 +78,31 @@ export function usePlanes() {
         }
       }
 
-      const lUrl = new URL('https://opensky-network.org/api/states/all')
-      lUrl.searchParams.set('lamin', String(LAMIN))
-      lUrl.searchParams.set('lomin', String(LOMIN))
-      lUrl.searchParams.set('lamax', String(LAMAX))
-      lUrl.searchParams.set('lomax', String(LOMAX))
+      const lUrl = `https://api.adsb.fi/v1/aircraft?lat=${LAT_CENTER}&lon=${LON_CENTER}&radius=${RADIUS_KM}`
+      const lResponse = await fetch(lUrl)
+      if (!lResponse.ok) throw new Error(`adsb.fi erreur HTTP ${lResponse.status}`)
 
-      const lResponse = await fetch(lUrl.toString())
-      if (!lResponse.ok) throw new Error(`OpenSky erreur HTTP ${lResponse.status}`)
+      const lData = await lResponse.json() as AdsbFiResponse
 
-      const lData = await lResponse.json() as OpenSkyResponse
-
-      const lPlanes: Plane[] = (lData.states ?? [])
-        .filter(lS => {
-          // Garder uniquement les avions en vol avec position valide
-          const lOnGround = lS[8]
-          const lLon      = lS[5]
-          const lLat      = lS[6]
-          const lAlt      = lS[7]
-          return !lOnGround && lLon !== null && lLat !== null && lAlt !== null && lAlt > 500
+      const lPlanes: Plane[] = (lData.ac ?? [])
+        .filter(lAc => {
+          // Garder uniquement les avions en vol avec position et altitude valides
+          if (lAc.lat === undefined || lAc.lon === undefined) return false
+          if (lAc.alt_baro === undefined || lAc.alt_baro === 'ground') return false
+          return lAc.alt_baro > 1640  // > 500m (1640ft) = clairement en vol
         })
         .slice(0, 25)
-        .map(lS => ({
-          icao24:       (lS[0]).trim(),
-          callsign:     ((lS[1] ?? '').trim() || lS[0].toUpperCase()),
-          country:      lS[2],
-          longitude:    lS[5]!,
-          latitude:     lS[6]!,
-          altitude:     lS[7]!,
-          velocity:     lS[9] ?? 0,
-          heading:      lS[10] ?? 0,
-          verticalRate: lS[11] ?? 0,
+        .map(lAc => ({
+          icao24:       lAc.hex.trim(),
+          callsign:     (lAc.flight ?? lAc.r ?? lAc.hex).trim() || lAc.hex.toUpperCase(),
+          registration: (lAc.r ?? '').trim(),
+          type:         (lAc.t ?? '').trim(),
+          longitude:    lAc.lon!,
+          latitude:     lAc.lat!,
+          altitude:     calcFtToM(lAc.alt_baro as number),
+          velocity:     calcKtToMs(lAc.gs ?? 0),
+          heading:      lAc.track ?? 0,
+          verticalRate: calcFtToM((lAc.baro_rate ?? 0) / 60),  // ft/min → m/s
         }))
 
       mPlanes.value = lPlanes
