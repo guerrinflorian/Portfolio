@@ -1,11 +1,11 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Server route - proxy OpenSky Network (pas de CORS côté serveur Node.js)
 
-// Zone couverte : Moselle + Luxembourg + marges
-const LAMIN = 48.8
-const LOMIN = 5.0
-const LAMAX = 50.5
-const LOMAX = 7.5
+// Zone couverte : ~80km autour de Bure (Moselle)
+const LAMIN = 48.9
+const LOMIN = 5.2
+const LAMAX = 49.8
+const LOMAX = 6.7
 
 export default defineEventHandler(async () => {
   const lUrl = `https://opensky-network.org/api/states/all?lamin=${LAMIN}&lomin=${LOMIN}&lamax=${LAMAX}&lomax=${LOMAX}`

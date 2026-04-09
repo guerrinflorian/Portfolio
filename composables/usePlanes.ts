@@ -85,7 +85,7 @@ export function usePlanes() {
           const lAlt      = lS[7]
           return !lOnGround && lLon !== null && lLat !== null && lAlt !== null && lAlt > 500
         })
-        .slice(0, 25)
+        .slice(0, 15)
         .map(lS => ({
           icao24:       lS[0].trim(),
           callsign:     ((lS[1] ?? '').trim() || lS[0].toUpperCase()),
