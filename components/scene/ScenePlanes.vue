@@ -1,15 +1,12 @@
 <script setup lang="ts">
 // Auteur : GUERRINF - Florian Guerrin
-// Composant - avions en temps réel (OpenSky) - mode near (devant arbre) ou far (derrière)
+// Composant - avions en temps réel (OpenSky) - couche unique z-index 5
+// Profondeur visuelle uniquement via scale/opacité selon distance
 
 import { ref, computed } from 'vue'
 import { usePlanes } from '~/composables/usePlanes'
 import { useWeatherStore } from '~/stores/weather'
 import type { Plane } from '~/composables/usePlanes'
-
-// ─── Props ────────────────────────────────────────────────────────────────────
-
-const props = defineProps<{ mode: 'near' | 'far' }>()
 
 // ─── Stores & données ─────────────────────────────────────────────────────────
 
@@ -24,7 +21,7 @@ const ALT_MIN  = 500
 const ALT_MAX  = 13000
 const BURE_LAT = 49.3500
 const BURE_LON = 5.9500
-const NEAR_KM  = 70   // seuil near/far en km depuis Bure (couvre Luxembourg airport ~45-60km)
+const MAX_KM   = 60   // rayon maximal autour de Bure - au-delà on ignore
 
 // ─── Mapping pays → ISO 3166-1 alpha-2 ────────────────────────────────────────
 
@@ -118,13 +115,10 @@ function calcDistanceBure(pLat: number, pLon: number): number {
   return Math.round(6371 * 2 * Math.atan2(Math.sqrt(lA), Math.sqrt(1 - lA)))
 }
 
-// ─── Filtrage near / far ──────────────────────────────────────────────────────
+// ─── Filtrage : uniquement les avions dans le rayon MAX_KM ───────────────────
 
 const mFilteredPlanes = computed(() =>
-  mPlanes.value.filter(lP => {
-    const lDist = calcDistanceBure(lP.latitude, lP.longitude)
-    return props.mode === 'near' ? lDist < NEAR_KM : lDist >= NEAR_KM
-  })
+  mPlanes.value.filter(lP => calcDistanceBure(lP.latitude, lP.longitude) <= MAX_KM)
 )
 
 // ─── Positionnement & profondeur ──────────────────────────────────────────────
@@ -136,9 +130,8 @@ function calcPlaneY(pPlane: Plane): number {
 
 function calcPositionStyle(pPlane: Plane): Record<string, string> {
   const lX    = 3 + ((pPlane.longitude - LON_MIN) / (LON_MAX - LON_MIN)) * 94
-  // Scale de profondeur : avions proches = plus grands, lointains = plus petits
   const lDist  = calcDistanceBure(pPlane.latitude, pPlane.longitude)
-  const lScale = 1.0 - Math.min(lDist / 90, 1) * 0.28
+  const lScale = 1.0 - Math.min(lDist / MAX_KM, 1) * 0.30
 
   return {
     left:      `${Math.max(2, Math.min(97, lX))}%`,
@@ -155,20 +148,19 @@ function calcTooltipFlipped(pPlane: Plane): boolean {
 // ─── Opacité de profondeur ────────────────────────────────────────────────────
 
 function calcDepthOpacity(pPlane: Plane): number {
-  const lDist   = calcDistanceBure(pPlane.latitude, pPlane.longitude)
-  const lNight  = mWeatherStore.timeOfDay === 'night' ? 0.65 : 0.92
-  const lDepth  = 1.0 - Math.min(lDist / 90, 1) * 0.30
+  const lDist  = calcDistanceBure(pPlane.latitude, pPlane.longitude)
+  const lNight = mWeatherStore.timeOfDay === 'night' ? 0.65 : 0.92
+  const lDepth = 1.0 - Math.min(lDist / MAX_KM, 1) * 0.35
   return lNight * lDepth
 }
 
-// ─── Survol (tooltip uniquement, plus de fetch) ───────────────────────────────
+// ─── Survol ───────────────────────────────────────────────────────────────────
 
 const mHoveredIcao = ref<string | null>(null)
 
 function onHover(pPlane: Plane): void { mHoveredIcao.value = pPlane.icao24 }
 function onLeave(): void              { mHoveredIcao.value = null }
 
-// Vrai uniquement si au moins un champ de détail est renseigné (hexdb peut renvoyer tout vide)
 function calcHasDetails(pIcao24: string): boolean {
   const lD = mDetails[pIcao24]
   return !!(lD && (lD.registration || lD.manufacturer || lD.type || lD.operator))
@@ -194,11 +186,7 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
 </script>
 
 <template>
-  <div
-    aria-hidden="true"
-    class="scene-planes"
-    :class="mode === 'near' ? 'scene-planes--near' : 'scene-planes--far'"
-  >
+  <div aria-hidden="true" class="scene-planes">
     <TransitionGroup name="plane-fade">
       <div
         v-for="lPlane in mFilteredPlanes"
@@ -225,11 +213,8 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <!-- Fuselage effilé -->
             <path d="M10,0.5 C11.3,0.5 12,2 12,5 L12,17.5 C12,20 11.5,22.5 10,24 C8.5,22.5 8,20 8,17.5 L8,5 C8,2 8.7,0.5 10,0.5 Z"/>
-            <!-- Ailes swept back -->
             <path d="M12,8.5 L20,16.5 L18.8,18 L12,13 L8,13 L1.2,18 L0,16.5 Z"/>
-            <!-- Empennage -->
             <path d="M10,20.5 L6.5,23.5 L7.2,24 L10,22 L12.8,24 L13.5,23.5 Z"/>
           </svg>
           <!-- Feux de navigation (nuit) -->
@@ -305,13 +290,8 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 5;
 }
-
-/* Avions lointains : derrière l'arbre (z-index 4) - purement décoratifs */
-.scene-planes--far  { z-index: 3; }
-.scene-planes--far .plane-item { pointer-events: none; }
-/* Avions proches : devant l'arbre (z-index 4) */
-.scene-planes--near { z-index: 5; }
 
 .plane-item {
   position: absolute;
@@ -322,6 +302,9 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   pointer-events: auto;
   cursor: default;
   transform-origin: center center;
+  /* Zone de clic élargie pour faciliter le survol sur petits avions */
+  padding: 8px;
+  margin: -8px;
 }
 
 .plane-icon {
@@ -374,7 +357,7 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   letter-spacing: 0.04em;
 }
 
-/* ─── Tooltip ─────────────────────────────────────────────────────────────── */
+/* ─── Tooltip ──────────────────────────────────────────────────────────────── */
 
 .plane-tooltip {
   position: absolute;

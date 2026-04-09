@@ -3,11 +3,11 @@
 // Variables Vercel : OPENSKY_CLIENT_ID + OPENSKY_CLIENT_SECRET
 // Sans credentials : tentative anonyme avec fallback gracieux (states vides)
 
-// Zone couverte : ~80km autour de Bure (Moselle)
-const LAMIN = 48.9
-const LOMIN = 5.2
-const LAMAX = 49.8
-const LOMAX = 6.7
+// Zone couverte : ~60km autour de Bure (Moselle) - 49.35°N, 5.95°E
+const LAMIN = 48.82
+const LOMIN = 5.13
+const LAMAX = 49.88
+const LOMAX = 6.77
 
 const TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token'
 
