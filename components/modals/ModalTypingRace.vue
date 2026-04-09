@@ -6,6 +6,7 @@ import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
 import { useLocale } from '~/composables/useLocale'
+import mPhotoSrc from '~/assets/images/moi/moi.jpg'
 
 // ─── Stores & locale ─────────────────────────────────────────────────────────
 
@@ -92,12 +93,12 @@ const mBotTimeFmt    = computed(() => mBotTime.value.toFixed(1) + 's')
 function planifierProchainChar(): void {
   if (mBotPos.value >= mTexte.value.length) return
 
-  // Vitesse : 120-210ms par caractère soit ~5-7 chars/sec
-  let lDelay = 120 + Math.random() * 90
+  // Vitesse : 65-115ms par caractère soit ~9-15 chars/sec
+  let lDelay = 65 + Math.random() * 50
 
-  // Hésitation occasionnelle toutes les 15-25 lettres
-  if (mBotPos.value > 0 && mBotPos.value % (15 + Math.floor(Math.random() * 10)) === 0) {
-    lDelay += 280 + Math.random() * 350
+  // Hésitation occasionnelle toutes les 22-38 lettres
+  if (mBotPos.value > 0 && mBotPos.value % (22 + Math.floor(Math.random() * 16)) === 0) {
+    lDelay += 180 + Math.random() * 280
   }
 
   mBotTimeoutId = setTimeout(() => {
@@ -158,6 +159,10 @@ function onInput(): void {
 function terminerJeu(lGagnant: 'player' | 'bot'): void {
   mWinner.value = lGagnant
   mState.value  = 'finished'
+  // Si le joueur gagne, on capture le temps actuel du bot (il n'a pas fini)
+  if (lGagnant === 'player' && mBotTime.value === 0) {
+    mBotTime.value = parseFloat(((Date.now() - mStartTime) / 1000).toFixed(1))
+  }
   effacerTimers()
 }
 
@@ -262,10 +267,16 @@ onUnmounted(() => effacerTimers())
           </div>
           <span class="progress-pct">{{ Math.round(mPlayerProgress) }}%</span>
         </div>
-        <div class="progress-row">
+        <div class="progress-row progress-row--bot">
           <span class="progress-label">Bot 🧑‍💻</span>
-          <div class="progress-track">
+          <div class="progress-track progress-track--bot">
             <div class="progress-fill progress-fill--bot" :style="{ width: mBotProgress + '%' }" />
+            <img
+              :src="mPhotoSrc"
+              class="bot-avatar-img"
+              alt="Florian"
+              :style="{ left: mBotProgress + '%' }"
+            />
           </div>
           <span class="progress-pct">{{ Math.round(mBotProgress) }}%</span>
         </div>
@@ -282,6 +293,30 @@ onUnmounted(() => effacerTimers())
 
     <!-- ── FINISHED ── -->
     <div v-else-if="mState === 'finished'" class="state-finished">
+
+      <!-- Barres de progression finales -->
+      <div class="progress-section">
+        <div class="progress-row">
+          <span class="progress-label">{{ t('Vous', 'You') }}</span>
+          <div class="progress-track">
+            <div class="progress-fill progress-fill--player" :style="{ width: mPlayerProgress + '%' }" />
+          </div>
+          <span class="progress-pct">{{ Math.round(mPlayerProgress) }}%</span>
+        </div>
+        <div class="progress-row progress-row--bot">
+          <span class="progress-label">Bot 🧑‍💻</span>
+          <div class="progress-track progress-track--bot">
+            <div class="progress-fill progress-fill--bot" :style="{ width: mBotProgress + '%' }" />
+            <img
+              :src="mPhotoSrc"
+              class="bot-avatar-img"
+              alt="Florian"
+              :style="{ left: mBotProgress + '%' }"
+            />
+          </div>
+          <span class="progress-pct">{{ Math.round(mBotProgress) }}%</span>
+        </div>
+      </div>
 
       <div class="result-header">
         <span class="result-emoji">{{ mWinner === 'player' ? '🏆' : '🤖' }}</span>
@@ -304,7 +339,11 @@ onUnmounted(() => effacerTimers())
         <div class="score-card" :class="{ 'score-card--winner': mWinner === 'bot' }">
           <p class="score-who">Bot 🧑‍💻</p>
           <p class="score-time">{{ mBotTimeFmt }}</p>
-          <p class="score-detail">~98% · {{ t('quelques hésitations', 'a few hesitations') }}</p>
+          <p class="score-detail">
+            {{ Math.round(mBotProgress) }}%
+            <template v-if="mWinner === 'player'"> · {{ t('pas fini', 'not finished') }}</template>
+            <template v-else> · ~99% · {{ t('hésitations', 'hesitations') }}</template>
+          </p>
         </div>
       </div>
 
@@ -502,6 +541,30 @@ onUnmounted(() => effacerTimers())
 
 .progress-fill--player { background: linear-gradient(to right, #1e40af, #60a5fa); }
 .progress-fill--bot    { background: linear-gradient(to right, #9333ea, #c084fc); }
+
+.progress-row--bot {
+  padding-top: 18px;
+}
+
+.progress-track--bot {
+  overflow: visible;
+  position: relative;
+}
+
+.bot-avatar-img {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -160%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #9333ea;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.4);
+  transition: left 0.1s ease;
+  z-index: 2;
+  pointer-events: none;
+}
 
 .progress-pct {
   font-size: 0.68rem;

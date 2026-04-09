@@ -73,14 +73,12 @@ const { t }  = useLocale()
 <style scoped>
 .cabin-wrapper {
   position: fixed;
-  bottom: 108px;
+  bottom: 62px;
   right: 14%;
   z-index: 5;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-end;
   transition: transform 0.15s ease;
   user-select: none;
 }
@@ -91,7 +89,7 @@ const { t }  = useLocale()
 }
 
 @media (max-height: 499px) {
-  .cabin-wrapper { bottom: 65px; }
+  .cabin-wrapper { bottom: 30px; }
 }
 
 .cabin-wrapper:hover {
@@ -103,6 +101,10 @@ const { t }  = useLocale()
 }
 
 .cabin-hint {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
   font-size: 0.68rem;
   font-weight: 700;
   color: white;
@@ -110,7 +112,6 @@ const { t }  = useLocale()
   padding: 0.18rem 0.55rem;
   border-radius: 99px;
   opacity: 0;
-  transform: translateY(4px);
   transition: opacity 0.2s, transform 0.2s;
   white-space: nowrap;
   pointer-events: none;
@@ -118,6 +119,6 @@ const { t }  = useLocale()
 
 .cabin-wrapper:hover .cabin-hint {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 </style>
