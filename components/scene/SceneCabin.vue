@@ -73,7 +73,7 @@ const { t }  = useLocale()
 <style scoped>
 .cabin-wrapper {
   position: fixed;
-  bottom: 62px;
+  bottom: 45px;
   right: 14%;
   z-index: 5;
   cursor: pointer;
@@ -89,7 +89,7 @@ const { t }  = useLocale()
 }
 
 @media (max-height: 499px) {
-  .cabin-wrapper { bottom: 30px; }
+  .cabin-wrapper { bottom: 20px; }
 }
 
 .cabin-wrapper:hover {

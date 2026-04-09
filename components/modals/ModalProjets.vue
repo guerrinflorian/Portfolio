@@ -176,8 +176,8 @@ const mDetailNipponKempo: ProjectDetail = {
 
 const mDetailTowerDefense: ProjectDetail = {
   descriptionLongue:
-    'Jeu web Tower Defense multijoueur développé par passion, pour jouer avec des amis. ' +
-    'Développé sur le temps libre, non mis en production.',
+    'Jeu web Tower Defense multijoueur développé par passion pour jouer avec des amis. ' +
+    'Déployé sur Vercel et jouable en ligne. Code source disponible sur GitHub.',
   technos: [
     { label: 'Vue 3',        detail: 'Composition API',    color: '#4ade80' },
     { label: 'Phaser.js',    detail: 'Moteur de jeu 2D',   color: '#60a5fa' },
@@ -331,7 +331,7 @@ const mDetailNipponKempoEn: ProjectDetail = {
 const mDetailTowerDefenseEn: ProjectDetail = {
   descriptionLongue:
     'Multiplayer Tower Defense web game developed as a passion project, to play with friends. ' +
-    'Built in spare time, not deployed to production.',
+    'Deployed on Vercel and playable online. Source code available on GitHub.',
   technos: [
     { label: 'Vue 3',        detail: 'Composition API',  color: '#4ade80' },
     { label: 'Phaser.js',    detail: '2D game engine',   color: '#60a5fa' },
@@ -515,13 +515,14 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
   },
   {
     id: 'tower-defense',
-    titre: 'Tower Defense Web',
+    titre: 'Last Outpost - Tower Defense',
     type: 'Projet personnel',
     categorie: 'perso',
-    status: 'archived',
+    status: 'live',
     description:
-      'Jeu web Tower Defense développé en Vue 3 avec Phaser.js. Créé pour m\'amuser et jouer avec mes amis, non mis en production.',
+      'Jeu web Tower Defense multijoueur développé en Vue 3 avec Phaser.js. Déployé sur Vercel, jouable en ligne. Authentification, 8+ maps, vagues d\'ennemis progressives, système d\'upgrade du héros.',
     tags: ['Vue 3', 'Phaser.js', 'PostgreSQL', 'Node.js'],
+    url: 'https://last-outpost.vercel.app/',
     detail: 'tower-defense',
   },
 ] : [
@@ -593,13 +594,14 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
   },
   {
     id: 'tower-defense',
-    titre: 'Tower Defense Web',
+    titre: 'Last Outpost - Tower Defense',
     type: 'Personal Project',
     categorie: 'perso',
-    status: 'archived',
+    status: 'live',
     description:
-      'Web Tower Defense game built with Vue 3 and Phaser.js. Created for fun and to play with friends, not deployed to production.',
+      'Multiplayer web Tower Defense game built with Vue 3 and Phaser.js. Deployed on Vercel, playable online. Authentication, 8+ maps, progressive enemy waves, hero upgrade system.',
     tags: ['Vue 3', 'Phaser.js', 'PostgreSQL', 'Node.js'],
+    url: 'https://last-outpost.vercel.app/',
     detail: 'tower-defense',
   },
 ])
