@@ -19,35 +19,42 @@ const { t } = useLocale()
 // ─── Données compétences ──────────────────────────────────────────────────────
 
 const mCompetences: Skill[] = [
-  // Frontend
+  // Frontend - tri decroissant
   { name: 'Vue 2',                  level: 95, category: 'front',   context: 'prod'   },
-  { name: 'Vue 3 / Pinia / Router', level: 75, category: 'front',   context: 'prod'   },
   { name: 'HTML / CSS',             level: 85, category: 'front',   context: 'prod'   },
-  { name: 'TypeScript',             level: 70, category: 'front',   context: 'prod'   },
   { name: 'DevExtreme',             level: 80, category: 'front',   context: 'prod'   },
+  { name: 'Vue 3 / Pinia / Router', level: 75, category: 'front',   context: 'prod'   },
+  { name: 'TypeScript',             level: 70, category: 'front',   context: 'prod'   },
   { name: 'React',                  level: 65, category: 'front',   context: 'projet' },
   { name: 'Angular',                level: 50, category: 'front',   context: 'projet' },
 
-  // Back & BDD
-  { name: 'SQL Server',             level: 60, category: 'back',    context: 'prod'   },
+  // Back & BDD - tri decroissant
+  { name: 'Webservices REST',       level: 75, category: 'back',    context: 'prod'   },
   { name: 'Node.js / Fastify',      level: 65, category: 'back',    context: 'projet' },
+  { name: 'SQL Server',             level: 60, category: 'back',    context: 'prod'   },
   { name: 'VB.NET / ASP.NET',       level: 50, category: 'back',    context: 'prod'   },
-  { name: 'Webservices REST',        level: 65, category: 'back',    context: 'prod'   },
   { name: 'PostgreSQL',             level: 35, category: 'back',    context: 'projet' },
 
-  // DevOps & Outils
-  { name: 'GitHub / Git',           level: 80, category: 'outils',  context: 'prod'   },
-  { name: 'TFS / TFVC',             level: 75, category: 'outils',  context: 'prod'   },
-  { name: 'Docker / Compose',       level: 55, category: 'outils',  context: 'prod'   },
-  { name: 'Linux (admin VPS)',       level: 50, category: 'outils',  context: 'prod'   },
-  { name: 'Nginx / Caddy / Kong',   level: 45, category: 'outils',  context: 'prod'   },
-  { name: 'WireGuard VPN',          level: 40, category: 'outils',  context: 'prod'   },
+  // DevOps & Outils - tri decroissant
+  { name: 'GitHub / Git',           level: 60, category: 'outils',  context: 'prod'   },
+  { name: 'TFS / TFVC',             level: 60, category: 'outils',  context: 'prod'   },
+  { name: 'Docker / Compose',       level: 40, category: 'outils',  context: 'prod'   },
+  { name: 'Linux / Nginx',          level: 30, category: 'outils',  context: 'prod'   },
+  { name: 'WireGuard VPN',          level: 25, category: 'outils',  context: 'prod'   },
 
-  // Créatif & divers
+  // Creatif & divers - tri decroissant
   { name: 'Canvas API / GSAP',      level: 55, category: 'creatif', context: 'projet' },
+  { name: 'Lua',                    level: 35, category: 'creatif', context: 'projet' },
   { name: 'Phaser.js',              level: 35, category: 'creatif', context: 'projet' },
   { name: 'Flutter',                level: 30, category: 'creatif', context: 'projet' },
   { name: 'Python (scripts)',       level: 30, category: 'creatif', context: 'projet' },
+
+  // Methodo & Soft skills - tri decroissant
+  { name: 'Autonomie & Initiative', level: 80, category: 'methodo', context: 'prod'   },
+  { name: 'Travail en equipe',      level: 70, category: 'methodo', context: 'prod'   },
+  { name: 'Gestion de projet',      level: 65, category: 'methodo', context: 'prod'   },
+  { name: 'Redaction specs / recettes', level: 60, category: 'methodo', context: 'prod' },
+  { name: 'Encadrement / Mentorat', level: 55, category: 'methodo', context: 'prod'   },
 ]
 
 // ─── Groupes d'affichage ──────────────────────────────────────────────────────
@@ -60,10 +67,11 @@ interface SkillGroup {
 }
 
 const mGroupes = computed<SkillGroup[]>(() => [
-  { id: 'front',   label: t('Frontend', 'Frontend'),               color: '#3b82f6', skills: mCompetences.filter(c => c.category === 'front') },
-  { id: 'back',    label: t('Back & BDD', 'Back-end & DB'),        color: '#10b981', skills: mCompetences.filter(c => c.category === 'back') },
-  { id: 'outils',  label: t('DevOps & Outils', 'DevOps & Tools'),  color: '#f59e0b', skills: mCompetences.filter(c => c.category === 'outils') },
-  { id: 'creatif', label: t('Créatif & Divers', 'Creative & Misc'), color: '#ec4899', skills: mCompetences.filter(c => c.category === 'creatif') },
+  { id: 'front',   label: t('Frontend', 'Frontend'),                       color: '#3b82f6', skills: mCompetences.filter(c => c.category === 'front') },
+  { id: 'back',    label: t('Back & BDD', 'Back-end & DB'),                color: '#10b981', skills: mCompetences.filter(c => c.category === 'back') },
+  { id: 'outils',  label: t('DevOps & Outils', 'DevOps & Tools'),          color: '#f59e0b', skills: mCompetences.filter(c => c.category === 'outils') },
+  { id: 'creatif', label: t('Creatif & Divers', 'Creative & Misc'),        color: '#ec4899', skills: mCompetences.filter(c => c.category === 'creatif') },
+  { id: 'methodo', label: t('Methodo & Soft skills', 'Soft & Method.'),    color: '#06b6d4', skills: mCompetences.filter(c => c.category === 'methodo') },
 ])
 
 // ─── Animation GSAP des barres ────────────────────────────────────────────────

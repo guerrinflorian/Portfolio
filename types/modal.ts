@@ -25,7 +25,7 @@ export interface Skill {
   context: SkillContext
 }
 
-export type SkillCategory = 'front' | 'back' | 'outils' | 'creatif'
+export type SkillCategory = 'front' | 'back' | 'outils' | 'creatif' | 'methodo'
 
 // ─── Expérience professionnelle ───────────────────────────────────────────────
 
