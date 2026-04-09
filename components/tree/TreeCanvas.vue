@@ -125,6 +125,11 @@ let flyingLeaves: FlyingLeaf[] = []
 let rafId = 0
 let lastTimestamp = 0
 
+// Croissance initiale
+let growProgress  = 0       // 0 → 1
+let growStartTime = -1      // timestamp du premier frame
+const GROW_DURATION = 2600  // ms
+
 // Interaction
 let mouseDownNodeId: string | null = null
 let hoveredNodeId: string | null = null
@@ -418,6 +423,21 @@ function generateLeaves(pSeason: Season, pRng: SeededRandom): void {
   }
 }
 
+// ─── Helpers croissance ───────────────────────────────────────────────────────
+
+function easeOutExpo(pT: number): number {
+  return pT >= 1 ? 1 : 1 - Math.pow(2, -10 * pT)
+}
+
+// Retourne la fraction de dessin [0,1] pour une profondeur donnée
+function getDepthFrac(pDepth: number): number {
+  const lStarts = [0.00, 0.23, 0.42, 0.59, 0.74]
+  const lEnds   = [0.26, 0.48, 0.66, 0.83, 0.98]
+  const lS = lStarts[pDepth] ?? 0.74
+  const lE = lEnds[pDepth]   ?? 0.98
+  return Math.min(1, Math.max(0, (growProgress - lS) / (lE - lS)))
+}
+
 // ─── Calculs géométriques ─────────────────────────────────────────────────────
 
 function getBezierPoint(pT: number, pSx: number, pSy: number, pCpx: number, pCpy: number, pEx: number, pEy: number): { x: number; y: number } {
@@ -434,26 +454,28 @@ function drawTaperedTrunk(
   pCtx: CanvasRenderingContext2D,
   pSx: number, pSy: number,
   pCpx: number, pCpy: number,
-  pEx: number, pEy: number
+  pEx: number, pEy: number,
+  pFrac = 1
 ): void {
-  const STEPS = 18
+  const STEPS      = 18
+  const lStepCount = Math.max(2, Math.round(pFrac * STEPS))
 
-  // Calcule les points le long de la bezier
+  // Calcule les points le long de la bezier (jusqu'à pFrac)
   const lPts: Array<{ x: number; y: number }> = []
-  for (let lI = 0; lI <= STEPS; lI++) {
+  for (let lI = 0; lI <= lStepCount; lI++) {
     lPts.push(getBezierPoint(lI / STEPS, pSx, pSy, pCpx, pCpy, pEx, pEy))
   }
 
   const lLeft: Array<{ x: number; y: number }>  = []
   const lRight: Array<{ x: number; y: number }> = []
 
-  for (let lI = 0; lI <= STEPS; lI++) {
+  for (let lI = 0; lI <= lStepCount; lI++) {
     const lT    = lI / STEPS
     const lHalf = (34 + (14 - 34) * lT) / 2  // 34 → 14 px
     const lPt   = lPts[lI]!
-    const lNext = lI < STEPS ? lPts[lI + 1]! : lPts[lI - 1]!
-    const lDx   = lI < STEPS ? lNext.x - lPt.x : lPt.x - lPts[lI - 1]!.x
-    const lDy   = lI < STEPS ? lNext.y - lPt.y : lPt.y - lPts[lI - 1]!.y
+    const lNext = lI < lStepCount ? lPts[lI + 1]! : lPts[lI - 1]!
+    const lDx   = lI < lStepCount ? lNext.x - lPt.x : lPt.x - lPts[lI - 1]!.x
+    const lDy   = lI < lStepCount ? lNext.y - lPt.y : lPt.y - lPts[lI - 1]!.y
     const lLen  = Math.sqrt(lDx * lDx + lDy * lDy) || 1
     const lNx   = -lDy / lLen
     const lNy   =  lDx / lLen
@@ -475,7 +497,7 @@ function drawTaperedTrunk(
   // Reflet clair sur la gauche (~30% de la hauteur)
   pCtx.beginPath()
   pCtx.moveTo(lLeft[0]!.x, lLeft[0]!.y)
-  const lHighlightEnd = Math.floor(STEPS * 0.65)
+  const lHighlightEnd = Math.floor(lStepCount * 0.65)
   for (let lI = 1; lI <= lHighlightEnd; lI++) pCtx.lineTo(lLeft[lI]!.x, lLeft[lI]!.y)
   pCtx.strokeStyle = 'rgba(160, 118, 78, 0.38)'
   pCtx.lineWidth   = 3
@@ -534,26 +556,34 @@ function renderNode(
   pNode.ex  = lEx; pNode.ey  = lEy
   pNode.cpx = lCpx; pNode.cpy = lCpy
 
-  // ── Dessin ────────────────────────────────────────────────────────────────
-  if (pNode.depth === 0) {
-    // Tronc : polygone effilé avec reflet
-    drawTaperedTrunk(pCtx, lSx, lSy, lCpx, lCpy, lEx, lEy)
-  } else {
-    // Branches : couleur dégradée selon profondeur
-    const lT  = pNode.depth / 4
-    const lR  = Math.floor(90 + lT * 49)
-    const lG  = Math.floor(62 + lT * 37)
-    const lB  = Math.floor(43 + lT * 21)
+  // ── Dessin (avec clipping de croissance) ────────────────────────────────
+  const lFrac = getDepthFrac(pNode.depth)
 
-    pCtx.save()
-    pCtx.beginPath()
-    pCtx.moveTo(lSx, lSy)
-    pCtx.quadraticCurveTo(lCpx, lCpy, lEx, lEy)
-    pCtx.strokeStyle = `rgb(${lR}, ${lG}, ${lB})`
-    pCtx.lineWidth   = pNode.thickness
-    pCtx.lineCap     = 'round'
-    pCtx.stroke()
-    pCtx.restore()
+  if (lFrac > 0) {
+    if (pNode.depth === 0) {
+      // Tronc : polygone effilé avec reflet
+      drawTaperedTrunk(pCtx, lSx, lSy, lCpx, lCpy, lEx, lEy, lFrac)
+    } else {
+      // Branches : bezier partielle (de 0 à lFrac de la courbe)
+      const lPartCpx = lSx + (lCpx - lSx) * lFrac
+      const lPartCpy = lSy + (lCpy - lSy) * lFrac
+      const lPartPt  = getBezierPoint(lFrac, lSx, lSy, lCpx, lCpy, lEx, lEy)
+
+      const lT  = pNode.depth / 4
+      const lR  = Math.floor(90 + lT * 49)
+      const lG  = Math.floor(62 + lT * 37)
+      const lB  = Math.floor(43 + lT * 21)
+
+      pCtx.save()
+      pCtx.beginPath()
+      pCtx.moveTo(lSx, lSy)
+      pCtx.quadraticCurveTo(lPartCpx, lPartCpy, lPartPt.x, lPartPt.y)
+      pCtx.strokeStyle = `rgb(${lR}, ${lG}, ${lB})`
+      pCtx.lineWidth   = pNode.thickness
+      pCtx.lineCap     = 'round'
+      pCtx.stroke()
+      pCtx.restore()
+    }
   }
 
   // ── Récursion ─────────────────────────────────────────────────────────────
@@ -644,6 +674,9 @@ function drawLeafClusters(pCtx: CanvasRenderingContext2D): void {
   }
   collectById(treeRoot)
 
+  const lLeafFrac = Math.min(1, Math.max(0, (growProgress - 0.86) / 0.14))
+  if (lLeafFrac <= 0) return
+
   pCtx.save()
   for (const lLeaf of leaves) {
     const lNode = lAllNodes.get(lLeaf.nodeId)
@@ -661,7 +694,7 @@ function drawLeafClusters(pCtx: CanvasRenderingContext2D): void {
     pCtx.save()
     pCtx.translate(lX, lY)
     pCtx.rotate(lLeaf.angle)
-    pCtx.globalAlpha = lLeaf.alpha
+    pCtx.globalAlpha = lLeaf.alpha * lLeafFrac
     pCtx.fillStyle   = lColor
     pCtx.beginPath()
     pCtx.ellipse(0, 0, lLeaf.w / 2, lLeaf.h / 2, 0, 0, Math.PI * 2)
@@ -723,10 +756,13 @@ function computeNodePositions(): void {
 }
 
 function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
+  const lNodeFrac = Math.min(1, Math.max(0, (growProgress - 0.92) / 0.08))
+  if (lNodeFrac <= 0) return
+
   for (const lEntry of nodePositions) {
     const lCfg       = lEntry.config
     const lHovered   = hoveredNodeId === lCfg.id
-    const lRadius    = lCfg.radius + (lHovered ? 4 : 0)
+    const lRadius    = (lCfg.radius + (lHovered ? 4 : 0)) * lNodeFrac
     const calcPulse  = 0.5 + 0.5 * Math.sin(pTimeS * 2.2 + lCfg.pulsePhase)
     const calcRingR  = lRadius + calcPulse * 7
 
@@ -736,12 +772,12 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
     pCtx.beginPath()
     pCtx.arc(lEntry.x, lEntry.y, calcRingR, 0, Math.PI * 2)
     pCtx.strokeStyle = lCfg.color
-    pCtx.globalAlpha = (1 - calcPulse) * 0.45
+    pCtx.globalAlpha = (1 - calcPulse) * 0.45 * lNodeFrac
     pCtx.lineWidth   = 2
     pCtx.stroke()
 
     // Cercle principal
-    pCtx.globalAlpha = 1
+    pCtx.globalAlpha = lNodeFrac
     pCtx.beginPath()
     pCtx.arc(lEntry.x, lEntry.y, lRadius, 0, Math.PI * 2)
     pCtx.fillStyle = lCfg.color
@@ -757,7 +793,7 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
     pCtx.font          = `${lIconSize}px serif`
     pCtx.textAlign     = 'center'
     pCtx.textBaseline  = 'middle'
-    pCtx.globalAlpha   = 1
+    pCtx.globalAlpha   = lNodeFrac
     pCtx.fillText(lCfg.icon, lEntry.x, lEntry.y)
 
     pCtx.restore()
@@ -769,12 +805,15 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
 function drawCvIcon(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
   if (!treeRoot) return
 
+  const lNodeFrac = Math.min(1, Math.max(0, (growProgress - 0.92) / 0.08))
+  if (lNodeFrac <= 0) return
+
   const lX = treeRoot.ex
   const lY = treeRoot.ey - 14
   cvPos = { x: lX, y: lY }
 
   const lHovered  = hoveredNodeId === 'cv'
-  const lRadius   = lHovered ? 13 : 10
+  const lRadius   = (lHovered ? 13 : 10) * lNodeFrac
   const calcPulse = 0.5 + 0.5 * Math.sin(pTimeS * 2.2 + 1.8)
   const calcRingR = lRadius + calcPulse * 7
 
@@ -784,12 +823,12 @@ function drawCvIcon(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
   pCtx.beginPath()
   pCtx.arc(lX, lY, calcRingR, 0, Math.PI * 2)
   pCtx.strokeStyle = '#60a5fa'
-  pCtx.globalAlpha = (1 - calcPulse) * 0.4
+  pCtx.globalAlpha = (1 - calcPulse) * 0.4 * lNodeFrac
   pCtx.lineWidth   = 2
   pCtx.stroke()
 
   // Cercle principal
-  pCtx.globalAlpha = 1
+  pCtx.globalAlpha = lNodeFrac
   pCtx.beginPath()
   pCtx.arc(lX, lY, lRadius, 0, Math.PI * 2)
   pCtx.fillStyle = '#1e40af'
@@ -833,6 +872,14 @@ function render(pNow: number): void {
   const lH      = canvasRef.value.height
   const lDelta  = pNow - lastTimestamp
   const lTimeS  = pNow / 1000
+
+  // Mise a jour de la croissance initiale
+  if (growProgress < 1) {
+    if (growStartTime < 0) growStartTime = pNow
+    const lRaw = Math.min(1, (pNow - growStartTime) / GROW_DURATION)
+    growProgress = easeOutExpo(lRaw)
+    if (lRaw >= 1) growProgress = 1
+  }
 
   ctx.clearRect(0, 0, lW, lH)
 
