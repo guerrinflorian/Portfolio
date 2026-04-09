@@ -27,6 +27,7 @@ const mCompetences: Skill[] = [
   { name: 'TypeScript',             level: 70, category: 'front',   context: 'prod'   },
   { name: 'React',                  level: 65, category: 'front',   context: 'projet' },
   { name: 'Angular',                level: 50, category: 'front',   context: 'projet' },
+  { name: 'Tailwind CSS',           level: 50, category: 'front',   context: 'projet' },
 
   // Back & BDD - tri decroissant
   { name: 'Webservices REST',       level: 75, category: 'back',    context: 'prod'   },
@@ -34,6 +35,7 @@ const mCompetences: Skill[] = [
   { name: 'SQL Server',             level: 60, category: 'back',    context: 'prod'   },
   { name: 'VB.NET / ASP.NET',       level: 50, category: 'back',    context: 'prod'   },
   { name: 'PostgreSQL',             level: 35, category: 'back',    context: 'projet' },
+  { name: 'Testing / Vitest',       level: 35, category: 'back',    context: 'projet' },
 
   // DevOps & Outils - tri decroissant
   { name: 'GitHub / Git',           level: 60, category: 'outils',  context: 'prod'   },
