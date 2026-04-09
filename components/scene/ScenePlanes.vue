@@ -63,15 +63,24 @@ function onLeave(): void {
 
 // ─── Fonctions de mapping ─────────────────────────────────────────────────────
 
+function calcPlaneY(pPlane: Plane): number {
+  const lY = 70 - ((pPlane.altitude - ALT_MIN) / (ALT_MAX - ALT_MIN)) * 65
+  return Math.max(4, Math.min(70, lY))
+}
+
 function calcPositionStyle(pPlane: Plane): Record<string, string> {
   const lX = 3 + ((pPlane.longitude - LON_MIN) / (LON_MAX - LON_MIN)) * 94
-  const lY = 70 - ((pPlane.altitude - ALT_MIN) / (ALT_MAX - ALT_MIN)) * 65
 
   return {
     left:       `${Math.max(2, Math.min(97, lX))}%`,
-    top:        `${Math.max(4, Math.min(70, lY))}%`,
+    top:        `${calcPlaneY(pPlane)}%`,
     transition: 'left 58s linear, top 58s linear',
   }
+}
+
+// Tooltip vers le bas si l'avion est dans le quart supérieur de l'écran
+function calcTooltipFlipped(pPlane: Plane): boolean {
+  return calcPlaneY(pPlane) < 22
 }
 
 // ─── Utilitaires d'affichage ──────────────────────────────────────────────────
@@ -149,7 +158,11 @@ const mPlaneOpacity = computed(() =>
 
         <!-- Tooltip au survol -->
         <Transition name="tooltip-fade">
-          <div v-if="mHoveredIcao === lPlane.icao24" class="plane-tooltip">
+          <div
+            v-if="mHoveredIcao === lPlane.icao24"
+            class="plane-tooltip"
+            :class="{ 'plane-tooltip--below': calcTooltipFlipped(lPlane) }"
+          >
 
             <!-- En-tête : callsign + immatriculation -->
             <div class="tooltip-header">
@@ -276,6 +289,11 @@ const mPlaneOpacity = computed(() =>
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
+}
+
+.plane-tooltip--below {
+  bottom: auto;
+  top: calc(100% + 8px);
   background: rgba(10, 12, 28, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
@@ -397,6 +415,11 @@ const mPlaneOpacity = computed(() =>
 .tooltip-fade-leave-to {
   opacity: 0;
   transform: translateX(-50%) translateY(4px);
+}
+
+.plane-tooltip--below.tooltip-fade-enter-from,
+.plane-tooltip--below.tooltip-fade-leave-to {
+  transform: translateX(-50%) translateY(-4px);
 }
 
 @media (max-width: 640px) {
