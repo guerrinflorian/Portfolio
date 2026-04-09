@@ -6,6 +6,7 @@ import { ref, computed } from 'vue'
 import { usePlanes } from '~/composables/usePlanes'
 import { useWeatherStore } from '~/stores/weather'
 import type { Plane } from '~/composables/usePlanes'
+import type { AircraftDetails } from '~/server/api/aircraft/[icao24]'
 
 // ─── Stores & données ────────────────────────────────────────────────────────
 
@@ -19,16 +20,48 @@ const LON_MAX = 7.5
 const ALT_MIN = 500
 const ALT_MAX = 13000
 
-// ─── Avion survolé ────────────────────────────────────────────────────────────
+// Coordonnées de Bure pour le calcul de distance
+const BURE_LAT = 49.3500
+const BURE_LON = 5.9500
 
-const mHoveredIcao = ref<string | null>(null)
+// ─── Détails avion enrichis (chargés au survol) ───────────────────────────────
+
+const mHoveredIcao   = ref<string | null>(null)
+const mDetailsCache  = new Map<string, AircraftDetails>()
+const mDetailsLoading = ref(false)
+const mHoveredDetails = ref<AircraftDetails | null>(null)
+
+async function onHover(pPlane: Plane): Promise<void> {
+  mHoveredIcao.value    = pPlane.icao24
+  mHoveredDetails.value = null
+
+  if (mDetailsCache.has(pPlane.icao24)) {
+    mHoveredDetails.value = mDetailsCache.get(pPlane.icao24)!
+    return
+  }
+
+  mDetailsLoading.value = true
+  try {
+    const lData = await $fetch<AircraftDetails>(`/api/aircraft/${pPlane.icao24}`)
+    mDetailsCache.set(pPlane.icao24, lData)
+    // Appliquer seulement si l'avion est encore survolé
+    if (mHoveredIcao.value === pPlane.icao24) mHoveredDetails.value = lData
+  } catch {
+    // Silencieux - pas bloquant
+  } finally {
+    mDetailsLoading.value = false
+  }
+}
+
+function onLeave(): void {
+  mHoveredIcao.value    = null
+  mHoveredDetails.value = null
+}
 
 // ─── Fonctions de mapping ─────────────────────────────────────────────────────
 
 function calcPositionStyle(pPlane: Plane): Record<string, string> {
-  // Longitude → X : 3% à 97% (marges pour ne pas sortir)
   const lX = 3 + ((pPlane.longitude - LON_MIN) / (LON_MAX - LON_MIN)) * 94
-  // Altitude → Y : 70% (bas du ciel) → 5% (zénith)
   const lY = 70 - ((pPlane.altitude - ALT_MIN) / (ALT_MAX - ALT_MIN)) * 65
 
   return {
@@ -49,12 +82,30 @@ function calcAltitudeFt(pAltitude: number): number {
 }
 
 function calcVerticalLabel(pRate: number): string {
-  if (pRate >  1) return '↑'
-  if (pRate < -1) return '↓'
+  if (pRate >  2) return '↑'
+  if (pRate < -2) return '↓'
   return '→'
 }
 
-// Opacité selon heure : légèrement réduite la nuit (navigation lights simulées)
+// Distance de Bure en km (formule haversine simplifiée)
+function calcDistanceBure(pLat: number, pLon: number): number {
+  const lDlat = (pLat - BURE_LAT) * Math.PI / 180
+  const lDlon = (pLon - BURE_LON) * Math.PI / 180
+  const lA =
+    Math.sin(lDlat / 2) ** 2 +
+    Math.cos(BURE_LAT * Math.PI / 180) * Math.cos(pLat * Math.PI / 180) * Math.sin(lDlon / 2) ** 2
+  return Math.round(6371 * 2 * Math.atan2(Math.sqrt(lA), Math.sqrt(1 - lA)))
+}
+
+// Squawk : détecte les codes d'urgence
+function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean } {
+  if (pSquawk === '7700') return { label: '7700 URGENCE', emergency: true }
+  if (pSquawk === '7600') return { label: '7600 RADIO', emergency: true }
+  if (pSquawk === '7500') return { label: '7500 DETOURNEMENT', emergency: true }
+  return { label: pSquawk || '----', emergency: false }
+}
+
+// Opacité selon heure : légèrement réduite la nuit
 const mPlaneOpacity = computed(() =>
   mWeatherStore.timeOfDay === 'night' ? 0.65 : 0.92
 )
@@ -68,9 +119,8 @@ const mPlaneOpacity = computed(() =>
         :key="lPlane.icao24"
         class="plane-item"
         :style="calcPositionStyle(lPlane)"
-        :class="{ 'is-night': mWeatherStore.timeOfDay === 'night' }"
-        @mouseenter="mHoveredIcao = lPlane.icao24"
-        @mouseleave="mHoveredIcao = null"
+        @mouseenter="onHover(lPlane)"
+        @mouseleave="onLeave"
       >
         <!-- Icône avion -->
         <div
@@ -81,41 +131,79 @@ const mPlaneOpacity = computed(() =>
           }"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <!-- Corps de l'avion pointant vers le nord (haut) -->
             <path
               d="M12 2 L14.5 9 L21 11 L14.5 13 L15 20 L12 18.5 L9 20 L9.5 13 L3 11 L9.5 9 Z"
               fill="white"
               opacity="0.92"
             />
           </svg>
-          <!-- Feu de navigation la nuit -->
-          <span
-            v-if="mWeatherStore.timeOfDay === 'night'"
-            class="nav-light"
-          />
+          <!-- Feu de navigation clignotant (nuit) -->
+          <span v-if="mWeatherStore.timeOfDay === 'night'" class="nav-light" />
         </div>
 
-        <!-- Callsign label (toujours visible) -->
+        <!-- Callsign sous l'avion -->
         <span class="plane-callsign">{{ lPlane.callsign }}</span>
 
         <!-- Tooltip au survol -->
         <Transition name="tooltip-fade">
           <div v-if="mHoveredIcao === lPlane.icao24" class="plane-tooltip">
-            <div class="tooltip-callsign">{{ lPlane.callsign }}</div>
+
+            <!-- En-tête : callsign + immatriculation -->
+            <div class="tooltip-header">
+              <span class="tooltip-callsign">{{ lPlane.callsign }}</span>
+              <span v-if="mHoveredDetails?.registration" class="tooltip-reg">
+                {{ mHoveredDetails.registration }}
+              </span>
+            </div>
+
+            <!-- Type avion + opérateur (chargé dynamiquement) -->
+            <div v-if="mHoveredDetails?.type || mHoveredDetails?.manufacturer" class="tooltip-aircraft">
+              <span v-if="mHoveredDetails.manufacturer">{{ mHoveredDetails.manufacturer }}</span>
+              <span v-if="mHoveredDetails.type" class="tooltip-type"> {{ mHoveredDetails.type }}</span>
+            </div>
+            <div v-if="mHoveredDetails?.operator" class="tooltip-operator">
+              {{ mHoveredDetails.operator }}
+            </div>
+            <div v-else-if="mDetailsLoading" class="tooltip-loading">chargement...</div>
+
+            <div class="tooltip-divider" />
+
+            <!-- Altitude -->
             <div class="tooltip-row">
               <span class="tooltip-label">Alt</span>
               <span>{{ calcAltitudeFt(lPlane.altitude).toLocaleString() }} ft</span>
               <span class="tooltip-sub">({{ Math.round(lPlane.altitude) }} m)</span>
             </div>
+
+            <!-- Vitesse -->
             <div class="tooltip-row">
               <span class="tooltip-label">Vit</span>
               <span>{{ calcSpeedKmh(lPlane.velocity) }} km/h</span>
+              <span class="tooltip-sub">{{ calcVerticalLabel(lPlane.verticalRate) }}</span>
             </div>
+
+            <!-- Cap -->
             <div class="tooltip-row">
               <span class="tooltip-label">Cap</span>
               <span>{{ Math.round(lPlane.heading) }}°</span>
-              <span class="tooltip-sub">{{ calcVerticalLabel(lPlane.verticalRate) }}</span>
             </div>
+
+            <!-- Distance depuis Bure -->
+            <div class="tooltip-row">
+              <span class="tooltip-label">Dist</span>
+              <span>{{ calcDistanceBure(lPlane.latitude, lPlane.longitude) }} km de Bure</span>
+            </div>
+
+            <!-- Squawk -->
+            <div
+              class="tooltip-row"
+              :class="{ 'tooltip-emergency': calcSquawkLabel(lPlane.squawk).emergency }"
+            >
+              <span class="tooltip-label">Sqk</span>
+              <span>{{ calcSquawkLabel(lPlane.squawk).label }}</span>
+            </div>
+
+            <!-- Pays d'immatriculation -->
             <div class="tooltip-country">{{ lPlane.country }}</div>
           </div>
         </Transition>
@@ -132,7 +220,6 @@ const mPlaneOpacity = computed(() =>
   pointer-events: none;
 }
 
-/* Plane item - positionné en absolu par JS */
 .plane-item {
   position: absolute;
   display: flex;
@@ -143,7 +230,6 @@ const mPlaneOpacity = computed(() =>
   cursor: default;
 }
 
-/* Icône avion + rotation cap */
 .plane-icon {
   position: relative;
   display: flex;
@@ -153,7 +239,6 @@ const mPlaneOpacity = computed(() =>
   transition: opacity 2s ease;
 }
 
-/* Feu de navigation clignotant (nuit) */
 .nav-light {
   position: absolute;
   top: 2px;
@@ -170,7 +255,6 @@ const mPlaneOpacity = computed(() =>
   50%       { opacity: 0.1; }
 }
 
-/* Label callsign sous l'avion */
 .plane-callsign {
   font-size: 9px;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
@@ -182,30 +266,75 @@ const mPlaneOpacity = computed(() =>
   pointer-events: none;
 }
 
-/* Tooltip au survol */
+/* ─── Tooltip ─────────────────────────────────────────────────────────────── */
+
 .plane-tooltip {
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(10, 12, 28, 0.92);
+  background: rgba(10, 12, 28, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  padding: 8px 12px;
-  min-width: 160px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 10px 13px;
+  min-width: 190px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 10;
   pointer-events: none;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
+.tooltip-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
 .tooltip-callsign {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #e0e7ff;
-  margin-bottom: 6px;
   letter-spacing: 0.08em;
+}
+
+.tooltip-reg {
+  font-size: 10px;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.tooltip-aircraft {
+  font-size: 10px;
+  color: rgba(99, 179, 237, 0.9);
+  margin-bottom: 1px;
+}
+
+.tooltip-type {
+  font-weight: 600;
+}
+
+.tooltip-operator {
+  font-size: 9px;
+  color: rgba(167, 243, 208, 0.85);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.tooltip-loading {
+  font-size: 9px;
+  color: rgba(148, 163, 184, 0.5);
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
+.tooltip-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
 }
 
 .tooltip-row {
@@ -219,7 +348,7 @@ const mPlaneOpacity = computed(() =>
 
 .tooltip-label {
   color: rgba(148, 163, 184, 0.9);
-  width: 24px;
+  width: 28px;
   flex-shrink: 0;
 }
 
@@ -228,11 +357,22 @@ const mPlaneOpacity = computed(() =>
   font-size: 9px;
 }
 
+.tooltip-emergency {
+  color: #ff6b6b;
+  font-weight: 700;
+  animation: pulse-red 1s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
 .tooltip-country {
   margin-top: 5px;
   font-size: 9px;
-  color: rgba(148, 163, 184, 0.65);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(148, 163, 184, 0.55);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 5px;
 }
 
@@ -256,10 +396,7 @@ const mPlaneOpacity = computed(() =>
   transform: translateX(-50%) translateY(4px);
 }
 
-/* Caché sur mobile (trop petit) */
 @media (max-width: 640px) {
-  .scene-planes {
-    display: none;
-  }
+  .scene-planes { display: none; }
 }
 </style>

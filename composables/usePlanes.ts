@@ -15,6 +15,7 @@ export interface Plane {
   velocity:     number    // m/s
   heading:      number    // degrés, sens horaire depuis le nord
   verticalRate: number    // m/s (positif = montée)
+  squawk:       string    // code transpondeur 4 chiffres
 }
 
 type OpenSkyStateVector = [
@@ -96,6 +97,7 @@ export function usePlanes() {
           velocity:     lS[9] ?? 0,
           heading:      lS[10] ?? 0,
           verticalRate: lS[11] ?? 0,
+          squawk:       (lS[14] ?? '').trim(),
         }))
 
       mPlanes.value = lPlanes
