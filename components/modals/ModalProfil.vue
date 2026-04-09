@@ -44,13 +44,13 @@ async function initMap(): Promise<void> {
     shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   })
 
-  // Tressange / Bure - Moselle (57710)
-  const LAT = 49.362
-  const LNG = 5.934
+  // Bure - Moselle (57710), rattaché à Tressange
+  const LAT = 49.4167
+  const LNG = 6.0000
 
   mLeafletMap = L.map(mMapContainer.value, {
     center:             [LAT, LNG],
-    zoom:               14,
+    zoom:               13,
     zoomControl:        false,
     scrollWheelZoom:    false,
     dragging:           false,
@@ -64,15 +64,22 @@ async function initMap(): Promise<void> {
     maxZoom:     19,
   }).addTo(mLeafletMap)
 
-  // Force le recalcul des dimensions après rendu (cas modale animée)
-  setTimeout(() => mLeafletMap?.invalidateSize(), 100)
+  // Cercle de zone autour du village
+  L.circle([LAT, LNG], {
+    radius:      600,
+    color:       '#3b82f6',
+    fillColor:   '#3b82f6',
+    fillOpacity: 0.12,
+    weight:      2,
+    opacity:     0.55,
+  }).addTo(mLeafletMap)
 
   const lIcon = L.divIcon({
     className: '',
     html: `<div style="
       width:14px;height:14px;border-radius:50%;
       background:#3b82f6;border:3px solid white;
-      box-shadow:0 2px 10px rgba(59,130,246,0.55);
+      box-shadow:0 2px 10px rgba(59,130,246,0.6);
     "></div>`,
     iconSize:   [14, 14],
     iconAnchor: [7, 7],
@@ -81,10 +88,13 @@ async function initMap(): Promise<void> {
   L.marker([LAT, LNG], { icon: lIcon })
     .addTo(mLeafletMap)
     .bindPopup(
-      `<strong>Tressange · Moselle</strong><br><span style="font-size:0.78rem;color:#666">${t('5 min du Luxembourg', '5 min from Luxembourg')}</span>`,
+      `<strong>Bure · Moselle</strong><br><span style="font-size:0.78rem;color:#666">${t('5 min du Luxembourg', '5 min from Luxembourg')}</span>`,
       { closeButton: false }
     )
     .openPopup()
+
+  // Force le recalcul des dimensions après rendu (cas modale animée)
+  setTimeout(() => mLeafletMap?.invalidateSize(), 150)
 }
 
 watch(mOuverte, async (lVal) => {
