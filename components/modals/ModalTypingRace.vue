@@ -36,9 +36,11 @@ const mTexte      = ref('')
 const mInput      = ref('')
 const mCountdown  = ref(3)
 const mBotPos     = ref(0)
+const mBotErrors  = ref(0)
 const mPlayerTime = ref(0)
 const mBotTime    = ref(0)
 const mWinner     = ref<'player' | 'bot' | null>(null)
+const mLostReason = ref<'accuracy' | 'qualite' | null>(null)
 
 const mInputRef = ref<HTMLInputElement | null>(null)
 
@@ -85,6 +87,10 @@ const mAccuracy = computed(() => {
   return Math.max(0, Math.round(lGood / mTexte.value.length * 100))
 })
 
+const mBotAccuracy = computed(() =>
+  mTexte.value ? Math.max(0, Math.round((1 - mBotErrors.value / mTexte.value.length) * 100)) : 100
+)
+
 const mPlayerTimeFmt = computed(() => mPlayerTime.value.toFixed(1) + 's')
 const mBotTimeFmt    = computed(() => mBotTime.value.toFixed(1) + 's')
 
@@ -104,6 +110,8 @@ function planifierProchainChar(): void {
   mBotTimeoutId = setTimeout(() => {
     if (mState.value !== 'playing') return
     mBotPos.value++
+    // 2.5% de chance de faire une erreur sur ce caractère
+    if (Math.random() < 0.025) mBotErrors.value++
     if (mBotPos.value >= mTexte.value.length) {
       mBotTime.value = parseFloat(((Date.now() - mStartTime) / 1000).toFixed(1))
       terminerJeu('bot')
@@ -116,14 +124,16 @@ function planifierProchainChar(): void {
 // ─── Contrôle du jeu ─────────────────────────────────────────────────────────
 
 function demarrer(): void {
-  mTexte.value    = TEXTES[Math.floor(Math.random() * TEXTES.length)]
-  mInput.value    = ''
-  mBotPos.value   = 0
-  mWinner.value   = null
+  mTexte.value      = TEXTES[Math.floor(Math.random() * TEXTES.length)]
+  mInput.value      = ''
+  mBotPos.value     = 0
+  mBotErrors.value  = 0
+  mWinner.value     = null
+  mLostReason.value = null
   mPlayerTime.value = 0
-  mBotTime.value  = 0
-  mState.value    = 'countdown'
-  mCountdown.value = 3
+  mBotTime.value    = 0
+  mState.value      = 'countdown'
+  mCountdown.value  = 3
 
   mCdIntervalId = setInterval(() => {
     mCountdown.value--
@@ -152,7 +162,26 @@ function onInput(): void {
   if (mState.value !== 'playing') return
   if (mInput.value.length >= mTexte.value.length) {
     mPlayerTime.value = parseFloat(((Date.now() - mStartTime) / 1000).toFixed(1))
-    terminerJeu('player')
+
+    // Calcul des erreurs joueur (sans le bonus "chars manquants" qui s'applique après)
+    let lPlayerErrors = 0
+    for (let i = 0; i < mTexte.value.length; i++) {
+      if ((mInput.value[i] ?? '') !== mTexte.value[i]) lPlayerErrors++
+    }
+    const lErrorRate = lPlayerErrors / mTexte.value.length
+
+    if (lErrorRate > 0.06) {
+      // Plus de 6% d'erreurs → défaite
+      mLostReason.value = 'accuracy'
+      terminerJeu('bot')
+    } else if (lPlayerErrors > mBotErrors.value) {
+      // Plus d'erreurs que le bot même en étant plus rapide → défaite
+      mLostReason.value = 'qualite'
+      terminerJeu('bot')
+    } else {
+      mLostReason.value = null
+      terminerJeu('player')
+    }
   }
 }
 
@@ -168,10 +197,12 @@ function terminerJeu(lGagnant: 'player' | 'bot'): void {
 
 function rejouer(): void {
   effacerTimers()
-  mState.value = 'idle'
-  mInput.value = ''
-  mBotPos.value = 0
-  mWinner.value = null
+  mState.value      = 'idle'
+  mInput.value      = ''
+  mBotPos.value     = 0
+  mBotErrors.value  = 0
+  mWinner.value     = null
+  mLostReason.value = null
 }
 
 function effacerTimers(): void {
@@ -329,6 +360,16 @@ onUnmounted(() => effacerTimers())
         </h3>
       </div>
 
+      <!-- Raison de défaite -->
+      <div v-if="mWinner === 'bot' && mLostReason" class="lost-reason">
+        <template v-if="mLostReason === 'accuracy'">
+          {{ t('Trop d\'erreurs — tu dépasses 6% de taux d\'erreur.', 'Too many errors — you exceeded the 6% error rate.') }}
+        </template>
+        <template v-else-if="mLostReason === 'qualite'">
+          {{ t('Plus rapide que le bot, mais plus d\'erreurs — la vitesse ne suffit pas.', 'Faster than the bot, but more errors — speed alone isn\'t enough.') }}
+        </template>
+      </div>
+
       <!-- Scores -->
       <div class="scores-grid">
         <div class="score-card" :class="{ 'score-card--winner': mWinner === 'player' }">
@@ -340,9 +381,8 @@ onUnmounted(() => effacerTimers())
           <p class="score-who">Bot 🧑‍💻</p>
           <p class="score-time">{{ mBotTimeFmt }}</p>
           <p class="score-detail">
-            {{ Math.round(mBotProgress) }}%
+            {{ mBotAccuracy }}% · {{ mBotErrors }} {{ t('erreur(s)', 'error(s)') }}
             <template v-if="mWinner === 'player'"> · {{ t('pas fini', 'not finished') }}</template>
-            <template v-else> · ~99% · {{ t('hésitations', 'hesitations') }}</template>
           </p>
         </div>
       </div>
@@ -543,7 +583,7 @@ onUnmounted(() => effacerTimers())
 .progress-fill--bot    { background: linear-gradient(to right, #9333ea, #c084fc); }
 
 .progress-row--bot {
-  padding-top: 18px;
+  padding-top: 34px;
 }
 
 .progress-track--bot {
@@ -553,8 +593,8 @@ onUnmounted(() => effacerTimers())
 
 .bot-avatar-img {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -160%);
+  bottom: calc(100% + 4px);  /* 4px au-dessus du bord supérieur de la barre */
+  transform: translateX(-50%);
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -646,6 +686,16 @@ onUnmounted(() => effacerTimers())
   opacity: 0.5;
   color: var(--modal-text);
   margin-top: 0.25rem;
+}
+
+.lost-reason {
+  padding: 0.6rem 1rem;
+  background: rgba(239, 68, 68, 0.07);
+  border-left: 2px solid #ef4444;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ef4444;
 }
 
 .recruit-msg {
