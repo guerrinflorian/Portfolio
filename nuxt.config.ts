@@ -15,7 +15,7 @@ export default defineNuxtConfig({
   ],
 
   // CSS global
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', 'flag-icons/css/flag-icons.min.css'],
 
   // Configuration app
   app: {
