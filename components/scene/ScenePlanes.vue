@@ -32,22 +32,25 @@ const mDetailsLoading = ref(false)
 const mHoveredDetails = ref<AircraftDetails | null>(null)
 
 async function onHover(pPlane: Plane): Promise<void> {
+  console.log('[ScenePlanes] hover →', pPlane.icao24, pPlane.callsign)
   mHoveredIcao.value    = pPlane.icao24
   mHoveredDetails.value = null
 
   if (mDetailsCache.has(pPlane.icao24)) {
+    console.log('[ScenePlanes] cache hit →', mDetailsCache.get(pPlane.icao24))
     mHoveredDetails.value = mDetailsCache.get(pPlane.icao24)!
     return
   }
 
   mDetailsLoading.value = true
   try {
+    console.log('[ScenePlanes] fetch /api/aircraft/', pPlane.icao24)
     const lData = await $fetch<AircraftDetails>(`/api/aircraft/${pPlane.icao24}`)
+    console.log('[ScenePlanes] réponse →', lData)
     mDetailsCache.set(pPlane.icao24, lData)
-    // Appliquer seulement si l'avion est encore survolé
     if (mHoveredIcao.value === pPlane.icao24) mHoveredDetails.value = lData
-  } catch {
-    // Silencieux - pas bloquant
+  } catch (lErr) {
+    console.error('[ScenePlanes] erreur fetch détails →', lErr)
   } finally {
     mDetailsLoading.value = false
   }
