@@ -1,6 +1,6 @@
 // Auteur : GUERRINF - Florian Guerrin
-// Composable - avions en temps réel via server route /api/planes (proxy OpenSky)
-// État module-level partagé entre les deux instances de ScenePlanes (near/far)
+// Composable - avions en temps réel via server route /api/planes (proxy airplanes.live)
+// Etat module-level partage entre les instances de ScenePlanes
 
 import { ref, reactive, onMounted } from 'vue'
 import type { AircraftDetails } from '~/server/api/aircraft/[icao24]'
@@ -13,33 +13,20 @@ export interface Plane {
   country:      string
   longitude:    number
   latitude:     number
-  altitude:     number    // mètres (baro)
+  altitude:     number    // metres (baro)
   velocity:     number    // m/s
-  heading:      number    // degrés, sens horaire depuis le nord
-  verticalRate: number    // m/s (positif = montée)
+  heading:      number    // degres, sens horaire depuis le nord
+  verticalRate: number    // m/s (positif = montee)
   squawk:       string
-}
-
-type OpenSkyStateVector = [
-  string, string | null, string,
-  number | null, number,
-  number | null, number | null, number | null,
-  boolean, number, number | null, number | null,
-  number[] | null, number | null, string | null, boolean, number
-]
-
-interface OpenSkyResponse {
-  time:   number
-  states: OpenSkyStateVector[] | null
 }
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const REFRESH_MS = 5 * 60_000
-const CACHE_KEY  = 'planes_cache'
+const CACHE_KEY  = 'planes_cache_v2'
 const CACHE_TTL  = 4.5 * 60_000
 
-// ─── État singleton module-level (partagé entre les instances du composant) ───
+// ─── Etat singleton module-level ─────────────────────────────────────────────
 
 const mPlanesShared  = ref<Plane[]>([])
 const mDetailsShared = reactive<Record<string, AircraftDetails>>({})
@@ -55,7 +42,6 @@ async function fetchAllDetails(): Promise<void> {
   const lNew = mPlanesShared.value.filter(lP => !mDetailsShared[lP.icao24])
   if (lNew.length === 0) return
 
-  // Lots de 5 pour ne pas saturer hexdb.io
   for (let lI = 0; lI < lNew.length; lI += 5) {
     const lBatch = lNew.slice(lI, lI + 5)
     await Promise.allSettled(
@@ -77,6 +63,7 @@ async function fetchPlanes(): Promise<void> {
   mErrorShared.value   = null
 
   try {
+    // Cache sessionStorage
     const lCached = sessionStorage.getItem(CACHE_KEY)
     if (lCached) {
       const lParsed = JSON.parse(lCached) as { ts: number; data: Plane[] }
@@ -88,34 +75,11 @@ async function fetchPlanes(): Promise<void> {
       }
     }
 
-    const lData = await $fetch<OpenSkyResponse>('/api/planes')
-
-    const lPlanes: Plane[] = (lData.states ?? [])
-      .filter(lS => {
-        const lOnGround = lS[8]
-        const lLon      = lS[5]
-        const lLat      = lS[6]
-        const lAlt      = lS[7]
-        return !lOnGround && lLon !== null && lLat !== null && lAlt !== null && lAlt > 500
-      })
-      .slice(0, 15)
-      .map(lS => ({
-        icao24:       lS[0].trim(),
-        callsign:     ((lS[1] ?? '').trim() || lS[0].toUpperCase()),
-        country:      lS[2],
-        longitude:    lS[5]!,
-        latitude:     lS[6]!,
-        altitude:     lS[7]!,
-        velocity:     lS[9] ?? 0,
-        heading:      lS[10] ?? 0,
-        verticalRate: lS[11] ?? 0,
-        squawk:       (lS[14] ?? '').trim(),
-      }))
+    // Le serveur retourne directement Plane[]
+    const lPlanes = await $fetch<Plane[]>('/api/planes')
 
     mPlanesShared.value = lPlanes
     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: lPlanes }))
-
-    // Préchargement immédiat des détails → plus de changement de taille au survol
     void fetchAllDetails()
   } catch (lErr: unknown) {
     mErrorShared.value = lErr instanceof Error ? lErr.message : 'Erreur inconnue'
@@ -129,7 +93,6 @@ async function fetchPlanes(): Promise<void> {
 
 export function usePlanes() {
   onMounted(() => {
-    // Un seul interval pour toutes les instances (singleton)
     if (!mInitialized) {
       mInitialized = true
       void fetchPlanes()
