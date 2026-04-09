@@ -136,6 +136,9 @@ const labelY       = ref(0)
 // Positions monde des noeuds UI (recalculées chaque frame)
 let nodePositions: Array<{ config: TreeNodeConfig; x: number; y: number }> = []
 
+// Position de l'icône CV (haut du tronc, recalculée chaque frame)
+let cvPos: { x: number; y: number } | null = null
+
 // ─── Génération de l'arbre ────────────────────────────────────────────────────
 
 let nodeIdCounter = 0
@@ -753,6 +756,66 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
   }
 }
 
+// ─── Icône CV sur le tronc ────────────────────────────────────────────────────
+
+function drawCvIcon(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
+  if (!treeRoot) return
+
+  const lX = treeRoot.ex
+  const lY = treeRoot.ey - 14
+  cvPos = { x: lX, y: lY }
+
+  const lHovered  = hoveredNodeId === 'cv'
+  const lRadius   = lHovered ? 13 : 10
+  const calcPulse = 0.5 + 0.5 * Math.sin(pTimeS * 2.2 + 1.8)
+  const calcRingR = lRadius + calcPulse * 7
+
+  pCtx.save()
+
+  // Anneau pulsant
+  pCtx.beginPath()
+  pCtx.arc(lX, lY, calcRingR, 0, Math.PI * 2)
+  pCtx.strokeStyle = '#60a5fa'
+  pCtx.globalAlpha = (1 - calcPulse) * 0.4
+  pCtx.lineWidth   = 2
+  pCtx.stroke()
+
+  // Cercle principal
+  pCtx.globalAlpha = 1
+  pCtx.beginPath()
+  pCtx.arc(lX, lY, lRadius, 0, Math.PI * 2)
+  pCtx.fillStyle = '#1e40af'
+  pCtx.fill()
+
+  // Bordure blanche
+  pCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
+  pCtx.lineWidth   = 2
+  pCtx.stroke()
+
+  // Mini icône document
+  const lDW = 7, lDH = 9
+  const lDX = lX - lDW / 2
+  const lDY = lY - lDH / 2
+
+  pCtx.fillStyle   = 'white'
+  pCtx.globalAlpha = 0.95
+  pCtx.fillRect(lDX, lDY, lDW, lDH)
+
+  pCtx.strokeStyle = '#1e40af'
+  pCtx.lineWidth   = 0.9
+  pCtx.globalAlpha = 1
+  pCtx.beginPath()
+  pCtx.moveTo(lDX + 1.5, lDY + 2.5)
+  pCtx.lineTo(lDX + lDW - 1.5, lDY + 2.5)
+  pCtx.moveTo(lDX + 1.5, lDY + 4.5)
+  pCtx.lineTo(lDX + lDW - 1.5, lDY + 4.5)
+  pCtx.moveTo(lDX + 1.5, lDY + 6.5)
+  pCtx.lineTo(lDX + lDW - 2.5, lDY + 6.5)
+  pCtx.stroke()
+
+  pCtx.restore()
+}
+
 // ─── Boucle de rendu ──────────────────────────────────────────────────────────
 
 function render(pNow: number): void {
@@ -792,6 +855,7 @@ function render(pNow: number): void {
   // Recalcul des positions des noeuds UI (elles bougent avec le vent)
   computeNodePositions()
   drawNodes(ctx, lTimeS)
+  drawCvIcon(ctx, lTimeS)
 
   lastTimestamp = pNow
   rafId = requestAnimationFrame(render)
@@ -808,6 +872,13 @@ function hitTestNode(pX: number, pY: number): typeof nodePositions[0] | null {
     if (Math.sqrt(lDx * lDx + lDy * lDy) < HIT_RADIUS) return lEntry
   }
   return null
+}
+
+function hitTestCv(pX: number, pY: number): boolean {
+  if (!cvPos) return false
+  const lDx = pX - cvPos.x
+  const lDy = pY - cvPos.y
+  return Math.sqrt(lDx * lDx + lDy * lDy) < HIT_RADIUS
 }
 
 function getCanvasCoords(pEvent: MouseEvent | TouchEvent): { x: number; y: number } {
@@ -828,6 +899,7 @@ function getCanvasCoords(pEvent: MouseEvent | TouchEvent): { x: number; y: numbe
  */
 function onMouseDown(pEvent: MouseEvent): void {
   const { x, y } = getCanvasCoords(pEvent)
+  if (hitTestCv(x, y)) { mouseDownNodeId = 'cv'; return }
   mouseDownNodeId = hitTestNode(x, y)?.config.id ?? null
 }
 
@@ -838,8 +910,14 @@ function onMouseDown(pEvent: MouseEvent): void {
 function onMouseUp(pEvent: MouseEvent): void {
   pEvent.stopPropagation()
   const { x, y } = getCanvasCoords(pEvent)
-  const lEntry = hitTestNode(x, y)
 
+  if (mouseDownNodeId === 'cv' && hitTestCv(x, y)) {
+    window.location.href = '/cv.html'
+    mouseDownNodeId = null
+    return
+  }
+
+  const lEntry = hitTestNode(x, y)
   if (lEntry && lEntry.config.id === mouseDownNodeId) {
     void triggerNodeClick(lEntry)
   }
@@ -868,8 +946,18 @@ async function triggerNodeClick(pEntry: typeof nodePositions[0]): Promise<void> 
 
 function onMouseMove(pEvent: MouseEvent): void {
   const { x, y } = getCanvasCoords(pEvent)
-  const lEntry = hitTestNode(x, y)
 
+  if (hitTestCv(x, y)) {
+    hoveredNodeId      = 'cv'
+    canvasRef.value!.style.cursor = 'pointer'
+    labelText.value    = 'CV'
+    labelX.value       = cvPos!.x
+    labelY.value       = cvPos!.y
+    labelVisible.value = true
+    return
+  }
+
+  const lEntry = hitTestNode(x, y)
   if (lEntry) {
     hoveredNodeId     = lEntry.config.id
     canvasRef.value!.style.cursor = 'pointer'
@@ -895,6 +983,7 @@ function onTouchEnd(pEvent: TouchEvent): void {
   pEvent.preventDefault()
   pEvent.stopPropagation()
   const { x, y } = getCanvasCoords(pEvent)
+  if (hitTestCv(x, y)) { window.location.href = '/cv.html'; return }
   const lEntry = hitTestNode(x, y)
   if (lEntry) void triggerNodeClick(lEntry)
 }
