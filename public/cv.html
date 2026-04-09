@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV – Florian Guerrin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Base ── */
+    html { font-size: 13px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #dde8e2;
+      color: #1c1c1c;
+      line-height: 1.5;
+    }
+
+    /* ── Print ── */
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      body { background: white; }
+      .ui-bar { display: none !important; }
+      .page { width: 100%; margin: 0; box-shadow: none; border-radius: 0; page-break-after: avoid; }
+    }
+
+    /* ── Bouton retour ── */
+    .btn-back {
+      position: fixed; top: 1rem; left: 1rem; z-index: 100;
+    }
+    .btn-back button {
+      font-family: inherit; font-size: 0.78rem; font-weight: 600;
+      padding: 0.28rem 0.85rem; border-radius: 6px;
+      border: 1px solid #ccc; cursor: pointer;
+      background: white; color: #1a3a28;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+      transition: all 0.15s;
+    }
+    .btn-back button:hover { background: #f0f0f0; border-color: #1a3a28; }
+    @media print { .btn-back { display: none !important; } }
+
+    /* ── UI Bar ── */
+    .ui-bar {
+      position: fixed; top: 1rem; right: 1rem; z-index: 100;
+      display: flex; gap: 0.4rem; align-items: center;
+      background: white; border-radius: 10px;
+      padding: 0.4rem 0.6rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    }
+    .ui-bar button {
+      font-family: inherit; font-size: 0.78rem; font-weight: 600;
+      padding: 0.28rem 0.7rem; border-radius: 6px; border: 1px solid #ccc;
+      cursor: pointer; background: transparent; color: #555; transition: all 0.15s;
+    }
+    .ui-bar button:hover { background: #f0f0f0; }
+    .ui-bar button.active { background: #1a3a28; color: white; border-color: #1a3a28; }
+    .ui-bar .btn-print    { background: #4b5563; color: white; border-color: #4b5563; }
+    .ui-bar .btn-print:hover { background: #374151; }
+    .ui-bar .btn-dl       { background: #2d7a2d; color: white; border-color: #2d7a2d; }
+    .ui-bar .btn-dl:hover { background: #246824; }
+    .ui-bar .sep { width: 1px; height: 18px; background: #e0e0e0; }
+
+    /* ── Page A4 ── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 2.5rem auto;
+      background: white;
+      box-shadow: 0 6px 48px rgba(0,0,0,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .page.hidden { display: none; }
+
+    /* ── Header ── */
+    .cv-header {
+      background: linear-gradient(135deg, #1a3a28 0%, #0d2218 100%);
+      color: white;
+      padding: 1.2rem 1.75rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.25rem;
+      align-items: center;
+    }
+    .cv-photo {
+      width: 68px; height: 68px; border-radius: 50%;
+      object-fit: cover; object-position: top center;
+      border: 2px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.05);
+    }
+    .cv-name h1 {
+      font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em;
+      color: white; line-height: 1.1;
+    }
+    .cv-name .cv-title {
+      font-size: 0.83rem; font-weight: 500;
+      color: rgba(255,255,255,0.72); margin-top: 0.25rem;
+    }
+    .cv-name .cv-sub {
+      font-size: 0.72rem; color: rgba(255,255,255,0.48);
+      margin-top: 0.15rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;
+    }
+    .dot-live {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ade80; display: inline-block; flex-shrink: 0;
+      animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.45; } }
+    .cv-contact {
+      text-align: right; font-size: 0.7rem;
+      color: rgba(255,255,255,0.65); line-height: 1.9;
+    }
+    .cv-contact a { color: inherit; text-decoration: none; }
+    .cv-contact a:hover { color: white; }
+    .cv-contact .crow { display: flex; align-items: center; justify-content: flex-end; gap: 0.38rem; }
+    .cv-contact svg { opacity: 0.55; flex-shrink: 0; }
+
+    /* ── Body grid ── */
+    .cv-body { display: grid; grid-template-columns: 196px 1fr; flex: 1; }
+
+    /* ── Sidebar ── */
+    .cv-sidebar {
+      background: #f3f7f4;
+      border-right: 1px solid #d8e6dc;
+      padding: 1.1rem 1rem;
+    }
+
+    /* ── Main ── */
+    .cv-main { padding: 1.1rem 1.5rem; }
+
+    /* ── Section title ── */
+    .section { margin-bottom: 1.1rem; }
+    .section-title {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: #2d7a2d;
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.28rem;
+      border-bottom: 1px solid #d8e6dc;
+      display: flex; align-items: center; gap: 0.38rem;
+    }
+    .section-title::before {
+      content: ''; width: 3px; height: 10px;
+      background: #2d7a2d; border-radius: 2px; display: block; flex-shrink: 0;
+    }
+
+    /* ── Profile ── */
+    .profile-text {
+      font-size: 0.79rem; line-height: 1.65; color: #333;
+      padding: 0.65rem 0.85rem;
+      background: #f3faf5;
+      border-left: 2px solid #2d7a2d;
+      border-radius: 0 5px 5px 0;
+    }
+    .profile-meta { font-size: 0.7rem; color: #777; margin-top: 0.45rem; }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+    .tl-item {
+      padding-left: 0.85rem;
+      border-left: 2px solid #d8e6dc;
+      position: relative;
+    }
+    .tl-item::before {
+      content: ''; position: absolute; left: -5px; top: 4px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #2d7a2d; border: 2px solid white;
+      box-shadow: 0 0 0 1px #2d7a2d;
+    }
+    .tl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+    .tl-left { flex: 1; min-width: 0; }
+    .tl-right { flex-shrink: 0; text-align: right; }
+    .tl-title { font-size: 0.83rem; font-weight: 600; color: #1a1a1a; line-height: 1.3; }
+    .tl-sub { font-size: 0.72rem; color: #444; font-weight: 500; margin-top: 0.08rem; }
+    .tl-loc { font-size: 0.67rem; color: #888; margin-top: 0.04rem; }
+    .tl-date { font-size: 0.68rem; color: #2d7a2d; font-weight: 600; white-space: nowrap; }
+    .tl-dur { font-size: 0.63rem; color: #aaa; font-style: italic; white-space: nowrap; }
+    .tl-desc { font-size: 0.76rem; color: #3a3a3a; line-height: 1.55; margin-top: 0.3rem; }
+    .tl-bullets { margin-top: 0.3rem; padding-left: 0; list-style: none; }
+    .tl-bullets li {
+      font-size: 0.74rem; color: #333; line-height: 1.5;
+      margin-bottom: 0.14rem; padding-left: 0.8rem; position: relative;
+    }
+    .tl-bullets li::before { content: '·'; position: absolute; left: 0; color: #2d7a2d; font-weight: 700; }
+    .tl-tags { display: flex; flex-wrap: wrap; gap: 0.22rem; margin-top: 0.38rem; }
+    .tag {
+      font-size: 0.62rem; font-weight: 500;
+      padding: 0.12rem 0.42rem;
+      background: #e6f2e8; color: #185c18;
+      border-radius: 4px;
+    }
+
+    /* ── Skills ── */
+    .skill-group-label {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #999;
+      margin: 0.65rem 0 0.35rem;
+    }
+    .skill-item { margin-bottom: 0.52rem; }
+    .skill-header {
+      display: flex; justify-content: space-between;
+      align-items: baseline; margin-bottom: 0.18rem;
+    }
+    .skill-name { font-size: 0.73rem; font-weight: 500; color: #2a2a2a; }
+    .skill-pct { font-size: 0.62rem; font-weight: 600; color: #2d7a2d; }
+    .skill-track {
+      height: 4px; background: #d8e6dc;
+      border-radius: 9999px; overflow: hidden;
+    }
+    .skill-fill {
+      height: 100%;
+      background: linear-gradient(to right, #2d6a2d, #52c774);
+      border-radius: 9999px;
+    }
+
+    /* ── Languages ── */
+    .lang-item {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 0.38rem;
+    }
+    .lang-name { font-size: 0.75rem; color: #2a2a2a; }
+    .lang-lvl { font-size: 0.64rem; font-weight: 600; color: #888; margin-left: 0.25rem; }
+    .lang-dots { display: flex; gap: 3px; }
+    .lang-dot { width: 7px; height: 7px; border-radius: 50%; background: #d8e6dc; }
+    .lang-dot.on { background: #2d7a2d; }
+
+    /* ── Sidebar links ── */
+    .s-link {
+      display: flex; align-items: center; gap: 0.38rem;
+      font-size: 0.71rem; color: #2d7a2d; text-decoration: none;
+      margin-bottom: 0.38rem; word-break: break-all;
+    }
+    .s-link:hover { text-decoration: underline; }
+    .s-link svg { flex-shrink: 0; }
+
+    /* ── Interests ── */
+    .interests { font-size: 0.71rem; color: #555; line-height: 1.65; }
+  </style>
+</head>
+<body>
+
+<!-- ── Bouton retour ── -->
+<div class="btn-back">
+  <button onclick="history.length > 1 ? history.back() : window.location.href = '/'">&#8592; Retour</button>
+</div>
+
+<!-- ── UI Bar ── -->
+<div class="ui-bar">
+  <button id="btn-fr" class="active" onclick="setLang('fr')">FR</button>
+  <button id="btn-en" onclick="setLang('en')">EN</button>
+  <div class="sep"></div>
+  <button class="btn-print" onclick="window.print()">&#128438; Imprimer</button>
+  <button class="btn-dl" onclick="downloadPdf()">&#8595; PDF</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  VERSION FRANÇAISE                          -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page" id="page-fr">
+
+  <header class="cv-header">
+    <img class="cv-photo" src="/images/moi/moi.png" alt="Florian Guerrin" />
+
+    <div class="cv-name">
+      <h1>Florian Guerrin</h1>
+      <p class="cv-title">Développeur Full-Stack &middot; Vue 3 / TypeScript / SQL Server</p>
+      <p class="cv-sub">
+        <span id="age-fr"></span> ans &middot; Tressange, Moselle (57710)
+        &nbsp;&middot;&nbsp;
+        <span class="dot-live"></span>
+        Ouvert aux opportunités Moselle / Luxembourg
+      </p>
+    </div>
+
+    <div class="cv-contact">
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+        <a href="tel:+33695380157">06 95 38 01 57</a>
+      </div>
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <a href="mailto:guerrinflorian@yahoo.com">guerrinflorian@yahoo.com</a>
+      </div>
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0112 6.84c.85 0 1.71.12 2.5.34 1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85 0 1.34-.01 2.41-.01 2.74 0 .27.18.58.69.48C19.14 20.16 22 16.42 22 12c0-5.52-4.48-10-10-10z"/></svg>
+        <a href="https://github.com/guerrinflorian" target="_blank" rel="noopener">guerrinflorian</a>
+      </div>
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45C23.2 24 24 23.23 24 22.27V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+        <a href="https://linkedin.com/in/florian-guerrin-43a138295" target="_blank" rel="noopener">Florian Guerrin</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="cv-body">
+
+    <!-- ── Sidebar FR ── -->
+    <aside class="cv-sidebar">
+
+      <div class="section">
+        <div class="section-title">Compétences</div>
+
+        <p class="skill-group-label">Frontend</p>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Vue 2 / Vue 3</span><span class="skill-pct">90%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:90%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">HTML / CSS</span><span class="skill-pct">85%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:85%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">TypeScript</span><span class="skill-pct">60%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">React</span><span class="skill-pct">60%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Nuxt.js</span><span class="skill-pct">70%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+
+        <p class="skill-group-label">Back-end &amp; BDD</p>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Node.js / Fastify</span><span class="skill-pct">65%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">SQL Server</span><span class="skill-pct">60%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">VB.NET / ASP.NET</span><span class="skill-pct">50%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:50%"></div></div>
+        </div>
+
+        <p class="skill-group-label">DevOps &amp; Outils</p>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Git / GitHub</span><span class="skill-pct">65%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Docker</span><span class="skill-pct">40%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:40%"></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Langues</div>
+        <div class="lang-item">
+          <span class="lang-name">Français <span class="lang-lvl">Natif</span></span>
+          <div class="lang-dots">
+            <div class="lang-dot on"></div><div class="lang-dot on"></div>
+            <div class="lang-dot on"></div><div class="lang-dot on"></div>
+            <div class="lang-dot on"></div>
+          </div>
+        </div>
+        <div class="lang-item">
+          <span class="lang-name">Anglais <span class="lang-lvl">B2</span></span>
+          <div class="lang-dots">
+            <div class="lang-dot on"></div><div class="lang-dot on"></div>
+            <div class="lang-dot on"></div><div class="lang-dot"></div>
+            <div class="lang-dot"></div>
+          </div>
+        </div>
+        <div class="lang-item">
+          <span class="lang-name">Allemand <span class="lang-lvl">B1</span></span>
+          <div class="lang-dots">
+            <div class="lang-dot on"></div><div class="lang-dot"></div>
+            <div class="lang-dot"></div><div class="lang-dot"></div>
+            <div class="lang-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Liens</div>
+        <a class="s-link" href="https://github.com/guerrinflorian" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0112 6.84c.85 0 1.71.12 2.5.34 1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85 0 1.34-.01 2.41-.01 2.74 0 .27.18.58.69.48C19.14 20.16 22 16.42 22 12c0-5.52-4.48-10-10-10z"/></svg>
+          github.com/guerrinflorian
+        </a>
+        <a class="s-link" href="https://linkedin.com/in/florian-guerrin-43a138295" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45C23.2 24 24 23.23 24 22.27V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+          linkedin.com/in/florian-guerrin
+        </a>
+        <a class="s-link" href="https://www.lehubduweb.fr" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          lehubduweb.fr
+        </a>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Intérêts</div>
+        <p class="interests">
+          Développer jeux et applications sur temps perso<br/>
+          Tester de nouvelles technologies<br/>
+          Tennis · Football · Karting<br/>
+          Jeux vidéo
+        </p>
+      </div>
+
+    </aside>
+
+    <!-- ── Main FR ── -->
+    <main class="cv-main">
+
+      <div class="section">
+        <div class="section-title">Profil</div>
+        <p class="profile-text">
+          Développeur Full-Stack passionné, spécialisé en Vue 3 et TypeScript, avec plus de 3 ans d'expérience en alternance dans un environnement industriel exigeant. Je conçois et fais évoluer des applications métier complexes chez Saarstahl Rail, et je mène en parallèle des missions freelance via ma micro-entreprise. Curieux et autonome, j'expérimente régulièrement de nouvelles technologies et je reste attentif aux évolutions du métier.
+        </p>
+        <p class="profile-meta">Tressange (57710) &middot; 5 min de la frontière luxembourgeoise &middot; Frontalier potentiel &middot; Permis B &middot; Véhiculé</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Expériences professionnelles</div>
+        <div class="timeline">
+
+          <!-- Auto-entrepreneur -->
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Développeur Web &amp; Applications métier</div>
+                <div class="tl-sub">Auto-entrepreneur &middot; lehubduweb.fr</div>
+                <div class="tl-loc">Tressange, Moselle</div>
+              </div>
+              <div class="tl-right">
+                <div class="tl-date">Sep. 2025 – Présent</div>
+                <div class="tl-dur" id="dur-ae-fr"></div>
+              </div>
+            </div>
+            <ul class="tl-bullets">
+              <li>Création et développement de sites web et applications métier sur-mesure pour clients</li>
+              <li>Missions freelance en parallèle de l'alternance Saarstahl Rail</li>
+            </ul>
+          </div>
+
+          <!-- Saarstahl Rail -->
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Développeur IT Applicatif</div>
+                <div class="tl-sub">Saarstahl Rail &middot; Alternance</div>
+                <div class="tl-loc">Hayange / Tressange, Moselle</div>
+              </div>
+              <div class="tl-right">
+                <div class="tl-date">Oct. 2022 – Présent</div>
+                <div class="tl-dur" id="dur-sr-fr"></div>
+              </div>
+            </div>
+            <ul class="tl-bullets">
+              <li>Développement d'applications métier intranet : gestion de production ferroviaire de la commande à l'expédition, priorisation des chargements, fusions, transferts et logique métier avancée</li>
+              <li>Mise en place de la nouvelle architecture : migration de pages .aspx + Vue 2 (TFS) vers une SPA Vue 3 + Pinia + GitHub</li>
+              <li>Développement de routes et controllers en VB.NET / ASP.NET sur les webservices existants</li>
+              <li>SQL Server : écriture et modification de procédures stockées, création de tables pensées pour être flexibles à long terme</li>
+              <li>Participation à l'analyse des besoins avec les équipes usine, rédaction de specs, suivi via Microsoft Planner</li>
+              <li>Encadrement de stagiaires</li>
+            </ul>
+            <div class="tl-tags">
+              <span class="tag">Vue 2</span><span class="tag">Vue 3</span><span class="tag">Pinia</span>
+              <span class="tag">TypeScript</span><span class="tag">VB.NET</span><span class="tag">SQL Server</span>
+              <span class="tag">DevExtreme</span><span class="tag">GitHub</span><span class="tag">TFS</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Formation</div>
+        <div class="timeline">
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Manager en Architecture et Applications Logicielles des SI</div>
+                <div class="tl-sub">CESI Nancy &middot; Bac+5 (Niveau 7)</div>
+              </div>
+              <div class="tl-right">
+                <div class="tl-date">Sep. 2025 – Sep. 2027</div>
+                <div class="tl-dur">En cours</div>
+              </div>
+            </div>
+            <ul class="tl-bullets">
+              <li><strong>Architecture &amp; Cloud</strong> : architectures microservices / Serverless, infrastructures cloud scalables</li>
+              <li><strong>DevOps &amp; Sécurité</strong> : pipelines CI/CD industriels, IaC, DevSecOps</li>
+              <li><strong>Gouvernance SI</strong> : schémas directeurs, alignement IT/métier, gestion des risques</li>
+              <li><strong>Management &amp; Agilité</strong> : pilotage d'équipes, projets complexes, frameworks agiles à l'échelle</li>
+            </ul>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Concepteur Développeur d'Applications</div>
+                <div class="tl-sub">CESI Nancy &middot; Bac+3 (Niveau 6)</div>
+              </div>
+              <div class="tl-right"><div class="tl-date">2024 – 2025</div></div>
+            </div>
+            <ul class="tl-bullets">
+              <li><strong>Conception logicielle</strong> : modélisation UML, design patterns pour la maintenabilité</li>
+              <li><strong>API</strong> : création, documentation Swagger/OpenAPI et sécurisation d'API RESTful</li>
+              <li><strong>Qualité &amp; Déploiement</strong> : Docker, tests automatisés (unitaires/intégration), CI/CD</li>
+              <li><strong>Gestion de projet</strong> : Scrum/Kanban en équipe pluridisciplinaire</li>
+            </ul>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Développeur Informatique</div>
+                <div class="tl-sub">CESI Nancy &middot; Bac+2 (Niveau 5)</div>
+              </div>
+              <div class="tl-right"><div class="tl-date">Oct. 2022 – 2024</div></div>
+            </div>
+            <ul class="tl-bullets">
+              <li><strong>Full-Stack</strong> : applications web complètes (front-end interactif et back-end robuste)</li>
+              <li><strong>Bases de données</strong> : modélisation conceptuelle/physique, SQL avancé, procédures stockées</li>
+              <li><strong>Intégration</strong> : consommation de webservices, flux JSON et XML</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  VERSION ANGLAISE                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="page hidden" id="page-en">
+
+  <header class="cv-header">
+    <img class="cv-photo" src="/images/moi/moi.png" alt="Florian Guerrin" />
+
+    <div class="cv-name">
+      <h1>Florian Guerrin</h1>
+      <p class="cv-title">Full-Stack Developer &middot; Vue 3 / TypeScript / SQL Server</p>
+      <p class="cv-sub">
+        <span id="age-en"></span> y.o. &middot; Tressange, Moselle, France
+        &nbsp;&middot;&nbsp;
+        <span class="dot-live"></span>
+        Open to Moselle / Luxembourg opportunities
+      </p>
+    </div>
+
+    <div class="cv-contact">
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82 19.79 19.79 0 01.06 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+        <a href="tel:+33695380157">+33 6 95 38 01 57</a>
+      </div>
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <a href="mailto:guerrinflorian@yahoo.com">guerrinflorian@yahoo.com</a>
+      </div>
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0112 6.84c.85 0 1.71.12 2.5.34 1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85 0 1.34-.01 2.41-.01 2.74 0 .27.18.58.69.48C19.14 20.16 22 16.42 22 12c0-5.52-4.48-10-10-10z"/></svg>
+        <a href="https://github.com/guerrinflorian" target="_blank" rel="noopener">guerrinflorian</a>
+      </div>
+      <div class="crow">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45C23.2 24 24 23.23 24 22.27V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+        <a href="https://linkedin.com/in/florian-guerrin-43a138295" target="_blank" rel="noopener">Florian Guerrin</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="cv-body">
+
+    <!-- ── Sidebar EN ── -->
+    <aside class="cv-sidebar">
+
+      <div class="section">
+        <div class="section-title">Skills</div>
+
+        <p class="skill-group-label">Frontend</p>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Vue 2 / Vue 3</span><span class="skill-pct">90%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:90%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">HTML / CSS</span><span class="skill-pct">85%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:85%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">TypeScript</span><span class="skill-pct">60%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">React</span><span class="skill-pct">60%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Nuxt.js</span><span class="skill-pct">70%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+
+        <p class="skill-group-label">Back-end &amp; DB</p>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Node.js / Fastify</span><span class="skill-pct">65%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">SQL Server</span><span class="skill-pct">60%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:60%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">VB.NET / ASP.NET</span><span class="skill-pct">50%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:50%"></div></div>
+        </div>
+
+        <p class="skill-group-label">DevOps &amp; Tools</p>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Git / GitHub</span><span class="skill-pct">65%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Docker</span><span class="skill-pct">40%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:40%"></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Languages</div>
+        <div class="lang-item">
+          <span class="lang-name">French <span class="lang-lvl">Native</span></span>
+          <div class="lang-dots">
+            <div class="lang-dot on"></div><div class="lang-dot on"></div>
+            <div class="lang-dot on"></div><div class="lang-dot on"></div>
+            <div class="lang-dot on"></div>
+          </div>
+        </div>
+        <div class="lang-item">
+          <span class="lang-name">English <span class="lang-lvl">B2</span></span>
+          <div class="lang-dots">
+            <div class="lang-dot on"></div><div class="lang-dot on"></div>
+            <div class="lang-dot on"></div><div class="lang-dot"></div>
+            <div class="lang-dot"></div>
+          </div>
+        </div>
+        <div class="lang-item">
+          <span class="lang-name">German <span class="lang-lvl">B1</span></span>
+          <div class="lang-dots">
+            <div class="lang-dot on"></div><div class="lang-dot"></div>
+            <div class="lang-dot"></div><div class="lang-dot"></div>
+            <div class="lang-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Links</div>
+        <a class="s-link" href="https://github.com/guerrinflorian" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0112 6.84c.85 0 1.71.12 2.5.34 1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85 0 1.34-.01 2.41-.01 2.74 0 .27.18.58.69.48C19.14 20.16 22 16.42 22 12c0-5.52-4.48-10-10-10z"/></svg>
+          github.com/guerrinflorian
+        </a>
+        <a class="s-link" href="https://linkedin.com/in/florian-guerrin-43a138295" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45C23.2 24 24 23.23 24 22.27V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+          linkedin.com/in/florian-guerrin
+        </a>
+        <a class="s-link" href="https://www.lehubduweb.fr" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          lehubduweb.fr
+        </a>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Interests</div>
+        <p class="interests">
+          Developing games and apps in personal time<br/>
+          Testing new technologies<br/>
+          Tennis · Football · Karting<br/>
+          Gaming
+        </p>
+      </div>
+
+    </aside>
+
+    <!-- ── Main EN ── -->
+    <main class="cv-main">
+
+      <div class="section">
+        <div class="section-title">Profile</div>
+        <p class="profile-text">
+          Passionate Full-Stack Developer specializing in Vue 3 and TypeScript, with over 3 years of hands-on experience in a demanding industrial environment. I build and maintain complex business applications at Saarstahl Rail, while running freelance projects in parallel through my self-employed business. Driven by curiosity and autonomy, I regularly experiment with new technologies and stay close to industry developments.
+        </p>
+        <p class="profile-meta">Tressange (57710), Moselle &middot; 5 min from Luxembourg border &middot; Cross-border worker eligible &middot; Driver's license &middot; Own vehicle</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Work Experience</div>
+        <div class="timeline">
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Web &amp; Business App Developer</div>
+                <div class="tl-sub">Freelance &middot; lehubduweb.fr</div>
+                <div class="tl-loc">Tressange, Moselle, France</div>
+              </div>
+              <div class="tl-right">
+                <div class="tl-date">Sep. 2025 – Present</div>
+                <div class="tl-dur" id="dur-ae-en"></div>
+              </div>
+            </div>
+            <ul class="tl-bullets">
+              <li>Building custom websites and business applications for clients</li>
+              <li>Freelance projects alongside the Saarstahl Rail apprenticeship</li>
+            </ul>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">IT Application Developer</div>
+                <div class="tl-sub">Saarstahl Rail &middot; Apprenticeship</div>
+                <div class="tl-loc">Hayange / Tressange, Moselle, France</div>
+              </div>
+              <div class="tl-right">
+                <div class="tl-date">Oct. 2022 – Present</div>
+                <div class="tl-dur" id="dur-sr-en"></div>
+              </div>
+            </div>
+            <ul class="tl-bullets">
+              <li>Developing intranet business apps: railway production management from order to shipment, load prioritization, merges, transfers and advanced business logic</li>
+              <li>Led new architecture rollout: migration from .aspx + Vue 2 (TFS) to a Vue 3 + Pinia SPA on GitHub</li>
+              <li>Building routes and controllers in VB.NET / ASP.NET on existing webservices</li>
+              <li>SQL Server: stored procedures, long-term table design and evolution</li>
+              <li>Requirements analysis with factory teams, specs writing, task tracking via Microsoft Planner</li>
+              <li>Mentoring interns</li>
+            </ul>
+            <div class="tl-tags">
+              <span class="tag">Vue 2</span><span class="tag">Vue 3</span><span class="tag">Pinia</span>
+              <span class="tag">TypeScript</span><span class="tag">VB.NET</span><span class="tag">SQL Server</span>
+              <span class="tag">DevExtreme</span><span class="tag">GitHub</span><span class="tag">TFS</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Education</div>
+        <div class="timeline">
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Software Architecture &amp; IS Applications Manager</div>
+                <div class="tl-sub">CESI Nancy &middot; Master's equivalent (Level 7)</div>
+              </div>
+              <div class="tl-right">
+                <div class="tl-date">Sep. 2025 – Sep. 2027</div>
+                <div class="tl-dur">In progress</div>
+              </div>
+            </div>
+            <ul class="tl-bullets">
+              <li><strong>Architecture &amp; Cloud</strong>: complex software architectures (microservices, Serverless), scalable cloud infrastructures</li>
+              <li><strong>DevOps &amp; Security</strong>: industrial CI/CD pipelines, IaC, DevSecOps</li>
+              <li><strong>IS Governance</strong>: IT roadmaps, IT/business alignment, risk management</li>
+              <li><strong>Management &amp; Agility</strong>: team leadership, complex projects with scaled agile frameworks</li>
+            </ul>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">Application Designer &amp; Developer</div>
+                <div class="tl-sub">CESI Nancy &middot; Bachelor's equivalent (Level 6)</div>
+              </div>
+              <div class="tl-right"><div class="tl-date">2024 – 2025</div></div>
+            </div>
+            <ul class="tl-bullets">
+              <li><strong>Software design</strong>: UML modelling, design patterns for maintainability</li>
+              <li><strong>APIs</strong>: RESTful APIs — creation, Swagger/OpenAPI documentation, security</li>
+              <li><strong>Quality &amp; Deployment</strong>: Docker, automated testing (unit/integration), CI/CD</li>
+              <li><strong>Project management</strong>: Scrum/Kanban in a multidisciplinary team</li>
+            </ul>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-head">
+              <div class="tl-left">
+                <div class="tl-title">IT Developer</div>
+                <div class="tl-sub">CESI Nancy &middot; Associate's equivalent (Level 5)</div>
+              </div>
+              <div class="tl-right"><div class="tl-date">Oct. 2022 – 2024</div></div>
+            </div>
+            <ul class="tl-bullets">
+              <li><strong>Full-Stack</strong>: complete web applications (interactive front-end and robust back-end)</li>
+              <li><strong>Databases</strong>: conceptual and physical modelling, advanced SQL, stored procedures</li>
+              <li><strong>Integration</strong>: external webservices, JSON and XML data streams</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+
+<script>
+  // ── Date de naissance ─────────────────────────────────────────────────────
+  // TODO: Remplace "1900-01-01" par ta vraie date de naissance (format AAAA-MM-JJ)
+  const DATE_NAISSANCE = '2002-10-08';
+
+  function calcAge(dateStr) {
+    const today = new Date();
+    const birth  = new Date(dateStr);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  }
+
+  function dureeFR(dateStr) {
+    const start  = new Date(dateStr);
+    const now    = new Date();
+    let years    = now.getFullYear() - start.getFullYear();
+    let months   = now.getMonth()    - start.getMonth();
+    if (months < 0) { years--; months += 12; }
+    const parts  = [];
+    if (years  > 0) parts.push(years  + ' an'  + (years  > 1 ? 's' : ''));
+    if (months > 0) parts.push(months + ' mois');
+    return parts.length ? '(' + parts.join(' ') + ')' : '';
+  }
+
+  function dureeEN(dateStr) {
+    const start  = new Date(dateStr);
+    const now    = new Date();
+    let years    = now.getFullYear() - start.getFullYear();
+    let months   = now.getMonth()    - start.getMonth();
+    if (months < 0) { years--; months += 12; }
+    const parts  = [];
+    if (years  > 0) parts.push(years  + ' yr'  + (years  > 1 ? 's' : ''));
+    if (months > 0) parts.push(months + ' mo');
+    return parts.length ? '(' + parts.join(' ') + ')' : '';
+  }
+
+  // ── Injection âge ─────────────────────────────────────────────────────────
+  const age = calcAge(DATE_NAISSANCE);
+  document.getElementById('age-fr').textContent = age;
+  document.getElementById('age-en').textContent = age;
+
+  // ── Injection durées ──────────────────────────────────────────────────────
+  document.getElementById('dur-sr-fr').textContent = dureeFR('2022-10-01');
+  document.getElementById('dur-ae-fr').textContent = dureeFR('2025-09-01');
+  document.getElementById('dur-sr-en').textContent = dureeEN('2022-10-01');
+  document.getElementById('dur-ae-en').textContent = dureeEN('2025-09-01');
+
+  // ── Switcher de langue ────────────────────────────────────────────────────
+  function setLang(lang) {
+    document.getElementById('page-fr').classList.toggle('hidden', lang !== 'fr');
+    document.getElementById('page-en').classList.toggle('hidden', lang !== 'en');
+    document.documentElement.lang = lang;
+    document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.title = lang === 'fr' ? 'CV \u2013 Florian Guerrin' : 'Resume \u2013 Florian Guerrin';
+  }
+
+  // ── Téléchargement PDF ────────────────────────────────────────────────────
+  function downloadPdf() {
+    const lFr = document.getElementById('page-fr');
+    const lLang = lFr.classList.contains('hidden') ? 'en' : 'fr';
+    const lEl = document.getElementById(lLang === 'fr' ? 'page-fr' : 'page-en');
+    const lName = lLang === 'fr' ? 'CV-Florian-Guerrin.pdf' : 'Resume-Florian-Guerrin.pdf';
+
+    html2canvas(lEl, {
+      scale: 2,
+      useCORS: true,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      width: lEl.offsetWidth,
+      height: lEl.offsetHeight,
+    }).then(lCanvas => {
+      const { jsPDF } = window.jspdf;
+      const lPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const lImg = lCanvas.toDataURL('image/jpeg', 0.98);
+      lPdf.addImage(lImg, 'JPEG', 0, 0, 210, 297);
+      lPdf.save(lName);
+    });
+  }
+</script>
+
+</body>
+</html>

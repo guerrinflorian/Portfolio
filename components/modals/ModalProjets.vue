@@ -201,7 +201,7 @@ const mDetailTowerDefense: ProjectDetail = {
     { src: '/images/projets/towerdefense/map-2.png',        caption: 'Map 2',                      alt: 'Aperçu de la map 2' },
     { src: '/images/projets/towerdefense/map-3.png',        caption: 'Map 3',                      alt: 'Aperçu de la map 3' },
     { src: '/images/projets/towerdefense/hero-upgrade.png', caption: 'Améliorations du héros',     alt: 'Interface d\'amélioration du héros' },
-    { src: '/images/projets/towerdefense/success.png',      caption: 'Écran de victoire',          alt: 'Écran de succès en fin de partie' },
+    { src: '/images/projets/towerdefense/success.png',      caption: 'Succès',                     alt: 'Succès du jeu' },
   ],
 }
 
@@ -355,7 +355,7 @@ const mDetailTowerDefenseEn: ProjectDetail = {
     { src: '/images/projets/towerdefense/map-2.png',        caption: 'Map 2',              alt: 'Map 2 preview' },
     { src: '/images/projets/towerdefense/map-3.png',        caption: 'Map 3',              alt: 'Map 3 preview' },
     { src: '/images/projets/towerdefense/hero-upgrade.png', caption: 'Hero upgrades',      alt: 'Hero upgrade interface' },
-    { src: '/images/projets/towerdefense/success.png',      caption: 'Victory screen',     alt: 'Success screen at end of game' },
+    { src: '/images/projets/towerdefense/success.png',      caption: 'Achievements',       alt: 'Game achievements' },
   ],
 }
 

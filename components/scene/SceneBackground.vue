@@ -81,9 +81,18 @@ function redimensionnerStars(): void {
 }
 
 // ─── Position du soleil ────────────────────────────────────────────────────────
+// Heure locale réactive (initialisée côté client uniquement pour éviter le
+// décalage SSR/timezone entre dev et prod)
+
+const mHeureLocale = ref(12) // valeur neutre avant hydration
+
+function majHeureLocale(): void {
+  const lNow = new Date()
+  mHeureLocale.value = lNow.getHours() + lNow.getMinutes() / 60
+}
 
 const mSoleilStyle = computed(() => {
-  const lHeure = new Date().getHours() + new Date().getMinutes() / 60
+  const lHeure = mHeureLocale.value
 
   // Arc de 180° : 6h = horizon gauche (5%), 20h = horizon droit (95%)
   const HEURE_LEVER = 6
@@ -128,17 +137,24 @@ const mNeige = computed(() => mSceneStore.theme.groundColors.snow)
 
 // ─── Cycle de vie ─────────────────────────────────────────────────────────────
 
+let mSoleilTimerId: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
   if (!mStarsCanvas.value) return
   mStarsCtx = mStarsCanvas.value.getContext('2d')
   redimensionnerStars()
   mStarsRafId = requestAnimationFrame((lNow) => dessinerEtoiles(lNow / 1000))
   window.addEventListener('resize', redimensionnerStars)
+
+  // Initialise l'heure locale côté client (corrige le décalage SSR/timezone)
+  majHeureLocale()
+  mSoleilTimerId = setInterval(majHeureLocale, 60_000)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(mStarsRafId)
   window.removeEventListener('resize', redimensionnerStars)
+  if (mSoleilTimerId !== null) clearInterval(mSoleilTimerId)
 })
 </script>
 

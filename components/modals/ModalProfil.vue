@@ -14,6 +14,16 @@ const mOuverte = computed({
 })
 
 const { t } = useLocale()
+
+// Calcul dynamique de l'age depuis la date de naissance
+const mAge = computed(() => {
+  const lNaissance = new Date(2002, 9, 8) // 08/10/2002
+  const lAuj = new Date()
+  let lAge = lAuj.getFullYear() - lNaissance.getFullYear()
+  const lM = lAuj.getMonth() - lNaissance.getMonth()
+  if (lM < 0 || (lM === 0 && lAuj.getDate() < lNaissance.getDate())) lAge--
+  return lAge
+})
 </script>
 
 <template>
@@ -31,7 +41,7 @@ const { t } = useLocale()
           Full-Stack Developer
         </p>
         <p class="text-sm opacity-55 mt-0.5" style="color: var(--modal-text)">
-          {{ t('23 ans · Tressange, Moselle', '23 · Tressange, Moselle, France') }}
+          {{ t(`${mAge} ans · Tressange, Moselle`, `${mAge} · Tressange, Moselle, France`) }}
         </p>
         <p class="text-xs opacity-50 mt-0.5 flex items-center gap-1" style="color: var(--modal-text)">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
