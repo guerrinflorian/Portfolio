@@ -121,6 +121,13 @@ let grass: GrassBlade[] = []
 let leaves: LeafSprite[] = []
 let flyingLeaves: FlyingLeaf[] = []
 
+// Cache : map id->noeud (evite rebuild a chaque frame dans drawLeafClusters)
+let nodeById: Map<number, TreeNode> = new Map()
+// Cache : largeurs des pills (evite measureText a chaque frame)
+const pillWidthCache: Map<string, number> = new Map()
+// Buffer reutilise pour les branches terminales (evite allocation a chaque frame)
+const terminalNodesBuffer: Array<{ ex: number; ey: number }> = []
+
 // Animation
 let rafId = 0
 let lastTimestamp = 0
@@ -234,6 +241,16 @@ function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
   generateGrass(lRng, pWidth, pHeight)
   generateLeaves(pSeason, lRng)
   generateGroundElements(lRng, pWidth, pHeight)
+
+  // Reconstruction du cache id->noeud et invalidation du cache pills
+  nodeById.clear()
+  pillWidthCache.clear()
+  buildNodeById(treeRoot)
+}
+
+function buildNodeById(pNode: TreeNode): void {
+  nodeById.set(pNode.id, pNode)
+  for (const lChild of pNode.children) buildNodeById(lChild)
 }
 
 // ─── Génération des racines ───────────────────────────────────────────────────
@@ -671,21 +688,13 @@ function drawLeafClusters(pCtx: CanvasRenderingContext2D): void {
   if (!treeRoot) return
 
   const lCfg     = SEASON_CONFIGS[weatherStore.season]
-  const lAllNodes = new Map<number, TreeNode>()
-
-  // Collecte tous les noeuds terminaux par id
-  function collectById(pNode: TreeNode): void {
-    lAllNodes.set(pNode.id, pNode)
-    for (const lChild of pNode.children) collectById(lChild)
-  }
-  collectById(treeRoot)
 
   const lLeafFrac = Math.min(1, Math.max(0, (growProgress - 0.86) / 0.14))
   if (lLeafFrac <= 0) return
 
   pCtx.save()
   for (const lLeaf of leaves) {
-    const lNode = lAllNodes.get(lLeaf.nodeId)
+    const lNode = nodeById.get(lLeaf.nodeId)
     if (!lNode) continue
 
     const lPalette = lCfg.season === 'spring' && lLeaf.colorIdx >= lCfg.leafColors.length
@@ -796,10 +805,14 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
     const lCfg     = lEntry.config
     const lHovered = hoveredNodeId === lCfg.id
 
-    // Texte et dimensions du pill
-    const lLabel   = `${lCfg.icon}  ${lCfg.label}`
-    const lTextW   = pCtx.measureText(lLabel).width
-    const lPillW   = lTextW + PILL_PAD * 2 + ACCENT_W
+    // Texte et dimensions du pill (largeur mise en cache)
+    const lLabel = `${lCfg.icon}  ${lCfg.label}`
+    let lTextW = pillWidthCache.get(lCfg.id)
+    if (lTextW === undefined) {
+      lTextW = pCtx.measureText(lLabel).width
+      pillWidthCache.set(lCfg.id, lTextW)
+    }
+    const lPillW = lTextW + PILL_PAD * 2 + ACCENT_W
 
     // Direction selon la position du noeud par rapport au centre
     const lRight   = lEntry.x >= baseX - 20
@@ -956,6 +969,12 @@ function drawCvIcon(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
   pCtx.restore()
 }
 
+// Collecte les branches terminales dans le buffer reutilisable (module-level pour eviter redeclaration)
+function collectTerminalForFlying(pNode: TreeNode): void {
+  if (pNode.children.length === 0) terminalNodesBuffer.push({ ex: pNode.ex, ey: pNode.ey })
+  else for (const lC of pNode.children) collectTerminalForFlying(lC)
+}
+
 // ─── Boucle de rendu ──────────────────────────────────────────────────────────
 
 function render(pNow: number): void {
@@ -963,7 +982,7 @@ function render(pNow: number): void {
 
   const lW      = canvasRef.value.width
   const lH      = canvasRef.value.height
-  const lDelta  = pNow - lastTimestamp
+  const lDelta  = lastTimestamp > 0 ? Math.min(pNow - lastTimestamp, 100) : 16
   const lTimeS  = pNow / 1000
 
   // Mise a jour de la croissance initiale
@@ -978,8 +997,7 @@ function render(pNow: number): void {
 
   // Tick physique (mise à jour vent + feuilles volantes)
   physics.tick(lDelta)
-  const lCfg          = SEASON_CONFIGS[weatherStore.season]
-  const lTerminalNodes: Array<{ ex: number; ey: number }> = []
+  const lCfg = SEASON_CONFIGS[weatherStore.season]
 
   drawRoots(ctx)
   drawGrass(ctx, lTimeS)
@@ -988,14 +1006,11 @@ function render(pNow: number): void {
 
   // Collecte les branches terminales pour l'émission de feuilles volantes
   if (lCfg.leafColors.length > 0) {
-    function collectTerminal(pNode: TreeNode): void {
-      if (pNode.children.length === 0) lTerminalNodes.push({ ex: pNode.ex, ey: pNode.ey })
-      else for (const lC of pNode.children) collectTerminal(lC)
-    }
-    collectTerminal(treeRoot)
+    terminalNodesBuffer.length = 0
+    collectTerminalForFlying(treeRoot)
   }
 
-  flyingLeaves = physics.updateFlyingLeaves(flyingLeaves, lCfg.leafColors, lTerminalNodes)
+  flyingLeaves = physics.updateFlyingLeaves(flyingLeaves, lCfg.leafColors, terminalNodesBuffer)
 
   drawLeafClusters(ctx)
   drawFlyingLeaves(ctx)
@@ -1147,6 +1162,23 @@ function resetCanvas(): void {
   flyingLeaves = []
 }
 
+let resizeTimer = 0
+function onResize(): void {
+  clearTimeout(resizeTimer)
+  resizeTimer = window.setTimeout(resetCanvas, 150)
+}
+
+// ─── Visibilite de l'onglet ───────────────────────────────────────────────────
+
+function onVisibilityChange(): void {
+  if (document.hidden) {
+    cancelAnimationFrame(rafId)
+  } else {
+    lastTimestamp = 0  // reset pour eviter un delta enorme au retour
+    rafId = requestAnimationFrame(render)
+  }
+}
+
 // ─── Réactivité ───────────────────────────────────────────────────────────────
 
 watch(() => weatherStore.season, () => resetCanvas())
@@ -1160,12 +1192,15 @@ onMounted(() => {
   canvasRef.value.height = window.innerHeight
   buildTree(canvasRef.value.width, canvasRef.value.height, weatherStore.season)
   rafId = requestAnimationFrame(render)
-  window.addEventListener('resize', resetCanvas)
+  window.addEventListener('resize', onResize)
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(rafId)
-  window.removeEventListener('resize', resetCanvas)
+  clearTimeout(resizeTimer)
+  window.removeEventListener('resize', onResize)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 </script>
 
