@@ -59,11 +59,13 @@ async function initMap(): Promise<void> {
     attributionControl: true,
   })
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
-    subdomains:  'abcd',
-    maxZoom:     20,
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+    maxZoom:     19,
   }).addTo(mLeafletMap)
+
+  // Force le recalcul des dimensions après rendu (cas modale animée)
+  setTimeout(() => mLeafletMap?.invalidateSize(), 100)
 
   const lIcon = L.divIcon({
     className: '',
