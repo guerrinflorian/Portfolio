@@ -29,20 +29,29 @@
       .ui-bar, .btn-back { display: none !important; }
       .page { width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
 
-      /* Evite les titres de section orphelins en bas de page */
-      .section-title { break-after: avoid; page-break-after: avoid; }
+      /* Safari iOS : display:flex sur section-title bloque break-after avoid.
+         On repasse en block pour que l'anti-orphelin fonctionne. */
+      .section-title {
+        display: block;
+        break-after: avoid; page-break-after: avoid;
+      }
+      /* Le ::before passe inline-block pour garder la barre verte */
+      .section-title::before { display: inline-block; vertical-align: middle; margin-right: 0.38rem; }
 
-      /* Evite de couper un item timeline en deux pages */
+      /* Jamais de coupure à l'intérieur d'un item timeline */
       .tl-item { break-inside: avoid; page-break-inside: avoid; }
 
       /* Réduit les espacements pour tenir sur une seule page A4 */
-      .cv-sidebar  { padding: 0.75rem 0.85rem; }
-      .cv-main     { padding: 0.75rem 1.1rem; }
-      .section     { margin-bottom: 0.75rem; }
-      .timeline    { gap: 0.5rem; }
-      .tl-bullets  { margin-top: 0.15rem; }
-      .tl-bullets li { margin-bottom: 0.06rem; font-size: 0.72rem; }
-      .profile-text { padding: 0.5rem 0.75rem; }
+      html         { font-size: 11.5px; }
+      .cv-header   { padding: 0.9rem 1.5rem; }
+      .cv-sidebar  { padding: 0.65rem 0.85rem; }
+      .cv-main     { padding: 0.65rem 1.1rem; }
+      .section     { margin-bottom: 0.65rem; }
+      .timeline    { gap: 0.45rem; }
+      .tl-bullets  { margin-top: 0.12rem; }
+      .tl-bullets li { margin-bottom: 0.05rem; }
+      .profile-text { padding: 0.45rem 0.7rem; }
+      .skill-item  { margin-bottom: 0.38rem; }
     }
 
     /* ── Bouton retour ── */
