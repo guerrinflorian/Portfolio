@@ -123,19 +123,24 @@ useHead({
     <!-- Couche 2 : fragments de code flottants -->
     <FloatingCode />
 
-    <!-- Couche 2 : avions en temps réel (OpenSky Network) -->
-    <ClientOnly>
-      <ScenePlanes />
-    </ClientOnly>
-
     <!-- Couche 2 : effets météo Canvas -->
     <ClientOnly>
       <WeatherLayer />
     </ClientOnly>
 
-    <!-- Couche 3 : l'arbre - pièce maîtresse -->
+    <!-- Couche 3 : avions lointains (derrière l'arbre, z-index 3) -->
+    <ClientOnly>
+      <ScenePlanes mode="far" />
+    </ClientOnly>
+
+    <!-- Couche 4 : l'arbre - pièce maîtresse -->
     <ClientOnly>
       <TreeCanvas />
+    </ClientOnly>
+
+    <!-- Couche 5 : avions proches (devant l'arbre, z-index 5) -->
+    <ClientOnly>
+      <ScenePlanes mode="near" />
     </ClientOnly>
 
     <!-- Couche 3 : cabane mini-jeu (desktop uniquement) -->
