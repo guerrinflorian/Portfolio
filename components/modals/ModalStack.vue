@@ -18,7 +18,7 @@ const { t } = useLocale()
 
 // ─── Données compétences ──────────────────────────────────────────────────────
 
-const mCompetences: Skill[] = [
+const mCompetences = computed<Skill[]>(() => [
   // Frontend - tri decroissant
   { name: 'Vue 2',                  level: 95, category: 'front',   context: 'prod'   },
   { name: 'HTML / CSS',             level: 85, category: 'front',   context: 'prod'   },
@@ -52,12 +52,12 @@ const mCompetences: Skill[] = [
   { name: 'Python (scripts)',       level: 30, category: 'creatif', context: 'projet' },
 
   // Methodo & Soft skills - tri decroissant
-  { name: 'Autonomie & Initiative', level: 80, category: 'methodo', context: 'prod'   },
-  { name: 'Travail en equipe',      level: 70, category: 'methodo', context: 'prod'   },
-  { name: 'Gestion de projet',      level: 65, category: 'methodo', context: 'prod'   },
-  { name: 'Redaction specs / recettes', level: 60, category: 'methodo', context: 'prod' },
-  { name: 'Encadrement / Mentorat', level: 55, category: 'methodo', context: 'prod'   },
-]
+  { name: t('Autonomie & Initiative', 'Autonomy & Initiative'), level: 80, category: 'methodo', context: 'prod' },
+  { name: t('Travail en equipe',      'Teamwork'),              level: 70, category: 'methodo', context: 'prod' },
+  { name: t('Gestion de projet',      'Project management'),    level: 65, category: 'methodo', context: 'prod' },
+  { name: t('Redaction specs / recettes', 'Specs & UAT writing'), level: 60, category: 'methodo', context: 'prod' },
+  { name: t('Encadrement / Mentorat', 'Mentoring'),             level: 55, category: 'methodo', context: 'prod' },
+])
 
 // ─── Groupes d'affichage ──────────────────────────────────────────────────────
 
@@ -69,11 +69,11 @@ interface SkillGroup {
 }
 
 const mGroupes = computed<SkillGroup[]>(() => [
-  { id: 'front',   label: t('Frontend', 'Frontend'),                       color: '#3b82f6', skills: mCompetences.filter(c => c.category === 'front') },
-  { id: 'back',    label: t('Back & BDD', 'Back-end & DB'),                color: '#10b981', skills: mCompetences.filter(c => c.category === 'back') },
-  { id: 'outils',  label: t('DevOps & Outils', 'DevOps & Tools'),          color: '#f59e0b', skills: mCompetences.filter(c => c.category === 'outils') },
-  { id: 'creatif', label: t('Creatif & Divers', 'Creative & Misc'),        color: '#ec4899', skills: mCompetences.filter(c => c.category === 'creatif') },
-  { id: 'methodo', label: t('Methodo & Soft skills', 'Soft & Method.'),    color: '#06b6d4', skills: mCompetences.filter(c => c.category === 'methodo') },
+  { id: 'front',   label: t('Frontend', 'Frontend'),                       color: '#3b82f6', skills: mCompetences.value.filter(c => c.category === 'front') },
+  { id: 'back',    label: t('Back & BDD', 'Back-end & DB'),                color: '#10b981', skills: mCompetences.value.filter(c => c.category === 'back') },
+  { id: 'outils',  label: t('DevOps & Outils', 'DevOps & Tools'),          color: '#f59e0b', skills: mCompetences.value.filter(c => c.category === 'outils') },
+  { id: 'creatif', label: t('Creatif & Divers', 'Creative & Misc'),        color: '#ec4899', skills: mCompetences.value.filter(c => c.category === 'creatif') },
+  { id: 'methodo', label: t('Methodo & Soft skills', 'Soft & Method.'),    color: '#06b6d4', skills: mCompetences.value.filter(c => c.category === 'methodo') },
 ])
 
 // ─── Animation GSAP des barres ────────────────────────────────────────────────
