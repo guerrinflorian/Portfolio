@@ -139,7 +139,13 @@ const labelX       = ref(0)
 const labelY       = ref(0)
 
 // Positions monde des noeuds UI (recalculées chaque frame)
-let nodePositions: Array<{ config: TreeNodeConfig; x: number; y: number }> = []
+interface NodePosition {
+  config: TreeNodeConfig
+  x: number; y: number        // point d'accroche sur la branche
+  px: number; py: number      // coin haut-gauche du pill
+  pw: number; ph: number      // dimensions du pill
+}
+let nodePositions: NodePosition[] = []
 
 // Position de l'icône CV (haut du tronc, recalculée chaque frame)
 let cvPos: { x: number; y: number } | null = null
@@ -751,53 +757,140 @@ function computeNodePositions(): void {
     const lNode = findNodeAtDepth(treeRoot, lCfg.depth, lCfg.depthIndex)
     if (!lNode) continue
     const lPt = getBezierPoint(lCfg.t, lNode.sx, lNode.sy, lNode.cpx, lNode.cpy, lNode.ex, lNode.ey)
-    nodePositions.push({ config: lCfg, x: lPt.x, y: lPt.y })
+    // px/py/pw/ph remplis dans drawNodes
+    nodePositions.push({ config: lCfg, x: lPt.x, y: lPt.y, px: 0, py: 0, pw: 0, ph: 0 })
   }
+}
+
+// Helper: rectangle arrondi (compatibilite large)
+function tracerPill(pCtx: CanvasRenderingContext2D, pX: number, pY: number, pW: number, pH: number, pR: number): void {
+  pCtx.beginPath()
+  pCtx.moveTo(pX + pR, pY)
+  pCtx.lineTo(pX + pW - pR, pY)
+  pCtx.quadraticCurveTo(pX + pW, pY, pX + pW, pY + pR)
+  pCtx.lineTo(pX + pW, pY + pH - pR)
+  pCtx.quadraticCurveTo(pX + pW, pY + pH, pX + pW - pR, pY + pH)
+  pCtx.lineTo(pX + pR, pY + pH)
+  pCtx.quadraticCurveTo(pX, pY + pH, pX, pY + pH - pR)
+  pCtx.lineTo(pX, pY + pR)
+  pCtx.quadraticCurveTo(pX, pY, pX + pR, pY)
+  pCtx.closePath()
 }
 
 function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
   const lNodeFrac = Math.min(1, Math.max(0, (growProgress - 0.92) / 0.08))
   if (lNodeFrac <= 0) return
 
+  const lW        = canvasRef.value?.width  ?? 1440
+  const PILL_H    = 26
+  const PILL_PAD  = 9
+  const LINE_LEN  = 14
+  const DOT_R     = 3.5
+  const ACCENT_W  = 3
+  const PILL_R    = 5   // border-radius du pill
+
+  pCtx.save()
+  pCtx.font = '600 12px system-ui, -apple-system, sans-serif'
+
   for (const lEntry of nodePositions) {
-    const lCfg       = lEntry.config
-    const lHovered   = hoveredNodeId === lCfg.id
-    const lRadius    = (lCfg.radius + (lHovered ? 4 : 0)) * lNodeFrac
-    const calcPulse  = 0.5 + 0.5 * Math.sin(pTimeS * 2.2 + lCfg.pulsePhase)
-    const calcRingR  = lRadius + calcPulse * 7
+    const lCfg     = lEntry.config
+    const lHovered = hoveredNodeId === lCfg.id
 
+    // Texte et dimensions du pill
+    const lLabel   = `${lCfg.icon}  ${lCfg.label}`
+    const lTextW   = pCtx.measureText(lLabel).width
+    const lPillW   = lTextW + PILL_PAD * 2 + ACCENT_W
+
+    // Direction selon la position du noeud par rapport au centre
+    const lRight   = lEntry.x >= baseX - 20
+    let   lPillX   = lRight ? lEntry.x + LINE_LEN : lEntry.x - LINE_LEN - lPillW
+    // Clamp pour ne pas sortir du canvas
+    lPillX = Math.max(6, Math.min(lW - lPillW - 6, lPillX))
+    const lPillY   = lEntry.y - PILL_H / 2 - 2
+
+    // Stockage pour hit test
+    lEntry.px = lPillX
+    lEntry.py = lPillY
+    lEntry.pw = lPillW
+    lEntry.ph = PILL_H
+
+    const lAlpha = lNodeFrac * (lHovered ? 1 : 0.9)
+
+    // Ligne de connexion
     pCtx.save()
-
-    // Anneau pulsant
-    pCtx.beginPath()
-    pCtx.arc(lEntry.x, lEntry.y, calcRingR, 0, Math.PI * 2)
+    pCtx.globalAlpha = lNodeFrac * 0.55
     pCtx.strokeStyle = lCfg.color
-    pCtx.globalAlpha = (1 - calcPulse) * 0.45 * lNodeFrac
-    pCtx.lineWidth   = 2
+    pCtx.lineWidth   = 1.2
+    pCtx.setLineDash([3, 3])
+    pCtx.beginPath()
+    pCtx.moveTo(lEntry.x, lEntry.y)
+    pCtx.lineTo(lRight ? lPillX : lPillX + lPillW, lEntry.y)
     pCtx.stroke()
+    pCtx.setLineDash([])
+    pCtx.restore()
 
-    // Cercle principal
+    // Point d'accroche
+    pCtx.save()
     pCtx.globalAlpha = lNodeFrac
     pCtx.beginPath()
-    pCtx.arc(lEntry.x, lEntry.y, lRadius, 0, Math.PI * 2)
-    pCtx.fillStyle = lCfg.color
+    pCtx.arc(lEntry.x, lEntry.y, DOT_R, 0, Math.PI * 2)
+    pCtx.fillStyle   = lCfg.color
+    pCtx.fill()
+    pCtx.strokeStyle = 'rgba(255,255,255,0.75)'
+    pCtx.lineWidth   = 1.5
+    pCtx.stroke()
+    pCtx.restore()
+
+    // Fond du pill
+    pCtx.save()
+    pCtx.globalAlpha = lAlpha
+    tracerPill(pCtx, lPillX, lPillY, lPillW, PILL_H, PILL_R)
+    pCtx.fillStyle = lHovered ? 'rgba(18, 30, 55, 0.96)' : 'rgba(10, 18, 38, 0.88)'
     pCtx.fill()
 
-    // Bordure blanche
-    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.88)'
-    pCtx.lineWidth   = 2
+    // Bordure fine coloree
+    tracerPill(pCtx, lPillX, lPillY, lPillW, PILL_H, PILL_R)
+    pCtx.strokeStyle = lCfg.color + (lHovered ? 'cc' : '66')
+    pCtx.lineWidth   = 1
     pCtx.stroke()
 
-    // Icône emoji centrée
-    const lIconSize = Math.round(lCfg.radius * 1.25)
-    pCtx.font          = `${lIconSize}px serif`
-    pCtx.textAlign     = 'center'
-    pCtx.textBaseline  = 'middle'
-    pCtx.globalAlpha   = lNodeFrac
-    pCtx.fillText(lCfg.icon, lEntry.x, lEntry.y)
+    // Bande accent coloree (gauche si pill a droite, droite si pill a gauche)
+    const lAccX = lRight ? lPillX : lPillX + lPillW - ACCENT_W
+    pCtx.beginPath()
+    if (lRight) {
+      pCtx.moveTo(lAccX + PILL_R, lPillY)
+      pCtx.lineTo(lAccX + ACCENT_W, lPillY)
+      pCtx.lineTo(lAccX + ACCENT_W, lPillY + PILL_H)
+      pCtx.lineTo(lAccX + PILL_R, lPillY + PILL_H)
+      pCtx.quadraticCurveTo(lAccX, lPillY + PILL_H, lAccX, lPillY + PILL_H - PILL_R)
+      pCtx.lineTo(lAccX, lPillY + PILL_R)
+      pCtx.quadraticCurveTo(lAccX, lPillY, lAccX + PILL_R, lPillY)
+    } else {
+      pCtx.moveTo(lAccX, lPillY)
+      pCtx.lineTo(lAccX + ACCENT_W - PILL_R, lPillY)
+      pCtx.quadraticCurveTo(lAccX + ACCENT_W, lPillY, lAccX + ACCENT_W, lPillY + PILL_R)
+      pCtx.lineTo(lAccX + ACCENT_W, lPillY + PILL_H - PILL_R)
+      pCtx.quadraticCurveTo(lAccX + ACCENT_W, lPillY + PILL_H, lAccX + ACCENT_W - PILL_R, lPillY + PILL_H)
+      pCtx.lineTo(lAccX, lPillY + PILL_H)
+    }
+    pCtx.closePath()
+    pCtx.fillStyle = lCfg.color
+    pCtx.fill()
+    pCtx.restore()
 
+    // Texte du pill
+    pCtx.save()
+    pCtx.globalAlpha   = lNodeFrac
+    pCtx.font          = '600 12px system-ui, -apple-system, sans-serif'
+    pCtx.fillStyle     = lHovered ? '#ffffff' : 'rgba(220,230,255,0.92)'
+    pCtx.textAlign     = 'left'
+    pCtx.textBaseline  = 'middle'
+    const lTextX = lRight ? lPillX + ACCENT_W + PILL_PAD : lPillX + PILL_PAD
+    pCtx.fillText(lLabel, lTextX, lEntry.y - 2)
     pCtx.restore()
   }
+
+  pCtx.restore()
 }
 
 // ─── Icône CV sur le tronc ────────────────────────────────────────────────────
@@ -920,11 +1013,15 @@ function render(pNow: number): void {
 
 const HIT_RADIUS = 24  // zone cliquable (finger-friendly, px)
 
-function hitTestNode(pX: number, pY: number): typeof nodePositions[0] | null {
+function hitTestNode(pX: number, pY: number): NodePosition | null {
   for (const lEntry of nodePositions) {
-    const lDx = pX - lEntry.x
-    const lDy = pY - lEntry.y
-    if (Math.sqrt(lDx * lDx + lDy * lDy) < HIT_RADIUS) return lEntry
+    // Pill rect
+    if (lEntry.pw > 0 &&
+        pX >= lEntry.px && pX <= lEntry.px + lEntry.pw &&
+        pY >= lEntry.py && pY <= lEntry.py + lEntry.ph) return lEntry
+    // Dot d'accroche
+    const lDx = pX - lEntry.x, lDy = pY - lEntry.y
+    if (Math.sqrt(lDx * lDx + lDy * lDy) < 10) return lEntry
   }
   return null
 }
@@ -979,7 +1076,7 @@ function onMouseUp(pEvent: MouseEvent): void {
   mouseDownNodeId = null
 }
 
-async function triggerNodeClick(pEntry: typeof nodePositions[0]): Promise<void> {
+async function triggerNodeClick(pEntry: NodePosition): Promise<void> {
   // Animation GSAP de rebond sur la branche
   if (import.meta.client && treeRoot) {
     const { gsap } = await import('gsap')
@@ -1014,12 +1111,9 @@ function onMouseMove(pEvent: MouseEvent): void {
 
   const lEntry = hitTestNode(x, y)
   if (lEntry) {
-    hoveredNodeId     = lEntry.config.id
+    hoveredNodeId = lEntry.config.id
     canvasRef.value!.style.cursor = 'pointer'
-    labelText.value   = lEntry.config.label
-    labelX.value      = lEntry.x
-    labelY.value      = lEntry.y
-    labelVisible.value = true
+    labelVisible.value = false  // label visible dans le pill, pas de tooltip
   } else {
     hoveredNodeId = null
     if (canvasRef.value) canvasRef.value.style.cursor = 'default'
