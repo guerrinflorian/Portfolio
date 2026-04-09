@@ -85,7 +85,7 @@ useHead({
         email: 'guerrinflorian@yahoo.com',
         address: {
           '@type': 'PostalAddress',
-          addressLocality: 'Tressange',
+          addressLocality: 'Bure / Tressange',
           addressRegion: 'Moselle',
           addressCountry: 'FR',
         },

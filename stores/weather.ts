@@ -13,8 +13,8 @@ import type {
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const LATITUDE = 48.5041
-const LONGITUDE = 5.3568
+const LATITUDE = 49.4167
+const LONGITUDE = 6.0000
 const TIMEZONE = 'Europe/Paris'
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000 // 10 minutes
 

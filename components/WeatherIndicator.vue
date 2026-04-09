@@ -77,7 +77,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
     class="weather-indicator"
     :class="{ 'opacity-50': mLoading }"
     role="status"
-    :aria-label="t(`Météo à Tressange : ${mTemperature}°C`, `Weather in Tressange: ${mTemperature}°C`)"
+    :aria-label="t(`Météo à Bure / Tressange : ${mTemperature}°C`, `Weather in Bure / Tressange: ${mTemperature}°C`)"
     aria-live="polite"
   >
     <!-- Icône SVG -->
@@ -108,7 +108,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
     <span class="weather-separator" aria-hidden="true">·</span>
 
     <!-- Localisation -->
-    <span class="weather-city">{{ t('Tressange', 'Tressange, FR') }}</span>
+    <span class="weather-city">{{ t('Bure / Tressange', 'Bure / Tressange') }}</span>
   </div>
 </template>
 

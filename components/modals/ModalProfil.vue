@@ -127,7 +127,7 @@ onUnmounted(() => {
           Full-Stack Developer
         </p>
         <p class="text-sm opacity-55 mt-0.5" style="color: var(--modal-text)">
-          {{ t(`${mAge} ans · Tressange, Moselle`, `${mAge} · Tressange, Moselle, France`) }}
+          {{ t(`${mAge} ans · Bure / Tressange, Moselle`, `${mAge} · Bure / Tressange, Moselle, France`) }}
         </p>
         <p class="text-xs opacity-50 mt-0.5 flex items-center gap-1" style="color: var(--modal-text)">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
@@ -147,8 +147,8 @@ onUnmounted(() => {
       <p class="text-sm leading-relaxed" style="color: var(--modal-text)">
         {{
           t(
-            'Bonjour, je m\'appelle Florian. J\'habite à Tressange en Moselle, à cinq minutes de la frontière luxembourgeoise. D\'ailleurs, le petit indicateur météo en haut à droite affiche la température qu\'il fait chez moi en ce moment.',
-            'Hi, my name is Florian. I live in Tressange, Moselle, five minutes from the Luxembourg border. By the way, the small weather indicator in the top right shows the current temperature where I live.'
+            'Bonjour, je m\'appelle Florian. J\'habite à Bure / Tressange en Moselle, à cinq minutes de la frontière luxembourgeoise. D\'ailleurs, le petit indicateur météo en haut à droite affiche la température qu\'il fait chez moi en ce moment.',
+            'Hi, my name is Florian. I live in Bure / Tressange, Moselle, five minutes from the Luxembourg border. By the way, the small weather indicator in the top right shows the current temperature where I live.'
           )
         }}
       </p>

@@ -26,7 +26,7 @@ const mExperiencesFR = [
     title: 'Développeur IT Applicatif',
     subtitle: 'Saarstahl Rail · Alternance',
     period: 'Octobre 2022 → Aujourd\'hui',
-    location: 'Hayange / Tressange, Moselle',
+    location: 'Hayange / Bure - Tressange, Moselle',
     tags: ['Vue 3', 'Vue 2', 'TypeScript', 'VB.NET', 'SQL Server', 'Pinia', 'DevExtreme', 'GitHub', 'TFS'],
     points: [
       'Développement d\'applications métier sur l\'intranet : gestion de production ferroviaire de la commande à l\'expédition (wagons et camions), priorisation des chargements, fusions, transferts et logique métier avancée',
@@ -42,7 +42,7 @@ const mExperiencesFR = [
     title: 'Développeur Web & Applications métier',
     subtitle: 'Auto-entrepreneur',
     period: 'Septembre 2025 → Aujourd\'hui',
-    location: 'Tressange, Moselle',
+    location: 'Bure / Tressange, Moselle',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker'],
     points: [
       'Création et développement de sites web et applications métier sur-mesure pour clients',
@@ -58,7 +58,7 @@ const mExperiencesEN = [
     title: 'IT Application Developer',
     subtitle: 'Saarstahl Rail · Apprenticeship',
     period: 'October 2022 → Present',
-    location: 'Hayange / Tressange, Moselle, France',
+    location: 'Hayange / Bure - Tressange, Moselle, France',
     tags: ['Vue 3', 'Vue 2', 'TypeScript', 'VB.NET', 'SQL Server', 'Pinia', 'DevExtreme', 'GitHub', 'TFS'],
     points: [
       'Developing business applications on the company intranet: railway production management from order to shipment (wagons and trucks), load prioritization, merges, transfers and complex business logic',
@@ -74,7 +74,7 @@ const mExperiencesEN = [
     title: 'Web & Business App Developer',
     subtitle: 'Freelance',
     period: 'September 2025 → Present',
-    location: 'Tressange, Moselle, France',
+    location: 'Bure / Tressange, Moselle, France',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker'],
     points: [
       'Building custom websites and business applications for clients',

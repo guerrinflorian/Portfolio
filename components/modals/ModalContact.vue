@@ -75,7 +75,7 @@ const PHONE        = '06 95 38 01 57'
 
     <!-- Localisation -->
     <p class="mt-5 text-xs opacity-45 text-center" style="color: var(--modal-text)">
-      {{ t('Tressange · Moselle · 57710 · Frontière Luxembourg', 'Tressange · Moselle · France · Luxembourg border') }}
+      {{ t('Bure / Tressange · Moselle · 57710 · Frontière Luxembourg', 'Bure / Tressange · Moselle · France · Luxembourg border') }}
     </p>
   </ModalBase>
 </template>
