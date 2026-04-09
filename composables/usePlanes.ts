@@ -1,5 +1,5 @@
 // Auteur : GUERRINF - Florian Guerrin
-// Composable - avions en temps réel via adsb.fi (CORS-compatible navigateur)
+// Composable - avions en temps réel via server route /api/planes (proxy OpenSky)
 
 import { ref, onMounted, onUnmounted } from 'vue'
 
@@ -8,49 +8,45 @@ import { ref, onMounted, onUnmounted } from 'vue'
 export interface Plane {
   icao24:       string
   callsign:     string
-  registration: string
-  type:         string
+  country:      string
   longitude:    number
   latitude:     number
-  altitude:     number    // mètres
+  altitude:     number    // mètres (baro)
   velocity:     number    // m/s
   heading:      number    // degrés, sens horaire depuis le nord
   verticalRate: number    // m/s (positif = montée)
 }
 
-interface AdsbFiAircraft {
-  hex:       string
-  flight?:   string
-  r?:        string           // immatriculation
-  t?:        string           // type OACI (ex: A320)
-  lat?:      number
-  lon?:      number
-  alt_baro?: number | 'ground'
-  gs?:       number           // knots
-  track?:    number
-  baro_rate?: number          // feet/min
-}
+type OpenSkyStateVector = [
+  string,          // 0: icao24
+  string | null,   // 1: callsign
+  string,          // 2: origin_country
+  number | null,   // 3: time_position
+  number,          // 4: last_contact
+  number | null,   // 5: longitude
+  number | null,   // 6: latitude
+  number | null,   // 7: baro_altitude (mètres)
+  boolean,         // 8: on_ground
+  number,          // 9: velocity (m/s)
+  number | null,   // 10: true_track (degrés)
+  number | null,   // 11: vertical_rate (m/s)
+  number[] | null, // 12: sensors
+  number | null,   // 13: geo_altitude
+  string | null,   // 14: squawk
+  boolean,         // 15: spi
+  number           // 16: position_source
+]
 
-interface AdsbFiResponse {
-  ac:    AdsbFiAircraft[]
-  ctime: number
+interface OpenSkyResponse {
+  time:   number
+  states: OpenSkyStateVector[] | null
 }
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-// Centre : Moselle (Metz), rayon 200 km couvre Luxembourg + Saarbrücken + Nancy
-const LAT_CENTER = 49.4167
-const LON_CENTER = 6.0000
-const RADIUS_KM  = 200
-
 const REFRESH_MS = 60_000   // 60s
 const CACHE_KEY  = 'planes_cache'
 const CACHE_TTL  = 55_000
-
-// ─── Conversions ──────────────────────────────────────────────────────────────
-
-function calcFtToM(pFt: number): number  { return pFt * 0.3048 }
-function calcKtToMs(pKt: number): number { return pKt * 0.5144 }
 
 // ─── Composable ───────────────────────────────────────────────────────────────
 
@@ -67,7 +63,7 @@ export function usePlanes() {
     mError.value   = null
 
     try {
-      // Cache sessionStorage pour respecter le quota API
+      // Cache sessionStorage pour ne pas spammer le proxy
       const lCached = sessionStorage.getItem(CACHE_KEY)
       if (lCached) {
         const lParsed = JSON.parse(lCached) as { ts: number; data: Plane[] }
@@ -78,38 +74,35 @@ export function usePlanes() {
         }
       }
 
-      const lUrl = `https://api.adsb.fi/v1/aircraft?lat=${LAT_CENTER}&lon=${LON_CENTER}&radius=${RADIUS_KM}`
-      const lResponse = await fetch(lUrl)
-      if (!lResponse.ok) throw new Error(`adsb.fi erreur HTTP ${lResponse.status}`)
+      // Appel à notre server route (même origine → pas de CORS)
+      const lData = await $fetch<OpenSkyResponse>('/api/planes')
 
-      const lData = await lResponse.json() as AdsbFiResponse
-
-      const lPlanes: Plane[] = (lData.ac ?? [])
-        .filter(lAc => {
-          // Garder uniquement les avions en vol avec position et altitude valides
-          if (lAc.lat === undefined || lAc.lon === undefined) return false
-          if (lAc.alt_baro === undefined || lAc.alt_baro === 'ground') return false
-          return lAc.alt_baro > 1640  // > 500m (1640ft) = clairement en vol
+      const lPlanes: Plane[] = (lData.states ?? [])
+        .filter(lS => {
+          const lOnGround = lS[8]
+          const lLon      = lS[5]
+          const lLat      = lS[6]
+          const lAlt      = lS[7]
+          return !lOnGround && lLon !== null && lLat !== null && lAlt !== null && lAlt > 500
         })
         .slice(0, 25)
-        .map(lAc => ({
-          icao24:       lAc.hex.trim(),
-          callsign:     (lAc.flight ?? lAc.r ?? lAc.hex).trim() || lAc.hex.toUpperCase(),
-          registration: (lAc.r ?? '').trim(),
-          type:         (lAc.t ?? '').trim(),
-          longitude:    lAc.lon!,
-          latitude:     lAc.lat!,
-          altitude:     calcFtToM(lAc.alt_baro as number),
-          velocity:     calcKtToMs(lAc.gs ?? 0),
-          heading:      lAc.track ?? 0,
-          verticalRate: calcFtToM((lAc.baro_rate ?? 0) / 60),  // ft/min → m/s
+        .map(lS => ({
+          icao24:       lS[0].trim(),
+          callsign:     ((lS[1] ?? '').trim() || lS[0].toUpperCase()),
+          country:      lS[2],
+          longitude:    lS[5]!,
+          latitude:     lS[6]!,
+          altitude:     lS[7]!,
+          velocity:     lS[9] ?? 0,
+          heading:      lS[10] ?? 0,
+          verticalRate: lS[11] ?? 0,
         }))
 
       mPlanes.value = lPlanes
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: lPlanes }))
     } catch (lErr: unknown) {
       mError.value = lErr instanceof Error ? lErr.message : 'Erreur inconnue'
-      console.warn('[usePlanes] Impossible de récupérer les avions :', mError.value)
+      console.warn('[usePlanes] Erreur récupération avions :', mError.value)
     } finally {
       mLoading.value = false
     }

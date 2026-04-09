@@ -81,12 +81,9 @@ export default defineNuxtConfig({
     },
   },
 
-  // Nitro - preset Vercel + prerender
+  // Nitro - preset node-server pour VPS (nuxt build + node .output/server/index.mjs)
   nitro: {
-    preset: 'vercel',
-    prerender: {
-      routes: ['/'],
-    },
+    preset: 'node-server',
   },
 
   // Vite - optimisation bundle
