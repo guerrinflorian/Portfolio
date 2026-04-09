@@ -24,6 +24,7 @@ const PixelBirds      = defineAsyncComponent(() => import('~/components/ui/Pixel
 const CommitLog       = defineAsyncComponent(() => import('~/components/ui/CommitLog.vue'))
 const StatusBar       = defineAsyncComponent(() => import('~/components/ui/StatusBar.vue'))
 const KeyboardHints   = defineAsyncComponent(() => import('~/components/ui/KeyboardHints.vue'))
+const CodeEcho        = defineAsyncComponent(() => import('~/components/ui/CodeEcho.vue'))
 
 // ─── Modales - chargement asynchrone (code splitting) ────────────────────────
 
@@ -146,6 +147,11 @@ useHead({
 
     <!-- Couche 4 : scan lines CRT subtil (au-dessus de tout sauf modales) -->
     <ScanLines />
+
+    <!-- Couche 6 : echo de code au curseur -->
+    <ClientOnly>
+      <CodeEcho />
+    </ClientOnly>
 
     <!-- UI layer : indicateur météo coin haut droit -->
     <WeatherIndicator />
