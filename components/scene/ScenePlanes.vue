@@ -219,7 +219,7 @@ const mPlaneOpacity = computed(() =>
 .scene-planes {
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 5;  /* au-dessus de TreeCanvas (z-index: 4) */
   pointer-events: none;
 }
 
