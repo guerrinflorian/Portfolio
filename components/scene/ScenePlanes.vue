@@ -24,7 +24,7 @@ const ALT_MIN  = 500
 const ALT_MAX  = 13000
 const BURE_LAT = 49.3500
 const BURE_LON = 5.9500
-const NEAR_KM  = 55   // seuil near/far en km depuis Bure
+const NEAR_KM  = 70   // seuil near/far en km depuis Bure (couvre Luxembourg airport ~45-60km)
 
 // ─── Mapping pays → ISO 3166-1 alpha-2 ────────────────────────────────────────
 
@@ -307,8 +307,9 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   pointer-events: none;
 }
 
-/* Avions lointains : derrière l'arbre (z-index 4) */
+/* Avions lointains : derrière l'arbre (z-index 4) - purement décoratifs */
 .scene-planes--far  { z-index: 3; }
+.scene-planes--far .plane-item { pointer-events: none; }
 /* Avions proches : devant l'arbre (z-index 4) */
 .scene-planes--near { z-index: 5; }
 
