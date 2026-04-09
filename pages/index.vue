@@ -38,6 +38,7 @@ const ModalContact      = defineAsyncComponent(() => import('~/components/modals
 const ModalTypingRace   = defineAsyncComponent(() => import('~/components/modals/ModalTypingRace.vue'))
 
 import SceneCabin from '~/components/scene/SceneCabin.vue'
+import ScenePlanes from '~/components/scene/ScenePlanes.vue'
 
 // ─── Démarrage météo + locale ─────────────────────────────────────────────────
 
@@ -121,6 +122,11 @@ useHead({
 
     <!-- Couche 2 : fragments de code flottants -->
     <FloatingCode />
+
+    <!-- Couche 2 : avions en temps réel (OpenSky Network) -->
+    <ClientOnly>
+      <ScenePlanes />
+    </ClientOnly>
 
     <!-- Couche 2 : effets météo Canvas -->
     <ClientOnly>
