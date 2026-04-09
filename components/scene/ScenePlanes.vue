@@ -74,7 +74,7 @@ function calcPositionStyle(pPlane: Plane): Record<string, string> {
   return {
     left:       `${Math.max(2, Math.min(97, lX))}%`,
     top:        `${calcPlaneY(pPlane)}%`,
-    transition: 'left 58s linear, top 58s linear',
+    transition: 'left 298s linear, top 298s linear',
   }
 }
 

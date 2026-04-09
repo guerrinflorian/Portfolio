@@ -45,9 +45,9 @@ interface OpenSkyResponse {
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const REFRESH_MS = 60_000   // 60s
+const REFRESH_MS = 5 * 60_000   // 5 minutes
 const CACHE_KEY  = 'planes_cache'
-const CACHE_TTL  = 55_000
+const CACHE_TTL  = 4.5 * 60_000 // 4min30 - légèrement sous le refresh
 
 // ─── Composable ───────────────────────────────────────────────────────────────
 
