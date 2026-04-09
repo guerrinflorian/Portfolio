@@ -205,12 +205,12 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
         :key="lPlane.icao24"
         class="plane-item"
         :style="calcPositionStyle(lPlane)"
+        @mouseenter="onHover(lPlane)"
+        @mouseleave="onLeave"
       >
-        <!-- Icône avion SVG - seul élément capturant les events (pas de conflit avec l'arbre) -->
+        <!-- Icône avion SVG -->
         <div
           class="plane-icon"
-          @mouseenter="onHover(lPlane)"
-          @mouseleave="onLeave"
           :style="{
             transform: `rotate(${lPlane.heading}deg)`,
             opacity:   String(calcDepthOpacity(lPlane)),
@@ -318,7 +318,7 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  pointer-events: none;   /* le bloc entier passe les events à l'arbre */
+  pointer-events: auto;
   cursor: default;
   transform-origin: center center;
 }
@@ -328,8 +328,6 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;   /* seule l'icône capture hover/click */
-  cursor: default;
   transition: opacity 2s ease, filter 0.3s ease;
 }
 
