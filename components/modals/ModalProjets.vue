@@ -170,7 +170,7 @@ const mDetailNipponKempo: ProjectDetail = {
     { src: '/images/projets/nippon-kempo/export-pdf-poule.png',      caption: 'Export PDF des résultats',             alt: 'Export PDF résultats de poule' },
     { src: '/images/projets/nippon-kempo/classement.png',            caption: 'Classement général',                   alt: 'Vue classement général' },
     { src: '/images/projets/nippon-kempo/stats-tournament.png',      caption: 'Statistiques du tournoi',              alt: 'Graphiques et statistiques tournoi' },
-    { src: '/images/projets/nippon-kempo/project-contributors.png', caption: 'Contributions GitHub — Développeur Principal (95 %+ du code)', alt: 'Graphique des contributions GitHub par développeur' },
+    { src: '/images/projets/nippon-kempo/project-contributors.png', caption: 'Contributions GitHub - Développeur Principal (95 %+ du code)', alt: 'Graphique des contributions GitHub par développeur' },
   ],
 }
 
@@ -326,7 +326,7 @@ const mDetailNipponKempoEn: ProjectDetail = {
     { src: '/images/projets/nippon-kempo/export-pdf-poule.png',      caption: 'PDF results export',              alt: 'PDF pool results export' },
     { src: '/images/projets/nippon-kempo/classement.png',            caption: 'Overall ranking',                 alt: 'Overall ranking view' },
     { src: '/images/projets/nippon-kempo/stats-tournament.png',      caption: 'Tournament statistics',           alt: 'Charts and tournament stats' },
-    { src: '/images/projets/nippon-kempo/project-contributors.png', caption: 'GitHub Contributions — Lead Developer (95%+ of code)', alt: 'GitHub contribution graph by developer' },
+    { src: '/images/projets/nippon-kempo/project-contributors.png', caption: 'GitHub Contributions - Lead Developer (95%+ of code)', alt: 'GitHub contribution graph by developer' },
   ],
 }
 
