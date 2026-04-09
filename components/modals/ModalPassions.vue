@@ -84,8 +84,8 @@ const { t } = useLocale()
         <p class="passion-text">
           {{
             t(
-              'J\'aime les jeux vidéo en général, sans me prendre la tête. PS5, PC, Switch 2 — peu importe la plateforme, c\'est surtout pour me détendre.',
-              'I enjoy gaming casually, no pressure. PS5, PC, Switch 2 — whatever the platform, it\'s mainly about relaxing.'
+              'J\'aime les jeux vidéo en général, sans me prendre la tête. PS5, PC, Switch 2, peu importe la plateforme, c\'est surtout pour me détendre.',
+              'I enjoy gaming casually, no pressure. PS5, PC, Switch 2, whatever the platform, it\'s mainly about relaxing.'
             )
           }}
         </p>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Auteur : GUERRINF - Florian Guerrin
-// Curseur personnalisé — réticule 4 coins, translate3d GPU, sans mix-blend-mode
+// Curseur personnalisé - réticule 4 coins, translate3d GPU, sans mix-blend-mode
 
 import { ref, onMounted, onUnmounted } from 'vue'
 
@@ -13,7 +13,7 @@ let mLastTarget: EventTarget | null = null
 
 function mOnMove(e: MouseEvent): void {
   if (mRootRef.value) {
-    // translate3d force la couche GPU — 0 lag de composition
+    // translate3d force la couche GPU - 0 lag de composition
     mRootRef.value.style.transform = `translate3d(${e.clientX}px,${e.clientY}px,0)`
   }
   if (!mVisible.value) mVisible.value = true
@@ -88,7 +88,7 @@ onUnmounted(() => {
   pointer-events: none;
   z-index: 99999;
   will-change: transform;
-  /* Pas de mix-blend-mode — pas de recomposition GPU */
+  /* Pas de mix-blend-mode - pas de recomposition GPU */
 }
 
 /* ─── Masqué ─────────────────────────────────────────────────────────────────── */

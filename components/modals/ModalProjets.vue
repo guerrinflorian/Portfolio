@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// Auteur : GUERRINF — Florian Guerrin
-// Modale — Projets personnels avec vue détail intégrée
+// Auteur : GUERRINF - Florian Guerrin
+// Modale - Projets personnels avec vue détail intégrée
 
 import { ref, computed } from 'vue'
 import ModalBase from './ModalBase.vue'
@@ -118,7 +118,7 @@ interface ProjectDetail {
   screenshots: Screenshot[]
 }
 
-// ─── Données détail — Nippon Kempo ────────────────────────────────────────────
+// ─── Données détail - Nippon Kempo ────────────────────────────────────────────
 
 const mDetailNipponKempo: ProjectDetail = {
   descriptionLongue:
@@ -135,7 +135,7 @@ const mDetailNipponKempo: ProjectDetail = {
     { nom: 'BURST Christophe' },
   ],
   stockage:
-    'IndexedDB + Replicache — toutes les données sont stockées localement. ' +
+    'IndexedDB + Replicache, toutes les données sont stockées localement. ' +
     'Zéro serveur, zéro connexion requise.',
   technos: [
     { label: 'Vue 3',          detail: 'Composition API',    color: '#4ade80' },
@@ -174,7 +174,7 @@ const mDetailNipponKempo: ProjectDetail = {
   ],
 }
 
-// ─── Données détail — Tower Defense ───────────────────────────────────────────
+// ─── Données détail - Tower Defense ───────────────────────────────────────────
 
 const mDetailTowerDefense: ProjectDetail = {
   descriptionLongue:
@@ -207,7 +207,7 @@ const mDetailTowerDefense: ProjectDetail = {
   ],
 }
 
-// ─── Données détail — NegoSud ─────────────────────────────────────────────────
+// ─── Données détail - NegoSud ─────────────────────────────────────────────────
 
 const mDetailNegoSud: ProjectDetail = {
   descriptionLongue:
@@ -243,7 +243,7 @@ const mDetailNegoSud: ProjectDetail = {
   screenshots: [],
 }
 
-// ─── Données détail — Bricoloc ────────────────────────────────────────────────
+// ─── Données détail - Bricoloc ────────────────────────────────────────────────
 
 const mDetailBricoloc: ProjectDetail = {
   descriptionLongue:
@@ -279,7 +279,7 @@ const mDetailBricoloc: ProjectDetail = {
   screenshots: [],
 }
 
-// ─── Données détail EN — Nippon Kempo ─────────────────────────────────────────
+// ─── Données détail EN - Nippon Kempo ─────────────────────────────────────────
 
 const mDetailNipponKempoEn: ProjectDetail = {
   descriptionLongue:
@@ -291,7 +291,7 @@ const mDetailNipponKempoEn: ProjectDetail = {
     'practiced as regulated fights with specific protective gear.',
   equipe: mDetailNipponKempo.equipe,
   stockage:
-    'IndexedDB + Replicache — all data stored locally. ' +
+    'IndexedDB + Replicache, all data stored locally. ' +
     'Zero server, zero internet connection required.',
   technos: [
     { label: 'Vue 3',          detail: 'Composition API',    color: '#4ade80' },
@@ -330,7 +330,7 @@ const mDetailNipponKempoEn: ProjectDetail = {
   ],
 }
 
-// ─── Données détail EN — Tower Defense ────────────────────────────────────────
+// ─── Données détail EN - Tower Defense ────────────────────────────────────────
 
 const mDetailTowerDefenseEn: ProjectDetail = {
   descriptionLongue:
@@ -363,7 +363,7 @@ const mDetailTowerDefenseEn: ProjectDetail = {
   ],
 }
 
-// ─── Données détail EN — NegoSud ──────────────────────────────────────────────
+// ─── Données détail EN - NegoSud ──────────────────────────────────────────────
 
 const mDetailNegoSudEn: ProjectDetail = {
   descriptionLongue:
@@ -397,7 +397,7 @@ const mDetailNegoSudEn: ProjectDetail = {
   screenshots: [],
 }
 
-// ─── Données détail EN — Bricoloc ─────────────────────────────────────────────
+// ─── Données détail EN - Bricoloc ─────────────────────────────────────────────
 
 const mDetailBricolocEn: ProjectDetail = {
   descriptionLongue:

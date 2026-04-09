@@ -73,14 +73,14 @@ onUnmounted(() => { if (mTimerLoop) clearTimeout(mTimerLoop) })
   opacity: 0;
 }
 
-/* Couche rouge — décalée à gauche */
+/* Couche rouge - décalée à gauche */
 .portfolio-title-name::before,
 .portfolio-title-firstname::before {
   color: rgba(255, 80, 80, 0.18);
   transform: translateX(-3px);
 }
 
-/* Couche bleue — décalée à droite */
+/* Couche bleue - décalée à droite */
 .portfolio-title-name::after,
 .portfolio-title-firstname::after {
   color: rgba(80, 120, 255, 0.18);

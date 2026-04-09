@@ -363,10 +363,10 @@ onUnmounted(() => effacerTimers())
       <!-- Raison de défaite -->
       <div v-if="mWinner === 'bot' && mLostReason" class="lost-reason">
         <template v-if="mLostReason === 'accuracy'">
-          {{ t('Trop d\'erreurs — tu dépasses 6% de taux d\'erreur.', 'Too many errors — you exceeded the 6% error rate.') }}
+          {{ t('Trop d\'erreurs : tu dépasses 6% de taux d\'erreur.', 'Too many errors: you exceeded the 6% error rate.') }}
         </template>
         <template v-else-if="mLostReason === 'qualite'">
-          {{ t('Plus rapide que le bot, mais plus d\'erreurs — la vitesse ne suffit pas.', 'Faster than the bot, but more errors — speed alone isn\'t enough.') }}
+          {{ t('Plus rapide que le bot, mais plus d\'erreurs : la vitesse ne suffit pas.', 'Faster than the bot, but more errors: speed alone isn\'t enough.') }}
         </template>
       </div>
 

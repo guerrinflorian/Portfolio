@@ -29,7 +29,7 @@ const mExperiencesFR = [
     location: 'Hayange / Bure - Tressange, Moselle',
     tags: ['Vue 2', 'Vue 3', 'TypeScript', 'VB.NET', 'SQL Server', 'DevExtreme', 'jQuery', 'ASP.NET', 'Pinia', 'GitHub', 'TFS'],
     points: [
-      'Développement fullstack en environnement hybride : Vue 2, jQuery, DevExtreme et ASP.NET (.aspx) côté front — controllers VB.NET, Web API REST et procédures stockées SQL Server côté back',
+      'Développement fullstack en environnement hybride : Vue 2, jQuery, DevExtreme et ASP.NET (.aspx) côté front / controllers VB.NET, Web API REST et procédures stockées SQL Server côté back',
       'Conception et livraison de plusieurs applications intranet complètes : gestion des tickets informatiques avec dashboard, tableau de bord de production (15+ graphiques, croix de sécurité utilisée par les RH), coffre-fort de mots de passe d\'entreprise',
       'Application de gestion de production ferroviaire de bout en bout : réception des commandes, création et priorisation des chargements, actions métier (transferts, fusions, changements d\'état), regroupement en expéditions',
       'Architecture SQL Server autonome : modélisation des tables, procédures stockées (CRUD, calculs, filtres complexes), vues, synonymes cross-environnements et optimisation de requêtes (plans d\'exécution, index)',
@@ -62,7 +62,7 @@ const mExperiencesEN = [
     location: 'Hayange / Bure - Tressange, Moselle, France',
     tags: ['Vue 2', 'Vue 3', 'TypeScript', 'VB.NET', 'SQL Server', 'DevExtreme', 'jQuery', 'ASP.NET', 'Pinia', 'GitHub', 'TFS'],
     points: [
-      'Fullstack development in a hybrid environment: Vue 2, jQuery, DevExtreme and ASP.NET (.aspx) on the front — VB.NET controllers, REST Web API and SQL Server stored procedures on the back',
+      'Fullstack development in a hybrid environment: Vue 2, jQuery, DevExtreme and ASP.NET (.aspx) on the front / VB.NET controllers, REST Web API and SQL Server stored procedures on the back',
       'Design and delivery of multiple complete intranet applications: IT ticket management with dashboard, production dashboard (15+ charts, safety cross tracker used by HR), company-wide password vault',
       'End-to-end railway production management app: order intake, load creation and prioritisation, business actions (transfers, merges, status changes), shipment grouping',
       'Autonomous SQL Server architecture: table design, stored procedures (CRUD, calculations, complex filters), views, cross-environment synonyms and query optimisation (execution plans, indexes)',
