@@ -168,6 +168,12 @@ const mHoveredIcao = ref<string | null>(null)
 function onHover(pPlane: Plane): void { mHoveredIcao.value = pPlane.icao24 }
 function onLeave(): void              { mHoveredIcao.value = null }
 
+// Vrai uniquement si au moins un champ de détail est renseigné (hexdb peut renvoyer tout vide)
+function calcHasDetails(pIcao24: string): boolean {
+  const lD = mDetails[pIcao24]
+  return !!(lD && (lD.registration || lD.manufacturer || lD.type || lD.operator))
+}
+
 // ─── Utilitaires d'affichage ──────────────────────────────────────────────────
 
 function calcSpeedKmh(pV: number): number   { return Math.round(pV * 3.6) }
@@ -199,12 +205,12 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
         :key="lPlane.icao24"
         class="plane-item"
         :style="calcPositionStyle(lPlane)"
-        @mouseenter="onHover(lPlane)"
-        @mouseleave="onLeave"
       >
-        <!-- Icône avion SVG -->
+        <!-- Icône avion SVG - seul élément capturant les events (pas de conflit avec l'arbre) -->
         <div
           class="plane-icon"
+          @mouseenter="onHover(lPlane)"
+          @mouseleave="onLeave"
           :style="{
             transform: `rotate(${lPlane.heading}deg)`,
             opacity:   String(calcDepthOpacity(lPlane)),
@@ -252,15 +258,16 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
               </span>
             </div>
 
-            <div v-if="mDetails[lPlane.icao24]?.manufacturer || mDetails[lPlane.icao24]?.type" class="tooltip-aircraft">
-              <span v-if="mDetails[lPlane.icao24]?.manufacturer">{{ mDetails[lPlane.icao24].manufacturer }}</span>
-              <span v-if="mDetails[lPlane.icao24]?.type" class="tooltip-type"> {{ mDetails[lPlane.icao24].type }}</span>
-            </div>
-            <div v-if="mDetails[lPlane.icao24]?.operator" class="tooltip-operator">
-              {{ mDetails[lPlane.icao24].operator }}
-            </div>
-
-            <div class="tooltip-divider" />
+            <template v-if="calcHasDetails(lPlane.icao24)">
+              <div v-if="mDetails[lPlane.icao24]?.manufacturer || mDetails[lPlane.icao24]?.type" class="tooltip-aircraft">
+                <span v-if="mDetails[lPlane.icao24]?.manufacturer">{{ mDetails[lPlane.icao24].manufacturer }}</span>
+                <span v-if="mDetails[lPlane.icao24]?.type" class="tooltip-type"> {{ mDetails[lPlane.icao24].type }}</span>
+              </div>
+              <div v-if="mDetails[lPlane.icao24]?.operator" class="tooltip-operator">
+                {{ mDetails[lPlane.icao24].operator }}
+              </div>
+              <div class="tooltip-divider" />
+            </template>
 
             <div class="tooltip-row">
               <span class="tooltip-label">Alt</span>
@@ -311,7 +318,7 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  pointer-events: auto;
+  pointer-events: none;   /* le bloc entier passe les events à l'arbre */
   cursor: default;
   transform-origin: center center;
 }
@@ -321,6 +328,8 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;   /* seule l'icône capture hover/click */
+  cursor: default;
   transition: opacity 2s ease, filter 0.3s ease;
 }
 
