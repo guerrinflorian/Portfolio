@@ -74,9 +74,9 @@ export default defineNuxtConfig({
 
   // Variables d'environnement runtime
   runtimeConfig: {
-    // Identifiants OpenSky (optionnels, contournent le blocage IP datacenter)
-    openskyUser: '',
-    openskyPass: '',
+    // Identifiants OAuth2 OpenSky (optionnels, contournent le blocage IP datacenter)
+    openskyClientId: '',
+    openskyClientSecret: '',
     public: {
       openMeteoUrl: 'https://api.open-meteo.com/v1/forecast',
       latitude: '49.4167',

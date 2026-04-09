@@ -1,7 +1,7 @@
 // Auteur : GUERRINF - Florian Guerrin
-// Server route - proxy OpenSky Network (pas de CORS cote serveur Node.js)
-// Authentification Basic Auth via OPENSKY_USER / OPENSKY_PASS (variables Vercel)
-// En cas d'echec : retourne states vides pour ne pas bloquer l'UI
+// Server route - proxy OpenSky Network via OAuth2 client credentials
+// Variables Vercel : OPENSKY_CLIENT_ID + OPENSKY_CLIENT_SECRET
+// Sans credentials : tentative anonyme avec fallback gracieux (states vides)
 
 // Zone couverte : ~80km autour de Bure (Moselle)
 const LAMIN = 48.9
@@ -9,19 +9,47 @@ const LOMIN = 5.2
 const LAMAX = 49.8
 const LOMAX = 6.7
 
+const TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token'
+
+// Cache du token en memoire (survive aux appels chauds Vercel, expiration 30min)
+let mCachedToken:   string | null = null
+let mTokenExpireAt: number        = 0
+
+async function fetchToken(pClientId: string, pClientSecret: string): Promise<string> {
+  const lNow = Date.now()
+  if (mCachedToken && lNow < mTokenExpireAt) return mCachedToken
+
+  const lResp = await $fetch<{ access_token: string; expires_in: number }>(TOKEN_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    new URLSearchParams({
+      grant_type:    'client_credentials',
+      client_id:     pClientId,
+      client_secret: pClientSecret,
+    }).toString(),
+  })
+
+  mCachedToken   = lResp.access_token
+  mTokenExpireAt = lNow + (lResp.expires_in - 60) * 1000  // marge 60s avant expiration
+  return mCachedToken
+}
+
 export default defineEventHandler(async (event) => {
   const lConfig = useRuntimeConfig(event)
   const lUrl    = `https://opensky-network.org/api/states/all?lamin=${LAMIN}&lomin=${LOMIN}&lamax=${LAMAX}&lomax=${LOMAX}`
 
   const lHeaders: Record<string, string> = {
-    'Accept': 'application/json',
+    'Accept':     'application/json',
     'User-Agent': 'portfolio-florian-guerrin/1.0',
   }
 
-  // Ajout du header Authorization si les identifiants sont configurés
-  if (lConfig.openskyUser && lConfig.openskyPass) {
-    const lToken = Buffer.from(`${lConfig.openskyUser}:${lConfig.openskyPass}`).toString('base64')
-    lHeaders['Authorization'] = `Basic ${lToken}`
+  if (lConfig.openskyClientId && lConfig.openskyClientSecret) {
+    try {
+      const lToken = await fetchToken(lConfig.openskyClientId, lConfig.openskyClientSecret)
+      lHeaders['Authorization'] = `Bearer ${lToken}`
+    } catch (lErr) {
+      console.warn('[server/api/planes] Echec obtention token OAuth2 :', lErr instanceof Error ? lErr.message : lErr)
+    }
   }
 
   try {
@@ -30,7 +58,6 @@ export default defineEventHandler(async (event) => {
   } catch (lErr: unknown) {
     const lMsg = lErr instanceof Error ? lErr.message : 'Erreur inconnue'
     console.warn('[server/api/planes] OpenSky indisponible :', lMsg)
-    // Retour gracieux : pas d'avions plutot qu'une erreur 502
     return { time: Math.floor(Date.now() / 1000), states: null }
   }
 })
