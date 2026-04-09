@@ -1,4 +1,4 @@
-# Portfolio – Florian Guerrin
+# Portfolio - Florian Guerrin
 
 Mon portfolio personnel, accessible sur **[florian-guerrin.fr](https://florian-guerrin.fr)**.
 
@@ -27,7 +27,7 @@ La scène change en fonction de la météo réelle à mon domicile à Tressange 
 
 C'est la partie la plus intéressante techniquement. L'arbre est généré récursivement avec des courbes de Bézier, animé avec un système de physique simple (oscillations sinusoïdales par branche, influencées par la vitesse du vent). Les feuilles qui tombent ont leur propre simulation physique indépendante.
 
-Les nœuds interactifs sont positionnés dynamiquement sur les courbes de Bézier via interpolation paramétrique — ils suivent les branches quand l'arbre bouge. La détection de clic se fait par hit-test distance euclidienne sur les coordonnées canvas.
+Les nœuds interactifs sont positionnés dynamiquement sur les courbes de Bézier via interpolation paramétrique, ils suivent les branches quand l'arbre bouge. La détection de clic se fait par hit-test distance euclidienne sur les coordonnées canvas.
 
 ---
 
