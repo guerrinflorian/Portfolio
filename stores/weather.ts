@@ -16,7 +16,9 @@ import type {
 const LATITUDE = 49.4167
 const LONGITUDE = 6.0000
 const TIMEZONE = 'Europe/Paris'
-const REFRESH_INTERVAL_MS = 10 * 60 * 1000 // 10 minutes
+const REFRESH_INTERVAL_MS = 15 * 60 * 1000 // 15 minutes
+const CACHE_KEY = 'weather_cache'
+const CACHE_TTL_MS = 15 * 60 * 1000 // 15 minutes
 
 // Mapping WMO weathercode → état visuel
 const WMO_MAP: WmoMapping = {
@@ -99,12 +101,27 @@ export const useWeatherStore = defineStore('weather', {
   actions: {
     /**
      * Récupère les données météo depuis l'API Open-Meteo.
+     * Utilise le cache localStorage si les données ont moins de 15 minutes.
      */
     async fetchWeather(): Promise<void> {
       this.loading = true
       this.error = null
 
       try {
+        // Lecture du cache localStorage
+        if (import.meta.client) {
+          const lCached = localStorage.getItem(CACHE_KEY)
+          if (lCached) {
+            const lParsed = JSON.parse(lCached) as { ts: number; data: OpenMeteoResponse }
+            if (Date.now() - lParsed.ts < CACHE_TTL_MS) {
+              this.applyWeatherData(lParsed.data)
+              this.lastFetch = new Date(lParsed.ts)
+              this.loading = false
+              return
+            }
+          }
+        }
+
         const lUrl = new URL('https://api.open-meteo.com/v1/forecast')
         lUrl.searchParams.set('latitude', String(LATITUDE))
         lUrl.searchParams.set('longitude', String(LONGITUDE))
@@ -120,6 +137,12 @@ export const useWeatherStore = defineStore('weather', {
         }
 
         const lData: OpenMeteoResponse = await lResponse.json() as OpenMeteoResponse
+
+        // Sauvegarde en cache localStorage
+        if (import.meta.client) {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: lData }))
+        }
+
         this.applyWeatherData(lData)
         this.lastFetch = new Date()
       } catch (lError: unknown) {
