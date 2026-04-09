@@ -2,7 +2,7 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Modale - Profil personnel
 
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick, onUnmounted } from 'vue'
 import ModalBase from './ModalBase.vue'
 import { useModalStore } from '~/stores/modal'
 import { useLocale } from '~/composables/useLocale'
@@ -23,6 +23,80 @@ const mAge = computed(() => {
   const lM = lAuj.getMonth() - lNaissance.getMonth()
   if (lM < 0 || (lM === 0 && lAuj.getDate() < lNaissance.getDate())) lAge--
   return lAge
+})
+
+// ─── Carte Leaflet ────────────────────────────────────────────────────────────
+
+const mMapContainer = ref<HTMLElement | null>(null)
+let mLeafletMap: any = null
+
+async function initMap(): Promise<void> {
+  if (!mMapContainer.value || mLeafletMap) return
+
+  const L = (await import('leaflet')).default
+  await import('leaflet/dist/leaflet.css')
+
+  // Fix icones Leaflet avec Vite (les assets ne sont pas résolus automatiquement)
+  delete (L.Icon.Default.prototype as any)._getIconUrl
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  })
+
+  // Tressange / Bure - Moselle (57710)
+  const LAT = 49.362
+  const LNG = 5.934
+
+  mLeafletMap = L.map(mMapContainer.value, {
+    center:             [LAT, LNG],
+    zoom:               14,
+    zoomControl:        false,
+    scrollWheelZoom:    false,
+    dragging:           false,
+    touchZoom:          false,
+    doubleClickZoom:    false,
+    attributionControl: true,
+  })
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+    subdomains:  'abcd',
+    maxZoom:     20,
+  }).addTo(mLeafletMap)
+
+  const lIcon = L.divIcon({
+    className: '',
+    html: `<div style="
+      width:14px;height:14px;border-radius:50%;
+      background:#3b82f6;border:3px solid white;
+      box-shadow:0 2px 10px rgba(59,130,246,0.55);
+    "></div>`,
+    iconSize:   [14, 14],
+    iconAnchor: [7, 7],
+  })
+
+  L.marker([LAT, LNG], { icon: lIcon })
+    .addTo(mLeafletMap)
+    .bindPopup(
+      `<strong>Tressange · Moselle</strong><br><span style="font-size:0.78rem;color:#666">${t('5 min du Luxembourg', '5 min from Luxembourg')}</span>`,
+      { closeButton: false }
+    )
+    .openPopup()
+}
+
+watch(mOuverte, async (lVal) => {
+  if (lVal) {
+    await nextTick()
+    await initMap()
+  } else {
+    mLeafletMap?.remove()
+    mLeafletMap = null
+  }
+})
+
+onUnmounted(() => {
+  mLeafletMap?.remove()
 })
 </script>
 
@@ -80,6 +154,9 @@ const mAge = computed(() => {
       </p>
     </div>
 
+    <!-- Carte localisation -->
+    <div ref="mMapContainer" class="map-container" aria-hidden="true" />
+
     <div class="separator" />
 
     <!-- Grille infos -->
@@ -131,6 +208,14 @@ const mAge = computed(() => {
   object-fit: cover;
   flex-shrink: 0;
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+}
+
+.map-container {
+  height: 155px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid var(--modal-header-border);
 }
 
 .separator {
