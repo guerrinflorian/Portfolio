@@ -78,14 +78,14 @@ const { t } = useLocale()
           </svg>
           <div>
             <h3 class="passion-title">{{ t('Jeux vidéo', 'Gaming') }}</h3>
-            <p class="passion-meta">RPG · Strategy · Tycoon</p>
+            <p class="passion-meta">PS5 · PC · Switch 2</p>
           </div>
         </div>
         <p class="passion-text">
           {{
             t(
-              'Surtout des RPG et des jeux de gestion. J\'aime les jeux avec de la profondeur, où t\'as envie de comprendre comment tout fonctionne sous le capot.',
-              'Mainly RPGs and management games. I like games with depth, where you want to understand how everything works under the hood.'
+              'J\'aime les jeux vidéo en général, sans me prendre la tête. PS5, PC, Switch 2 — peu importe la plateforme, c\'est surtout pour me détendre.',
+              'I enjoy gaming casually, no pressure. PS5, PC, Switch 2 — whatever the platform, it\'s mainly about relaxing.'
             )
           }}
         </p>
