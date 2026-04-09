@@ -27,7 +27,7 @@ export default defineNuxtConfig({
         {
           name: 'description',
           content:
-            'Portfolio de Florian Guerrin, developpeur full-stack Vue.js, TypeScript et SQL Server. Base a Tressange en Moselle, pres du Luxembourg. Specialiste applications intranet industrielles.',
+            'Portfolio de Florian Guerrin, developpeur full-stack Vue.js, TypeScript et SQL Server. Base a Bure / Tressange en Moselle, pres du Luxembourg. Specialiste applications intranet industrielles.',
         },
         { name: 'author', content: 'Florian Guerrin' },
         { name: 'keywords', content: 'Florian Guerrin, developpeur Vue.js, TypeScript, SQL Server, Moselle, Luxembourg, full-stack, portfolio' },
