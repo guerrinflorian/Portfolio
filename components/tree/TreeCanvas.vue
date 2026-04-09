@@ -92,13 +92,13 @@ const SEASON_CONFIGS: Record<Season, SeasonConfig> = {
 // ─── Configuration des 7 noeuds UI ───────────────────────────────────────────
 
 const UI_NODE_CONFIGS: TreeNodeConfig[] = [
-  { id: 'profil',     depth: 0, depthIndex: 0, t: 0.52, color: '#3b82f6', label: 'Profil',     radius: 10, pulsePhase: 0   },
-  { id: 'experience', depth: 1, depthIndex: 0, t: 0.68, color: '#10b981', label: 'Expérience', radius: 8,  pulsePhase: 0.5 },
-  { id: 'diplomes',   depth: 2, depthIndex: 0, t: 0.82, color: '#8b5cf6', label: 'Diplômes',   radius: 7,  pulsePhase: 1.0 },
-  { id: 'stack',      depth: 1, depthIndex: 1, t: 0.65, color: '#f59e0b', label: 'Stack',      radius: 8,  pulsePhase: 1.5 },
-  { id: 'projets',    depth: 2, depthIndex: 2, t: 0.88, color: '#ef4444', label: 'Projets',    radius: 7,  pulsePhase: 2.0 },
-  { id: 'passions',   depth: 2, depthIndex: 1, t: 0.95, color: '#ec4899', label: 'Passions',   radius: 7,  pulsePhase: 2.5 },
-  { id: 'contact',    depth: 2, depthIndex: 3, t: 0.90, color: '#06b6d4', label: 'Contact',    radius: 7,  pulsePhase: 3.0 },
+  { id: 'profil',     depth: 0, depthIndex: 0, t: 0.52, color: '#3b82f6', label: 'Profil',     radius: 10, pulsePhase: 0,   icon: '👤' },
+  { id: 'experience', depth: 1, depthIndex: 0, t: 0.68, color: '#10b981', label: 'Expérience', radius: 8,  pulsePhase: 0.5, icon: '💼' },
+  { id: 'diplomes',   depth: 2, depthIndex: 0, t: 0.82, color: '#8b5cf6', label: 'Diplômes',   radius: 7,  pulsePhase: 1.0, icon: '🎓' },
+  { id: 'stack',      depth: 1, depthIndex: 1, t: 0.65, color: '#f59e0b', label: 'Stack',      radius: 8,  pulsePhase: 1.5, icon: '⚡' },
+  { id: 'projets',    depth: 2, depthIndex: 2, t: 0.88, color: '#ef4444', label: 'Projets',    radius: 7,  pulsePhase: 2.0, icon: '🚀' },
+  { id: 'passions',   depth: 2, depthIndex: 1, t: 0.95, color: '#ec4899', label: 'Passions',   radius: 7,  pulsePhase: 2.5, icon: '❤️' },
+  { id: 'contact',    depth: 2, depthIndex: 3, t: 0.90, color: '#06b6d4', label: 'Contact',    radius: 7,  pulsePhase: 3.0, icon: '✉️' },
 ]
 
 // ─── Stores et composables ────────────────────────────────────────────────────
@@ -751,6 +751,14 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
     pCtx.strokeStyle = 'rgba(255, 255, 255, 0.88)'
     pCtx.lineWidth   = 2
     pCtx.stroke()
+
+    // Icône emoji centrée
+    const lIconSize = Math.round(lCfg.radius * 1.25)
+    pCtx.font          = `${lIconSize}px serif`
+    pCtx.textAlign     = 'center'
+    pCtx.textBaseline  = 'middle'
+    pCtx.globalAlpha   = 1
+    pCtx.fillText(lCfg.icon, lEntry.x, lEntry.y)
 
     pCtx.restore()
   }

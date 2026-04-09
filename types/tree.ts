@@ -28,6 +28,7 @@ export interface TreeNodeConfig {
   pulsePhase: number
   label: string
   radius: number
+  icon: string
 }
 
 // ─── Noeud de l'arbre (structure récursive) ───────────────────────────────────
