@@ -5,7 +5,7 @@ import type { TreeNodeId } from './tree'
 
 // ─── Identifiants de modales ──────────────────────────────────────────────────
 
-export type ModalId = TreeNodeId | 'contact'
+export type ModalId = TreeNodeId | 'contact' | 'minijeu'
 
 // ─── Store modal ──────────────────────────────────────────────────────────────
 

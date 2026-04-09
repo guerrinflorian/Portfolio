@@ -33,7 +33,10 @@ const ModalDiplomes   = defineAsyncComponent(() => import('~/components/modals/M
 const ModalStack      = defineAsyncComponent(() => import('~/components/modals/ModalStack.vue'))
 const ModalProjets    = defineAsyncComponent(() => import('~/components/modals/ModalProjets.vue'))
 const ModalPassions   = defineAsyncComponent(() => import('~/components/modals/ModalPassions.vue'))
-const ModalContact    = defineAsyncComponent(() => import('~/components/modals/ModalContact.vue'))
+const ModalContact      = defineAsyncComponent(() => import('~/components/modals/ModalContact.vue'))
+const ModalTypingRace   = defineAsyncComponent(() => import('~/components/modals/ModalTypingRace.vue'))
+
+import SceneCabin from '~/components/scene/SceneCabin.vue'
 
 // ─── Démarrage météo + locale ─────────────────────────────────────────────────
 
@@ -128,6 +131,11 @@ useHead({
       <TreeCanvas />
     </ClientOnly>
 
+    <!-- Couche 3 : cabane mini-jeu (desktop uniquement) -->
+    <ClientOnly>
+      <SceneCabin />
+    </ClientOnly>
+
     <!-- Couche 3 : sonar ping depuis la base de l'arbre -->
     <SonarPing />
 
@@ -169,6 +177,7 @@ useHead({
       <ModalProjets />
       <ModalPassions />
       <ModalContact />
+      <ModalTypingRace />
     </ClientOnly>
 
     <!-- Instruction d'interaction - visible uniquement jusqu'à la première modale ouverte -->
