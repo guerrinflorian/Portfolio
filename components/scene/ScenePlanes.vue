@@ -80,7 +80,7 @@ function calcPositionStyle(pPlane: Plane): Record<string, string> {
 
 // Tooltip vers le bas si l'avion est dans le quart supérieur de l'écran
 function calcTooltipFlipped(pPlane: Plane): boolean {
-  return calcPlaneY(pPlane) < 22
+  return calcPlaneY(pPlane) < 30
 }
 
 // ─── Utilitaires d'affichage ──────────────────────────────────────────────────
@@ -289,11 +289,6 @@ const mPlaneOpacity = computed(() =>
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-}
-
-.plane-tooltip--below {
-  bottom: auto;
-  top: calc(100% + 8px);
   background: rgba(10, 12, 28, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
@@ -304,6 +299,11 @@ const mPlaneOpacity = computed(() =>
   z-index: 10;
   pointer-events: none;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.plane-tooltip--below {
+  bottom: auto;
+  top: calc(100% + 8px);
 }
 
 .tooltip-header {
