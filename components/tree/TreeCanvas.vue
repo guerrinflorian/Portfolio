@@ -2,10 +2,11 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Composant principal - arbre récursif à courbes de Bézier avec physique de vent
 
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useWeatherStore } from '~/stores/weather'
 import { useTreePhysics } from '~/composables/useTreePhysics'
 import { useModal } from '~/composables/useModal'
+import { useLocale } from '~/composables/useLocale'
 import type { TreeNode, FlyingLeaf, SeasonConfig, TreeNodeConfig } from '~/types/tree'
 import type { Season } from '~/types/weather'
 
@@ -106,6 +107,19 @@ const UI_NODE_CONFIGS: TreeNodeConfig[] = [
 const weatherStore = useWeatherStore()
 const physics      = useTreePhysics()
 const modal        = useModal()
+const { t, locale } = useLocale()
+
+// Labels traduits des noeuds - reactive selon la langue
+const mNodeLabels = computed<Record<string, string>>(() => ({
+  profil:     t('Profil',     'Profile'),
+  experience: t('Expérience', 'Experience'),
+  stack:      t('Stack',      'Stack'),
+  diplomes:   t('Diplômes',   'Degrees'),
+  projets:    t('Projets',    'Projects'),
+  contact:    t('Contact',    'Contact'),
+  passions:   t('Passions',   'Passions'),
+}))
+
 
 // ─── Refs et état ─────────────────────────────────────────────────────────────
 
@@ -125,6 +139,8 @@ let flyingLeaves: FlyingLeaf[] = []
 let nodeById: Map<number, TreeNode> = new Map()
 // Cache : largeurs des pills (evite measureText a chaque frame)
 const pillWidthCache: Map<string, number> = new Map()
+// Vider le cache quand la langue change (labels differents = largeurs differentes)
+watch(locale, () => { pillWidthCache.clear() })
 // Buffer reutilise pour les branches terminales (evite allocation a chaque frame)
 const terminalNodesBuffer: Array<{ ex: number; ey: number }> = []
 
@@ -806,7 +822,7 @@ function drawNodes(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
     const lHovered = hoveredNodeId === lCfg.id
 
     // Texte et dimensions du pill (largeur mise en cache)
-    const lLabel = `${lCfg.icon}  ${lCfg.label}`
+    const lLabel = `${lCfg.icon}  ${mNodeLabels.value[lCfg.id] ?? lCfg.label}`
     let lTextW = pillWidthCache.get(lCfg.id)
     if (lTextW === undefined) {
       lTextW = pCtx.measureText(lLabel).width
