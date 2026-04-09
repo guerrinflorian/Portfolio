@@ -44,21 +44,26 @@ function mapWmoCode(pCode: number): WeatherState {
   return (WMO_MAP[pCode] as WeatherState | undefined) ?? 'clear'
 }
 
+// Heures de lever et coucher par mois pour Moselle (49.4°N) en heure locale Europe/Paris
+// Index 0 = janvier, 11 = décembre
+const LEVER_PAR_MOIS  = [8.50, 7.75, 7.00, 7.17, 6.25, 5.67, 5.92, 6.67, 7.50, 8.25, 7.50, 8.25]
+const COUCHER_PAR_MOIS = [17.00, 17.83, 18.67, 20.67, 21.33, 21.92, 21.67, 21.00, 19.83, 18.75, 17.25, 16.83]
+
 /**
  * Calcule l'heure de la journée selon l'heure locale et le mois.
- * Les horaires d'aube/coucher varient selon la saison.
+ * Les horaires d'aube/coucher sont calibrés par mois pour Moselle.
  */
 function computeTimeOfDay(pHour: number, pMonth: number): TimeOfDay {
-  // Heures de lever/coucher approximatives selon le mois (hémisphère nord)
-  const calcRise = pMonth >= 4 && pMonth <= 9 ? 6 : 7
-  const calcSet  = pMonth >= 4 && pMonth <= 9 ? 20 : 17
+  const lIdx    = pMonth - 1  // 0-11
+  const calcRise = LEVER_PAR_MOIS[lIdx]  ?? 7.5
+  const calcSet  = COUCHER_PAR_MOIS[lIdx] ?? 19.5
 
-  if (pHour < calcRise - 0.5) return 'night'
-  if (pHour < calcRise + 0.5) return 'dawn'
-  if (pHour < 10)             return 'morning'
-  if (pHour < 14)             return 'noon'
-  if (pHour < calcSet - 1)    return 'afternoon'
-  if (pHour < calcSet + 0.5)  return 'dusk'
+  if (pHour < calcRise - 0.75) return 'night'
+  if (pHour < calcRise + 0.50) return 'dawn'
+  if (pHour < 10)              return 'morning'
+  if (pHour < 14)              return 'noon'
+  if (pHour < calcSet - 1.0)   return 'afternoon'
+  if (pHour < calcSet + 0.50)  return 'dusk'
   return 'night'
 }
 
@@ -182,7 +187,8 @@ export const useWeatherStore = defineStore('weather', {
 
       this.timeOfDay = computeTimeOfDay(lHour, lMonth)
       this.season    = computeSeason(lMonth)
-      this.isDay     = lHour >= 7 && lHour < 20
+      const lIdx     = lMonth - 1
+      this.isDay     = lHour >= (LEVER_PAR_MOIS[lIdx] ?? 7.5) && lHour < (COUCHER_PAR_MOIS[lIdx] ?? 19.5)
     },
 
     /**

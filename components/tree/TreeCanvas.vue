@@ -53,7 +53,7 @@ interface LeafSprite {
   alpha: number
 }
 
-// ─── Configurations saisonnières ──────────────────────────────────────────────
+// ─── Configurations saisonnières de base ──────────────────────────────────────
 
 const SEASON_CONFIGS: Record<Season, SeasonConfig> = {
   spring: {
@@ -88,6 +88,41 @@ const SEASON_CONFIGS: Record<Season, SeasonConfig> = {
     foliageDensity: 0.0,
     grassColor:  'rgba(160, 170, 170, 0.55)',
   },
+}
+
+// Densité foliaire par mois (index 0=janvier) - reflète la montée en feuilles au printemps
+// et la chute progressive en automne pour Moselle
+const FOLIAGE_DENSITY_PAR_MOIS = [0.0, 0.0, 0.2, 0.55, 0.88, 1.0, 1.0, 0.95, 0.82, 0.48, 0.08, 0.0]
+
+/**
+ * Retourne la config saisonnière ajustée au mois courant.
+ * Surcharge foliageDensity et adapte les couleurs selon l'avancement dans la saison.
+ */
+function computeSeasonConfig(pSeason: Season): SeasonConfig {
+  const lBase  = SEASON_CONFIGS[pSeason]
+  const lMois  = new Date().getMonth()  // 0-11
+  const lDensity = FOLIAGE_DENSITY_PAR_MOIS[lMois] ?? lBase.foliageDensity
+
+  // Couleurs adaptées aux transitions inter-saison
+  let lLeafColors  = lBase.leafColors
+  let lBudColors   = lBase.budColors
+  let lGrassColor  = lBase.grassColor
+
+  if (pSeason === 'spring' && lMois === 2) {
+    // Mars : bourgeons dominants, quelques toutes petites feuilles vert très clair
+    lLeafColors = ['#d4f5b0', '#c8f0a0', '#b8ea90', '#e0fcc0']
+    lBudColors  = ['#FFB7C5', '#FF9BB0', '#FFC8D4', '#ffd0e0', '#f0a0b8']
+  } else if (pSeason === 'autumn' && lMois === 8) {
+    // Septembre : début d'automne, vert virant au jaune/orangé
+    lLeafColors = ['#a8c840', '#c8b020', '#d4882a', '#9ab828', '#c09030']
+    lGrassColor  = 'rgba(120, 130, 50, 0.7)'
+  } else if (pSeason === 'autumn' && lMois === 10) {
+    // Novembre : fin d'automne, feuilles brunes et rares
+    lLeafColors = ['#7a3510', '#5a2a08', '#8b4020', '#6b3015', '#4a1e05']
+    lGrassColor  = 'rgba(100, 85, 45, 0.55)'
+  }
+
+  return { ...lBase, foliageDensity: lDensity, leafColors: lLeafColors, budColors: lBudColors, grassColor: lGrassColor }
 }
 
 // ─── Configuration des 7 noeuds UI ───────────────────────────────────────────
@@ -227,7 +262,7 @@ function addChildren(pParent: TreeNode, pCfg: SeasonConfig, pDepth: number, pRng
 function buildTree(pWidth: number, pHeight: number, pSeason: Season): void {
   nodeIdCounter = 0
   const lRng = new SeededRandom(42)   // graine fixe → forme stable
-  const lCfg = SEASON_CONFIGS[pSeason]
+  const lCfg = computeSeasonConfig(pSeason)
 
   baseX = pWidth / 2
   baseY = pHeight - 62
@@ -433,7 +468,7 @@ function generateLeaves(pSeason: Season, pRng: SeededRandom): void {
   leaves = []
   if (!treeRoot) return
 
-  const lCfg = SEASON_CONFIGS[pSeason]
+  const lCfg = computeSeasonConfig(pSeason)
   if (lCfg.foliageDensity === 0) return
 
   const lTerminals: TreeNode[] = []
@@ -670,7 +705,7 @@ function drawRoots(pCtx: CanvasRenderingContext2D): void {
 // ─── Rendu de l'herbe ─────────────────────────────────────────────────────────
 
 function drawGrass(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
-  const lGrassColor = SEASON_CONFIGS[weatherStore.season].grassColor
+  const lGrassColor = computeSeasonConfig(weatherStore.season).grassColor
   const lSpeed      = physics.windState.value.currentSpeed
 
   pCtx.save()
@@ -703,7 +738,7 @@ function drawGrass(pCtx: CanvasRenderingContext2D, pTimeS: number): void {
 function drawLeafClusters(pCtx: CanvasRenderingContext2D): void {
   if (!treeRoot) return
 
-  const lCfg     = SEASON_CONFIGS[weatherStore.season]
+  const lCfg     = computeSeasonConfig(weatherStore.season)
 
   const lLeafFrac = Math.min(1, Math.max(0, (growProgress - 0.86) / 0.14))
   if (lLeafFrac <= 0) return
@@ -1013,7 +1048,7 @@ function render(pNow: number): void {
 
   // Tick physique (mise à jour vent + feuilles volantes)
   physics.tick(lDelta)
-  const lCfg = SEASON_CONFIGS[weatherStore.season]
+  const lCfg = computeSeasonConfig(weatherStore.season)
 
   drawRoots(ctx)
   drawGrass(ctx, lTimeS)

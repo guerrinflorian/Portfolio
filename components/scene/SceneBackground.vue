@@ -91,22 +91,28 @@ function majHeureLocale(): void {
   mHeureLocale.value = lNow.getHours() + lNow.getMinutes() / 60
 }
 
+// Heures de lever et coucher par mois pour Moselle (49.4°N) en heure locale Europe/Paris
+// Index 0 = janvier, 11 = décembre - synchronisé avec stores/weather.ts
+const LEVER_PAR_MOIS_BG   = [8.50, 7.75, 7.00, 7.17, 6.25, 5.67, 5.92, 6.67, 7.50, 8.25, 7.50, 8.25]
+const COUCHER_PAR_MOIS_BG  = [17.00, 17.83, 18.67, 20.67, 21.33, 21.92, 21.67, 21.00, 19.83, 18.75, 17.25, 16.83]
+
 const mSoleilStyle = computed(() => {
   const lHeure = mHeureLocale.value
+  const lIdx   = new Date().getMonth()  // 0-11
 
-  // Arc de 180° : 6h = horizon gauche (5%), 20h = horizon droit (95%)
-  const HEURE_LEVER = 6
-  const HEURE_COUCHER = 20
-  const lProgression = (lHeure - HEURE_LEVER) / (HEURE_COUCHER - HEURE_LEVER)
+  const HEURE_LEVER   = LEVER_PAR_MOIS_BG[lIdx]  ?? 7.5
+  const HEURE_COUCHER = COUCHER_PAR_MOIS_BG[lIdx] ?? 19.5
+
+  const lProgression        = (lHeure - HEURE_LEVER) / (HEURE_COUCHER - HEURE_LEVER)
   const lProgressionClampee = Math.max(0, Math.min(1, lProgression))
 
-  // Arc parabolique pour la hauteur
-  const calcX = 5 + lProgressionClampee * 90 // 5% → 95% horizontalement
-  const calcY = 75 - Math.sin(lProgressionClampee * Math.PI) * 55 // Parabolique
+  // Arc parabolique : horizon gauche (5%) → zénith → horizon droit (95%)
+  const calcX = 5 + lProgressionClampee * 90
+  const calcY = 75 - Math.sin(lProgressionClampee * Math.PI) * 55
 
   return {
-    left: `${calcX}%`,
-    top: `${calcY}%`,
+    left:    `${calcX}%`,
+    top:     `${calcY}%`,
     opacity: mWeatherStore.isDay && mWeatherStore.timeOfDay !== 'night' ? '1' : '0',
   }
 })
