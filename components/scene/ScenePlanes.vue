@@ -3,12 +3,11 @@
 // Composant - avions en temps réel (OpenSky) - couche unique z-index 2
 // Profondeur visuelle uniquement via scale/opacité selon distance
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import type { CSSProperties } from 'vue'
 import { usePlanes } from '~/composables/usePlanes'
 import { useWeatherStore } from '~/stores/weather'
 import type { Plane } from '~/composables/usePlanes'
-
-// ─── Survol ───────────────────────────────────────────────────────────────────
 
 // ─── Stores & données ─────────────────────────────────────────────────────────
 
@@ -156,29 +155,41 @@ function calcDepthOpacity(pPlane: Plane): number {
   return lNight * lDepth
 }
 
-interface HoveredState {
-  plane: Plane
-  rect:  DOMRect
+// ─── Survol via mousemove document ────────────────────────────────────────────
+// Le canvas de l'arbre (z-index 3, pointer-events: all) bloque les hover CSS
+// sur les avions (z-index 2). On détecte la proximité souris via mousemove global.
+
+const mHovered = ref<Plane | null>(null)
+const HOVER_RADIUS = 32 // pixels
+
+function calcPlaneViewportPos(pPlane: Plane): { x: number; y: number } {
+  const lX = (3 + ((pPlane.longitude - LON_MIN) / (LON_MAX - LON_MIN)) * 94) / 100 * window.innerWidth
+  const lY = calcPlaneY(pPlane) / 100 * window.innerHeight
+  return { x: lX, y: lY }
 }
 
-const mHovered = ref<HoveredState | null>(null)
-
-function onHover(pPlane: Plane, pEvent: MouseEvent): void {
-  const lEl = (pEvent.currentTarget as HTMLElement)
-  mHovered.value = { plane: pPlane, rect: lEl.getBoundingClientRect() }
-}
-function onLeave(): void { mHovered.value = null }
-
-// Position du tooltip téléporté (ancré au centre-haut ou centre-bas de l'avion)
-const mTooltipStyle = computed(() => {
-  if (!mHovered.value) return {}
-  const lRect    = mHovered.value.rect
-  const lFlipped = calcTooltipFlipped(mHovered.value.plane)
-  const lLeft    = lRect.left + lRect.width / 2
-  if (lFlipped) {
-    return { position: 'fixed', left: `${lLeft}px`, top: `${lRect.bottom + 8}px`, transform: 'translateX(-50%)' }
+function onDocMouseMove(pEvt: MouseEvent): void {
+  let lClosest: Plane | null = null
+  let lMinDist = HOVER_RADIUS
+  for (const lPlane of mFilteredPlanes.value) {
+    const lPos  = calcPlaneViewportPos(lPlane)
+    const lDist = Math.hypot(pEvt.clientX - lPos.x, pEvt.clientY - lPos.y)
+    if (lDist < lMinDist) { lMinDist = lDist; lClosest = lPlane }
   }
-  return { position: 'fixed', left: `${lLeft}px`, top: `${lRect.top - 8}px`, transform: 'translateX(-50%) translateY(-100%)' }
+  mHovered.value = lClosest
+}
+
+onMounted(() => { document.addEventListener('mousemove', onDocMouseMove) })
+onUnmounted(() => { document.removeEventListener('mousemove', onDocMouseMove) })
+
+const mTooltipStyle = computed((): CSSProperties => {
+  if (!mHovered.value || !import.meta.client) return {}
+  const lPos     = calcPlaneViewportPos(mHovered.value)
+  const lFlipped = calcTooltipFlipped(mHovered.value)
+  if (lFlipped) {
+    return { position: 'fixed', left: `${lPos.x}px`, top: `${lPos.y + 20}px`, transform: 'translateX(-50%)' }
+  }
+  return { position: 'fixed', left: `${lPos.x}px`, top: `${lPos.y}px`, transform: 'translateX(-50%) translateY(-100%)' }
 })
 
 function calcHasDetails(pIcao24: string): boolean {
@@ -213,8 +224,6 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
         :key="lPlane.icao24"
         class="plane-item"
         :style="calcPositionStyle(lPlane)"
-        @mouseenter="onHover(lPlane, $event)"
-        @mouseleave="onLeave"
       >
         <!-- Icône avion SVG -->
         <div
@@ -261,48 +270,48 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
         :style="mTooltipStyle"
       >
         <div class="tooltip-header">
-          <span v-if="calcIso(mHovered.plane.country)" :class="`fi fi-${calcIso(mHovered.plane.country)}`" class="tooltip-flag" />
-          <span class="tooltip-callsign">{{ mHovered.plane.callsign }}</span>
-          <span v-if="mDetails[mHovered.plane.icao24]?.registration" class="tooltip-reg">
-            {{ mDetails[mHovered.plane.icao24].registration }}
+          <span v-if="calcIso(mHovered.country)" :class="`fi fi-${calcIso(mHovered.country)}`" class="tooltip-flag" />
+          <span class="tooltip-callsign">{{ mHovered.callsign }}</span>
+          <span v-if="mDetails[mHovered.icao24]?.registration" class="tooltip-reg">
+            {{ mDetails[mHovered.icao24].registration }}
           </span>
         </div>
 
-        <template v-if="calcHasDetails(mHovered.plane.icao24)">
-          <div v-if="mDetails[mHovered.plane.icao24]?.manufacturer || mDetails[mHovered.plane.icao24]?.type" class="tooltip-aircraft">
-            <span v-if="mDetails[mHovered.plane.icao24]?.manufacturer">{{ mDetails[mHovered.plane.icao24].manufacturer }}</span>
-            <span v-if="mDetails[mHovered.plane.icao24]?.type" class="tooltip-type"> {{ mDetails[mHovered.plane.icao24].type }}</span>
+        <template v-if="calcHasDetails(mHovered.icao24)">
+          <div v-if="mDetails[mHovered.icao24]?.manufacturer || mDetails[mHovered.icao24]?.type" class="tooltip-aircraft">
+            <span v-if="mDetails[mHovered.icao24]?.manufacturer">{{ mDetails[mHovered.icao24].manufacturer }}</span>
+            <span v-if="mDetails[mHovered.icao24]?.type" class="tooltip-type"> {{ mDetails[mHovered.icao24].type }}</span>
           </div>
-          <div v-if="mDetails[mHovered.plane.icao24]?.operator" class="tooltip-operator">
-            {{ mDetails[mHovered.plane.icao24].operator }}
+          <div v-if="mDetails[mHovered.icao24]?.operator" class="tooltip-operator">
+            {{ mDetails[mHovered.icao24].operator }}
           </div>
           <div class="tooltip-divider" />
         </template>
 
         <div class="tooltip-row">
           <span class="tooltip-label">Alt</span>
-          <span>{{ calcAltitudeFt(mHovered.plane.altitude).toLocaleString() }} ft</span>
-          <span class="tooltip-sub">({{ Math.round(mHovered.plane.altitude) }} m)</span>
+          <span>{{ calcAltitudeFt(mHovered.altitude).toLocaleString() }} ft</span>
+          <span class="tooltip-sub">({{ Math.round(mHovered.altitude) }} m)</span>
         </div>
         <div class="tooltip-row">
           <span class="tooltip-label">Vit</span>
-          <span>{{ calcSpeedKmh(mHovered.plane.velocity) }} km/h</span>
-          <span class="tooltip-sub">{{ calcVerticalLabel(mHovered.plane.verticalRate) }}</span>
+          <span>{{ calcSpeedKmh(mHovered.velocity) }} km/h</span>
+          <span class="tooltip-sub">{{ calcVerticalLabel(mHovered.verticalRate) }}</span>
         </div>
         <div class="tooltip-row">
           <span class="tooltip-label">Cap</span>
-          <span>{{ Math.round(mHovered.plane.heading) }}°</span>
+          <span>{{ Math.round(mHovered.heading) }}°</span>
         </div>
         <div class="tooltip-row">
           <span class="tooltip-label">Dist</span>
-          <span>{{ calcDistanceBure(mHovered.plane.latitude, mHovered.plane.longitude) }} km de Bure</span>
+          <span>{{ calcDistanceBure(mHovered.latitude, mHovered.longitude) }} km de Bure</span>
         </div>
-        <div class="tooltip-row" :class="{ 'tooltip-emergency': calcSquawkLabel(mHovered.plane.squawk).emergency }">
+        <div class="tooltip-row" :class="{ 'tooltip-emergency': calcSquawkLabel(mHovered.squawk).emergency }">
           <span class="tooltip-label">Sqk</span>
-          <span>{{ calcSquawkLabel(mHovered.plane.squawk).label }}</span>
+          <span>{{ calcSquawkLabel(mHovered.squawk).label }}</span>
         </div>
 
-        <div class="tooltip-country">{{ mHovered.plane.country }}</div>
+        <div class="tooltip-country">{{ mHovered.country }}</div>
       </div>
     </Transition>
   </Teleport>
