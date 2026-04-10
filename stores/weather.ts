@@ -8,6 +8,7 @@ import type {
   TimeOfDay,
   Season,
   OpenMeteoResponse,
+  OpenMeteoDaily,
   WmoMapping,
 } from '~/types/weather'
 
@@ -68,6 +69,15 @@ function computeTimeOfDay(pHour: number, pMonth: number): TimeOfDay {
 }
 
 /**
+ * Extrait l'heure "HH:MM" depuis une chaîne ISO datetime Open-Meteo ("2026-04-10T06:23").
+ */
+function calcFormatTime(pDatetime: string | undefined): string | null {
+  if (!pDatetime) return null
+  const lParts = pDatetime.split('T')
+  return lParts[1] ?? null
+}
+
+/**
  * Calcule la saison selon le mois (saisons météorologiques).
  */
 function computeSeason(pMonth: number): Season {
@@ -86,6 +96,11 @@ export const useWeatherStore = defineStore('weather', {
     temperature: 15,
     windSpeed: 10,
     precipitation: 0,
+    tempMax: null,
+    tempMin: null,
+    precipitationSum: null,
+    sunrise: null,
+    sunset: null,
     timeOfDay: 'morning',
     season: 'spring',
     loading: false,
@@ -134,6 +149,11 @@ export const useWeatherStore = defineStore('weather', {
           'current',
           'temperature_2m,weathercode,is_day,precipitation,snowfall,windspeed_10m'
         )
+        lUrl.searchParams.set(
+          'daily',
+          'temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset'
+        )
+        lUrl.searchParams.set('forecast_days', '1')
         lUrl.searchParams.set('timezone', TIMEZONE)
 
         const lResponse = await fetch(lUrl.toString())
@@ -175,6 +195,14 @@ export const useWeatherStore = defineStore('weather', {
       this.precipitation = pData.current.precipitation
       this.timeOfDay     = computeTimeOfDay(lHour, lMonth)
       this.season        = computeSeason(lMonth)
+
+      if (pData.daily) {
+        this.tempMax          = pData.daily.temperature_2m_max[0] !== undefined ? Math.round(pData.daily.temperature_2m_max[0]) : null
+        this.tempMin          = pData.daily.temperature_2m_min[0] !== undefined ? Math.round(pData.daily.temperature_2m_min[0]) : null
+        this.precipitationSum = pData.daily.precipitation_sum[0] !== undefined ? pData.daily.precipitation_sum[0] : null
+        this.sunrise          = calcFormatTime(pData.daily.sunrise[0])
+        this.sunset           = calcFormatTime(pData.daily.sunset[0])
+      }
     },
 
     /**

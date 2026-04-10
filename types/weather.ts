@@ -50,6 +50,15 @@ export interface OpenMeteoCurrent {
   windspeed_10m: number
 }
 
+export interface OpenMeteoDaily {
+  time: string[]
+  temperature_2m_max: number[]
+  temperature_2m_min: number[]
+  precipitation_sum: number[]
+  sunrise: string[]
+  sunset: string[]
+}
+
 export interface OpenMeteoResponse {
   latitude: number
   longitude: number
@@ -60,6 +69,7 @@ export interface OpenMeteoResponse {
   elevation: number
   current_units: OpenMeteoCurrentUnits
   current: OpenMeteoCurrent
+  daily?: OpenMeteoDaily
 }
 
 // ─── Store Pinia météo ────────────────────────────────────────────────────────
@@ -70,6 +80,11 @@ export interface WeatherStoreState {
   temperature: number
   windSpeed: number        // km/h → intensité du vent sur l'arbre
   precipitation: number    // mm → intensité pluie/neige
+  tempMax: number | null
+  tempMin: number | null
+  precipitationSum: number | null
+  sunrise: string | null   // format "HH:MM"
+  sunset: string | null    // format "HH:MM"
   timeOfDay: TimeOfDay
   season: Season
   loading: boolean
