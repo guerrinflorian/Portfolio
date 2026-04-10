@@ -35,13 +35,13 @@ Les nœuds interactifs sont positionnés dynamiquement sur les courbes de Bézie
 
 ## Fonctionnalités notables
 
-- **Météo temps réel** : température, vent, précipitations, prévisions horaires et journalières via Open-Meteo (proxied server-side)
-- **Avions temps réel** : trafic aérien dans un rayon de 60 km autour de Bure via airplanes.live. Tooltip avec détails au survol, détection via `mousemove` (contourne le stacking context du canvas)
-- **Ciel dynamique** : lever/coucher du soleil calculé par mois pour la Moselle (49.4°N), phase de lune, étoiles scintillantes la nuit via Canvas
-- **Terminal scan visiteur** : au chargement, un terminal style Mr. Robot affiche les infos du visiteur (OS, navigateur, résolution, batterie, IP, localisation, FAI) — bilingue FR/EN, PC uniquement
-- **Bilingue FR/EN** : toute l'interface et les données basculables en temps réel
+- **Météo temps réel** : température, vent, précipitations, prévisions horaires et journalières via Open-Meteo
+- **Avions temps réel** : les vrais avions qui passent au-dessus de la Moselle s'affichent sur la scène, avec un tooltip au survol (compagnie, altitude, vitesse, cap)
+- **Ciel dynamique** : lever/coucher du soleil selon le mois, phase de lune, étoiles la nuit
+- **Terminal scan visiteur** : au chargement, un terminal affiche quelques infos sur le visiteur (OS, navigateur, IP, localisation...) — PC uniquement, disparaît après quelques secondes
+- **Bilingue FR/EN** : toute l'interface bascule en temps réel
 - **Lighthouse 96/100 Performance · 100 Accessibility · 100 Best Practices · 100 SEO**
-- **JSON-LD** (Person + FAQPage) pour le référencement IA / AEO
+- **JSON-LD** pour le référencement IA / AEO
 - **CV standalone** : `public/cv.html`, bilingue, prévu pour impression/PDF
 
 ---
