@@ -8,6 +8,8 @@ import { usePlanes } from '~/composables/usePlanes'
 import { useWeatherStore } from '~/stores/weather'
 import type { Plane } from '~/composables/usePlanes'
 
+// ─── Survol ───────────────────────────────────────────────────────────────────
+
 // ─── Stores & données ─────────────────────────────────────────────────────────
 
 const mWeatherStore = useWeatherStore()
@@ -154,12 +156,30 @@ function calcDepthOpacity(pPlane: Plane): number {
   return lNight * lDepth
 }
 
-// ─── Survol ───────────────────────────────────────────────────────────────────
+interface HoveredState {
+  plane: Plane
+  rect:  DOMRect
+}
 
-const mHoveredIcao = ref<string | null>(null)
+const mHovered = ref<HoveredState | null>(null)
 
-function onHover(pPlane: Plane): void { mHoveredIcao.value = pPlane.icao24 }
-function onLeave(): void              { mHoveredIcao.value = null }
+function onHover(pPlane: Plane, pEvent: MouseEvent): void {
+  const lEl = (pEvent.currentTarget as HTMLElement)
+  mHovered.value = { plane: pPlane, rect: lEl.getBoundingClientRect() }
+}
+function onLeave(): void { mHovered.value = null }
+
+// Position du tooltip téléporté (ancré au centre-haut ou centre-bas de l'avion)
+const mTooltipStyle = computed(() => {
+  if (!mHovered.value) return {}
+  const lRect    = mHovered.value.rect
+  const lFlipped = calcTooltipFlipped(mHovered.value.plane)
+  const lLeft    = lRect.left + lRect.width / 2
+  if (lFlipped) {
+    return { position: 'fixed', left: `${lLeft}px`, top: `${lRect.bottom + 8}px`, transform: 'translateX(-50%)' }
+  }
+  return { position: 'fixed', left: `${lLeft}px`, top: `${lRect.top - 8}px`, transform: 'translateX(-50%) translateY(-100%)' }
+})
 
 function calcHasDetails(pIcao24: string): boolean {
   const lD = mDetails[pIcao24]
@@ -193,7 +213,7 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
         :key="lPlane.icao24"
         class="plane-item"
         :style="calcPositionStyle(lPlane)"
-        @mouseenter="onHover(lPlane)"
+        @mouseenter="onHover(lPlane, $event)"
         @mouseleave="onLeave"
       >
         <!-- Icône avion SVG -->
@@ -228,61 +248,64 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
           <span class="plane-callsign">{{ lPlane.callsign }}</span>
         </div>
 
-        <!-- Tooltip -->
-        <Transition name="tooltip-fade">
-          <div
-            v-if="mHoveredIcao === lPlane.icao24"
-            class="plane-tooltip"
-            :class="{ 'plane-tooltip--below': calcTooltipFlipped(lPlane) }"
-          >
-            <div class="tooltip-header">
-              <span v-if="calcIso(lPlane.country)" :class="`fi fi-${calcIso(lPlane.country)}`" class="tooltip-flag" />
-              <span class="tooltip-callsign">{{ lPlane.callsign }}</span>
-              <span v-if="mDetails[lPlane.icao24]?.registration" class="tooltip-reg">
-                {{ mDetails[lPlane.icao24].registration }}
-              </span>
-            </div>
-
-            <template v-if="calcHasDetails(lPlane.icao24)">
-              <div v-if="mDetails[lPlane.icao24]?.manufacturer || mDetails[lPlane.icao24]?.type" class="tooltip-aircraft">
-                <span v-if="mDetails[lPlane.icao24]?.manufacturer">{{ mDetails[lPlane.icao24].manufacturer }}</span>
-                <span v-if="mDetails[lPlane.icao24]?.type" class="tooltip-type"> {{ mDetails[lPlane.icao24].type }}</span>
-              </div>
-              <div v-if="mDetails[lPlane.icao24]?.operator" class="tooltip-operator">
-                {{ mDetails[lPlane.icao24].operator }}
-              </div>
-              <div class="tooltip-divider" />
-            </template>
-
-            <div class="tooltip-row">
-              <span class="tooltip-label">Alt</span>
-              <span>{{ calcAltitudeFt(lPlane.altitude).toLocaleString() }} ft</span>
-              <span class="tooltip-sub">({{ Math.round(lPlane.altitude) }} m)</span>
-            </div>
-            <div class="tooltip-row">
-              <span class="tooltip-label">Vit</span>
-              <span>{{ calcSpeedKmh(lPlane.velocity) }} km/h</span>
-              <span class="tooltip-sub">{{ calcVerticalLabel(lPlane.verticalRate) }}</span>
-            </div>
-            <div class="tooltip-row">
-              <span class="tooltip-label">Cap</span>
-              <span>{{ Math.round(lPlane.heading) }}°</span>
-            </div>
-            <div class="tooltip-row">
-              <span class="tooltip-label">Dist</span>
-              <span>{{ calcDistanceBure(lPlane.latitude, lPlane.longitude) }} km de Bure</span>
-            </div>
-            <div class="tooltip-row" :class="{ 'tooltip-emergency': calcSquawkLabel(lPlane.squawk).emergency }">
-              <span class="tooltip-label">Sqk</span>
-              <span>{{ calcSquawkLabel(lPlane.squawk).label }}</span>
-            </div>
-
-            <div class="tooltip-country">{{ lPlane.country }}</div>
-          </div>
-        </Transition>
       </div>
     </TransitionGroup>
   </div>
+
+  <!-- Tooltip téléporté sur body pour échapper au stacking context z-index 2 -->
+  <Teleport to="body">
+    <Transition name="tooltip-fade">
+      <div
+        v-if="mHovered"
+        class="plane-tooltip-teleport"
+        :style="mTooltipStyle"
+      >
+        <div class="tooltip-header">
+          <span v-if="calcIso(mHovered.plane.country)" :class="`fi fi-${calcIso(mHovered.plane.country)}`" class="tooltip-flag" />
+          <span class="tooltip-callsign">{{ mHovered.plane.callsign }}</span>
+          <span v-if="mDetails[mHovered.plane.icao24]?.registration" class="tooltip-reg">
+            {{ mDetails[mHovered.plane.icao24].registration }}
+          </span>
+        </div>
+
+        <template v-if="calcHasDetails(mHovered.plane.icao24)">
+          <div v-if="mDetails[mHovered.plane.icao24]?.manufacturer || mDetails[mHovered.plane.icao24]?.type" class="tooltip-aircraft">
+            <span v-if="mDetails[mHovered.plane.icao24]?.manufacturer">{{ mDetails[mHovered.plane.icao24].manufacturer }}</span>
+            <span v-if="mDetails[mHovered.plane.icao24]?.type" class="tooltip-type"> {{ mDetails[mHovered.plane.icao24].type }}</span>
+          </div>
+          <div v-if="mDetails[mHovered.plane.icao24]?.operator" class="tooltip-operator">
+            {{ mDetails[mHovered.plane.icao24].operator }}
+          </div>
+          <div class="tooltip-divider" />
+        </template>
+
+        <div class="tooltip-row">
+          <span class="tooltip-label">Alt</span>
+          <span>{{ calcAltitudeFt(mHovered.plane.altitude).toLocaleString() }} ft</span>
+          <span class="tooltip-sub">({{ Math.round(mHovered.plane.altitude) }} m)</span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Vit</span>
+          <span>{{ calcSpeedKmh(mHovered.plane.velocity) }} km/h</span>
+          <span class="tooltip-sub">{{ calcVerticalLabel(mHovered.plane.verticalRate) }}</span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Cap</span>
+          <span>{{ Math.round(mHovered.plane.heading) }}°</span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Dist</span>
+          <span>{{ calcDistanceBure(mHovered.plane.latitude, mHovered.plane.longitude) }} km de Bure</span>
+        </div>
+        <div class="tooltip-row" :class="{ 'tooltip-emergency': calcSquawkLabel(mHovered.plane.squawk).emergency }">
+          <span class="tooltip-label">Sqk</span>
+          <span>{{ calcSquawkLabel(mHovered.plane.squawk).label }}</span>
+        </div>
+
+        <div class="tooltip-country">{{ mHovered.plane.country }}</div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -359,11 +382,8 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
 
 /* ─── Tooltip ──────────────────────────────────────────────────────────────── */
 
-.plane-tooltip {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+/* Tooltip téléporté sur body - position fixed gérée via mTooltipStyle */
+.plane-tooltip-teleport {
   background: rgba(8,10,24,0.96);
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 10px;
@@ -371,13 +391,11 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   min-width: 195px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  z-index: 20;
+  z-index: 200;
   pointer-events: none;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
-
-.plane-tooltip--below { bottom: auto; top: calc(100% + 8px); }
 
 .tooltip-header { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
 
@@ -438,11 +456,6 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
 }
 .tooltip-fade-enter-from, .tooltip-fade-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(4px);
-}
-.plane-tooltip--below.tooltip-fade-enter-from,
-.plane-tooltip--below.tooltip-fade-leave-to {
-  transform: translateX(-50%) translateY(-4px);
 }
 
 @media (max-width: 640px) { .scene-planes { display: none; } }
