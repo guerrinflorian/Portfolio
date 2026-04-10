@@ -46,8 +46,9 @@ const mExperiencesFR = [
     location: 'Bure / Tressange, Moselle',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker'],
     points: [
-      'Création et développement de sites web et applications métier sur-mesure pour clients',
-      'Missions freelance en parallèle de l\'alternance Saarstahl Rail',
+      'Développement de sites web et applications métier sur-mesure pour clients variés',
+      'Réalisation d\'un site vitrine personnalisé pour un caviste : présentation du point de vente, catalogue produits avec fiches détaillées, section accords mets & vins',
+      'Missions menées en parallèle de l\'alternance Saarstahl Rail',
     ],
     url: 'https://www.lehubduweb.fr',
   },
@@ -79,8 +80,9 @@ const mExperiencesEN = [
     location: 'Bure / Tressange, Moselle, France',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker'],
     points: [
-      'Building custom websites and business applications for clients',
-      'Freelance projects alongside the Saarstahl Rail apprenticeship',
+      'Building custom websites and business applications for various clients',
+      'Delivered a tailored website for a wine merchant: shop presentation, product catalogue with detailed descriptions, and a food & wine pairing section',
+      'Projects carried out alongside the Saarstahl Rail apprenticeship',
     ],
     url: 'https://www.lehubduweb.fr',
   },
