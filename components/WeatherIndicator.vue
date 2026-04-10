@@ -13,6 +13,7 @@ const { t } = useLocale()
 const mTemperature    = computed(() => mWeatherStore.temperature)
 const mState          = computed(() => mWeatherStore.state)
 const mLoading        = computed(() => mWeatherStore.loading)
+const mReady          = computed(() => mWeatherStore.lastFetch !== null)
 const mWindSpeed      = computed(() => mWeatherStore.windSpeed)
 const mTempMax        = computed(() => mWeatherStore.tempMax)
 const mTempMin        = computed(() => mWeatherStore.tempMin)
@@ -119,32 +120,39 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   >
     <div
       class="weather-indicator"
-      :class="{ 'opacity-50': mLoading }"
       role="status"
       :aria-label="t(`Météo à Bure / Tressange : ${mTemperature}°C`, `Weather in Bure / Tressange: ${mTemperature}°C`)"
       aria-live="polite"
     >
-      <svg
-        width="16" height="16"
-        :viewBox="mCurrentIcon.viewBox"
-        :stroke="mCurrentIcon.stroke ?? 'currentColor'"
-        :fill="mCurrentIcon.fill ?? 'none'"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path :d="mCurrentIcon.path" />
-      </svg>
-      <span class="weather-temp" aria-label="Température">
-        <span v-if="mLoading">-</span>
-        <span v-else>{{ mTemperature }}°C</span>
-      </span>
-      <span class="weather-separator" aria-hidden="true">·</span>
-      <span class="weather-city">{{ t('Bure / Tressange', 'Bure / Tressange') }}</span>
+      <!-- Etat chargement : pas encore de données réelles -->
+      <template v-if="!mReady">
+        <span class="weather-skeleton-dot" />
+        <span class="weather-skeleton-bar" aria-hidden="true" />
+        <span class="weather-separator" aria-hidden="true">·</span>
+        <span class="weather-city">{{ t('Bure / Tressange', 'Bure / Tressange') }}</span>
+      </template>
+
+      <!-- Données réelles disponibles -->
+      <template v-else>
+        <svg
+          width="16" height="16"
+          :viewBox="mCurrentIcon.viewBox"
+          :stroke="mCurrentIcon.stroke ?? 'currentColor'"
+          :fill="mCurrentIcon.fill ?? 'none'"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path :d="mCurrentIcon.path" />
+        </svg>
+        <span class="weather-temp" aria-label="Température">{{ mTemperature }}°C</span>
+        <span class="weather-separator" aria-hidden="true">·</span>
+        <span class="weather-city">{{ t('Bure / Tressange', 'Bure / Tressange') }}</span>
+      </template>
     </div>
 
     <!-- Tooltip -->
     <Transition name="weather-tooltip-fade">
-      <div v-if="mHovered && !mLoading" class="weather-tooltip" role="tooltip" @click.stop>
+      <div v-if="mHovered && mReady" class="weather-tooltip" role="tooltip" @click.stop>
 
         <!-- En-tête -->
         <div class="wt-header">
@@ -252,6 +260,30 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 .weather-city {
   opacity: 0.8;
   font-size: 0.78rem;
+}
+
+/* ─── Skeleton chargement ─────────────────────────────────────────────────── */
+
+@keyframes weather-pulse {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.55; }
+}
+
+.weather-skeleton-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: weather-pulse 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.weather-skeleton-bar {
+  width: 38px;
+  height: 10px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  animation: weather-pulse 1.4s ease-in-out infinite 0.2s;
 }
 
 /* ─── Tooltip ─────────────────────────────────────────────────────────────── */
