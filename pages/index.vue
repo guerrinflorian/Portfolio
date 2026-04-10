@@ -95,6 +95,7 @@ useHead({
           addressCountry: 'FR',
         },
         knowsAbout: ['Vue.js', 'TypeScript', 'SQL Server', 'Nuxt 3', 'Docker', 'Node.js'],
+        image: 'https://florian-guerrin.fr/og-image.png',
         sameAs: ['https://github.com/guerrinflorian'],
       }),
     },
