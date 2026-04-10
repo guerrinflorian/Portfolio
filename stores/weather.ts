@@ -16,7 +16,7 @@ import type {
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const REFRESH_INTERVAL_MS = 15 * 60 * 1000 // 15 minutes
-const CACHE_KEY = 'weather_cache'
+const CACHE_KEY = 'weather_cache_v3'
 const CACHE_TTL_MS = 15 * 60 * 1000 // 15 minutes
 
 // Mapping WMO weathercode → état visuel
