@@ -14,9 +14,6 @@ import type {
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const LATITUDE = 49.4167
-const LONGITUDE = 6.0000
-const TIMEZONE = 'Europe/Paris'
 const REFRESH_INTERVAL_MS = 15 * 60 * 1000 // 15 minutes
 const CACHE_KEY = 'weather_cache'
 const CACHE_TTL_MS = 15 * 60 * 1000 // 15 minutes
@@ -142,23 +139,9 @@ export const useWeatherStore = defineStore('weather', {
           }
         }
 
-        const lUrl = new URL('https://api.open-meteo.com/v1/forecast')
-        lUrl.searchParams.set('latitude', String(LATITUDE))
-        lUrl.searchParams.set('longitude', String(LONGITUDE))
-        lUrl.searchParams.set(
-          'current',
-          'temperature_2m,weathercode,is_day,precipitation,snowfall,windspeed_10m'
-        )
-        lUrl.searchParams.set(
-          'daily',
-          'temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset'
-        )
-        lUrl.searchParams.set('forecast_days', '1')
-        lUrl.searchParams.set('timezone', TIMEZONE)
-
-        const lResponse = await fetch(lUrl.toString())
+        const lResponse = await fetch('/api/weather')
         if (!lResponse.ok) {
-          throw new Error(`Erreur API Open-Meteo : ${lResponse.status}`)
+          throw new Error(`Erreur proxy météo : ${lResponse.status}`)
         }
 
         const lData: OpenMeteoResponse = await lResponse.json() as OpenMeteoResponse

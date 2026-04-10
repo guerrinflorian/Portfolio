@@ -21,7 +21,26 @@ const mPrecipSum      = computed(() => mWeatherStore.precipitationSum)
 const mSunrise        = computed(() => mWeatherStore.sunrise)
 const mSunset         = computed(() => mWeatherStore.sunset)
 
-const mHovered = ref(false)
+const mHovered  = ref(false)
+const mPinned   = ref(false) // maintenu ouvert au tap mobile
+
+function onMouseEnter() { mHovered.value = true }
+function onMouseLeave() { if (!mPinned.value) mHovered.value = false }
+function onToggle() {
+  mPinned.value  = !mPinned.value
+  mHovered.value = mPinned.value
+}
+
+// Ferme si on clique ailleurs
+if (import.meta.client) {
+  document.addEventListener('click', (lEvt) => {
+    const lEl = document.querySelector('.weather-wrapper')
+    if (lEl && !lEl.contains(lEvt.target as Node)) {
+      mPinned.value  = false
+      mHovered.value = false
+    }
+  })
+}
 
 const mStateLabel: Record<WeatherState, [string, string]> = {
   clear:    ['Ciel dégagé',  'Clear sky'],
@@ -98,8 +117,9 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 <template>
   <div
     class="weather-wrapper"
-    @mouseenter="mHovered = true"
-    @mouseleave="mHovered = false"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+    @click="onToggle"
   >
     <div
       class="weather-indicator"
@@ -207,6 +227,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 <style scoped>
 .weather-wrapper {
   position: relative;
+  cursor: pointer;
 }
 
 .weather-temp {
