@@ -8,18 +8,20 @@ Mon portfolio personnel, accessible sur **[florian-guerrin.fr](https://florian-g
 
 L'idée de départ était de faire quelque chose de différent d'un portfolio classique avec des sections qui défilent. J'ai opté pour une scène interactive : un arbre généré procéduralement dont les branches portent des nœuds cliquables, chacun ouvrant une modale avec une section du portfolio (profil, expériences, diplômes, stack, projets, passions, contact).
 
-La scène change en fonction de la météo réelle à mon domicile à Tressange (Moselle), récupérée via l'API Open-Meteo. En hiver, l'arbre perd ses feuilles et le sol se couvre de neige. Le ciel change de couleur selon l'heure de la journée, les étoiles apparaissent la nuit. Rien de révolutionnaire techniquement, mais ça donne un résultat vivant.
+La scène change en fonction de la météo réelle à mon domicile à Tressange (Moselle), récupérée via l'API Open-Meteo. En hiver, l'arbre perd ses feuilles et le sol se couvre de neige. Le ciel change de couleur selon l'heure de la journée, les étoiles apparaissent la nuit. De vrais avions survolant la Moselle s'affichent en temps réel via l'API airplanes.live, avec leur altitude, vitesse, cap et compagnie au survol.
 
 ---
 
 ## Stack
 
-- **Nuxt 3** en génération statique (SSG), déployé sur Vercel
+- **Nuxt 3** avec server routes (SSR hybride), déployé sur Vercel
 - **Vue 3** avec Composition API et TypeScript strict partout
 - **Pinia** pour la gestion d'état (météo, scène, modales, locale)
 - **GSAP** pour les transitions de couleurs du ciel
 - **Tailwind CSS** pour les modales
 - **Canvas API** pour le rendu de l'arbre (pas de librairie, tout à la main)
+- **Leaflet** pour la carte de localisation dans le profil
+- **flag-icons** pour les drapeaux des avions
 
 ---
 
@@ -31,25 +33,36 @@ Les nœuds interactifs sont positionnés dynamiquement sur les courbes de Bézie
 
 ---
 
+## Fonctionnalités notables
+
+- **Météo temps réel** : température, vent, précipitations, prévisions horaires et journalières via Open-Meteo (proxied server-side)
+- **Avions temps réel** : trafic aérien dans un rayon de 60 km autour de Bure via airplanes.live. Tooltip avec détails au survol, détection via `mousemove` (contourne le stacking context du canvas)
+- **Ciel dynamique** : lever/coucher du soleil calculé par mois pour la Moselle (49.4°N), phase de lune, étoiles scintillantes la nuit via Canvas
+- **Terminal scan visiteur** : au chargement, un terminal style Mr. Robot affiche les infos du visiteur (OS, navigateur, résolution, batterie, IP, localisation, FAI) — bilingue FR/EN, PC uniquement
+- **Bilingue FR/EN** : toute l'interface et les données basculables en temps réel
+- **Lighthouse 96/100 Performance · 100 Accessibility · 100 Best Practices · 100 SEO**
+- **JSON-LD** (Person + FAQPage) pour le référencement IA / AEO
+- **CV standalone** : `public/cv.html`, bilingue, prévu pour impression/PDF
+
+---
+
 ## Structure
 
 ```
 components/
   tree/          → arbre (rendu canvas + nœuds)
-  scene/         → fond (ciel, sol, étoiles, soleil/lune)
+  scene/         → fond (ciel, sol, étoiles, soleil/lune, avions)
   modals/        → 7 modales de contenu
-  ui/            → composants partagés
+  ui/            → composants partagés (terminal, badge Lighthouse, hints...)
+  weather/       → couche météo visuelle
 stores/          → météo, scène, modales, locale
-composables/     → logique réutilisable
+composables/     → logique réutilisable (avions, météo, scène, locale)
+server/api/
+  weather.ts     → proxy Open-Meteo (évite CORS)
+  visitor.ts     → proxy ip-api.com (infos visiteur)
 public/
-  cv.html        → CV bilingue FR/EN standalone (impression / PDF)
+  cv.html        → CV bilingue FR/EN standalone
 ```
-
----
-
-## CV
-
-Le CV est un fichier HTML/CSS autonome dans `public/cv.html`, bilingue FR/EN, prévu pour l'impression et l'export PDF. Accessible directement sur `/cv.html` ou via l'icône sur le tronc de l'arbre.
 
 ---
 
