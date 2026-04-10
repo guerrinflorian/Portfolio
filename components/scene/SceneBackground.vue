@@ -111,9 +111,8 @@ const mSoleilStyle = computed(() => {
   const calcY = 75 - Math.sin(lProgressionClampee * Math.PI) * 55
 
   return {
-    left:    `${calcX}%`,
-    top:     `${calcY}%`,
-    opacity: mWeatherStore.isDay && mWeatherStore.timeOfDay !== 'night' ? '1' : '0',
+    transform: `translate(calc(${calcX}vw - 30px), calc(${calcY}vh - 30px))`,
+    opacity:   mWeatherStore.isDay && mWeatherStore.timeOfDay !== 'night' ? '1' : '0',
   }
 })
 
@@ -171,7 +170,7 @@ onUnmounted(() => {
 
     <!-- Image de fond avec opacité -->
     <img
-      src="~/assets/images/moi/moi-background-remove.png"
+      src="~/assets/images/moi/moi-background-remove.webp"
       alt=""
       class="background-image"
       aria-hidden="true"
@@ -265,8 +264,9 @@ onUnmounted(() => {
 
 .soleil {
   position: absolute;
-  transform: translate(-50%, -50%);
-  transition: opacity 2s ease, left 60s linear, top 60s linear;
+  left: 0;
+  top: 0;
+  transition: opacity 2s ease, transform 60s linear;
   z-index: 1;
   filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
 }

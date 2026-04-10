@@ -45,12 +45,10 @@
   0% {
     transform: translate(-50%, -50%) scale(0);
     opacity: 0.55;
-    border-color: rgba(180, 220, 255, 0.3);
   }
   100% {
     transform: translate(-50%, -50%) scaleX(55) scaleY(30);
     opacity: 0;
-    border-color: rgba(255, 255, 255, 0.05);
   }
 }
 </style>
