@@ -5,6 +5,7 @@ import { defineStore } from 'pinia'
 import type {
   WeatherState,
   WeatherStoreState,
+  HourlySlot,
   TimeOfDay,
   Season,
   OpenMeteoResponse,
@@ -98,6 +99,7 @@ export const useWeatherStore = defineStore('weather', {
     precipitationSum: null,
     sunrise: null,
     sunset: null,
+    hourlySlots: [],
     timeOfDay: 'morning',
     season: 'spring',
     loading: false,
@@ -185,6 +187,24 @@ export const useWeatherStore = defineStore('weather', {
         this.precipitationSum = pData.daily.precipitation_sum[0] !== undefined ? pData.daily.precipitation_sum[0] : null
         this.sunrise          = calcFormatTime(pData.daily.sunrise[0])
         this.sunset           = calcFormatTime(pData.daily.sunset[0])
+      }
+
+      if (pData.hourly) {
+        const lNowHour = new Date().getHours()
+        const lSlots: HourlySlot[] = []
+        for (let lIdx = 0; lIdx < pData.hourly.time.length && lSlots.length < 12; lIdx++) {
+          const lRaw  = pData.hourly.time[lIdx] ?? ''
+          const lHour = parseInt(lRaw.split('T')[1]?.split(':')[0] ?? '0', 10)
+          if (lHour >= lNowHour) {
+            lSlots.push({
+              hour:      `${lHour}h`,
+              temp:      Math.round(pData.hourly.temperature_2m[lIdx] ?? 0),
+              state:     mapWmoCode(pData.hourly.weathercode[lIdx] ?? 0),
+              isCurrent: lHour === lNowHour,
+            })
+          }
+        }
+        this.hourlySlots = lSlots
       }
     },
 

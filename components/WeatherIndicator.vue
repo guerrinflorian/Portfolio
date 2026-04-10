@@ -8,7 +8,6 @@ import { useLocale } from '~/composables/useLocale'
 import type { WeatherState } from '~/types/weather'
 
 const mWeatherStore = useWeatherStore()
-
 const { t } = useLocale()
 
 const mTemperature    = computed(() => mWeatherStore.temperature)
@@ -20,9 +19,10 @@ const mTempMin        = computed(() => mWeatherStore.tempMin)
 const mPrecipSum      = computed(() => mWeatherStore.precipitationSum)
 const mSunrise        = computed(() => mWeatherStore.sunrise)
 const mSunset         = computed(() => mWeatherStore.sunset)
+const mHourlySlots    = computed(() => mWeatherStore.hourlySlots)
 
-const mHovered  = ref(false)
-const mPinned   = ref(false) // maintenu ouvert au tap mobile
+const mHovered = ref(false)
+const mPinned  = ref(false)
 
 function onMouseEnter() { mHovered.value = true }
 function onMouseLeave() { if (!mPinned.value) mHovered.value = false }
@@ -31,7 +31,6 @@ function onToggle() {
   mHovered.value = mPinned.value
 }
 
-// Ferme si on clique ailleurs
 if (import.meta.client) {
   document.addEventListener('click', (lEvt) => {
     const lEl = document.querySelector('.weather-wrapper')
@@ -42,14 +41,16 @@ if (import.meta.client) {
   })
 }
 
+// ─── Labels état météo ────────────────────────────────────────────────────────
+
 const mStateLabel: Record<WeatherState, [string, string]> = {
-  clear:    ['Ciel dégagé',  'Clear sky'],
-  cloudy:   ['Nuageux',      'Cloudy'],
-  overcast: ['Couvert',      'Overcast'],
-  rain:     ['Pluie',        'Rain'],
-  snow:     ['Neige',        'Snow'],
-  storm:    ['Orage',        'Storm'],
-  fog:      ['Brouillard',   'Fog'],
+  clear:    ['Ciel dégagé', 'Clear sky'],
+  cloudy:   ['Nuageux',     'Cloudy'],
+  overcast: ['Couvert',     'Overcast'],
+  rain:     ['Pluie',       'Rain'],
+  snow:     ['Neige',       'Snow'],
+  storm:    ['Orage',       'Storm'],
+  fog:      ['Brouillard',  'Fog'],
 }
 
 const mLabel = computed(() => {
@@ -59,12 +60,7 @@ const mLabel = computed(() => {
 
 // ─── Icônes SVG inline selon état météo ──────────────────────────────────────
 
-interface WeatherIcon {
-  path: string
-  viewBox: string
-  stroke?: string
-  fill?: string
-}
+interface WeatherIcon { path: string; viewBox: string; stroke?: string; fill?: string }
 
 const mIcons: Record<WeatherState, WeatherIcon> = {
   clear: {
@@ -128,48 +124,36 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
       :aria-label="t(`Météo à Bure / Tressange : ${mTemperature}°C`, `Weather in Bure / Tressange: ${mTemperature}°C`)"
       aria-live="polite"
     >
-      <!-- Icône SVG -->
       <svg
-        width="16"
-        height="16"
+        width="16" height="16"
         :viewBox="mCurrentIcon.viewBox"
         :stroke="mCurrentIcon.stroke ?? 'currentColor'"
         :fill="mCurrentIcon.fill ?? 'none'"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
         aria-hidden="true"
       >
         <path :d="mCurrentIcon.path" />
       </svg>
-
-      <!-- Température -->
       <span class="weather-temp" aria-label="Température">
         <span v-if="mLoading">-</span>
         <span v-else>{{ mTemperature }}°C</span>
       </span>
-
-      <!-- Séparateur -->
       <span class="weather-separator" aria-hidden="true">·</span>
-
-      <!-- Localisation -->
       <span class="weather-city">{{ t('Bure / Tressange', 'Bure / Tressange') }}</span>
     </div>
 
     <!-- Tooltip -->
     <Transition name="weather-tooltip-fade">
       <div v-if="mHovered && !mLoading" class="weather-tooltip" role="tooltip">
-        <!-- En-tête : état -->
+
+        <!-- En-tête -->
         <div class="wt-header">
           <svg
-            width="13"
-            height="13"
+            width="13" height="13"
             :viewBox="mCurrentIcon.viewBox"
             :stroke="mCurrentIcon.stroke ?? 'currentColor'"
             :fill="mCurrentIcon.fill ?? 'none'"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             aria-hidden="true"
           >
             <path :d="mCurrentIcon.path" />
@@ -180,7 +164,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 
         <div class="wt-divider" />
 
-        <!-- Température actuelle + max/min -->
+        <!-- Températures -->
         <div class="wt-row">
           <span class="wt-lbl">{{ t('Actuelle', 'Now') }}</span>
           <span class="wt-val">{{ mTemperature }}°C</span>
@@ -194,31 +178,57 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
           </span>
         </div>
 
-        <!-- Vent -->
+        <!-- Vent + précipitations -->
         <div class="wt-row">
           <span class="wt-lbl">{{ t('Vent', 'Wind') }}</span>
           <span class="wt-val">{{ mWindSpeed }} km/h</span>
         </div>
-
-        <!-- Précipitations du jour -->
         <div v-if="mPrecipSum !== null" class="wt-row">
           <span class="wt-lbl">{{ t('Préc.', 'Precip.') }}</span>
           <span class="wt-val">{{ mPrecipSum.toFixed(1) }} mm</span>
         </div>
 
-        <div v-if="mSunrise || mSunset" class="wt-divider" />
-
         <!-- Lever / coucher -->
-        <div v-if="mSunrise || mSunset" class="wt-row wt-row--sun">
-          <span class="wt-sun-item">
-            <span class="wt-sun-icon">↑</span>
-            <span>{{ mSunrise ?? '-' }}</span>
-          </span>
-          <span class="wt-sun-item">
-            <span class="wt-sun-icon">↓</span>
-            <span>{{ mSunset ?? '-' }}</span>
-          </span>
-        </div>
+        <template v-if="mSunrise || mSunset">
+          <div class="wt-divider" />
+          <div class="wt-row wt-row--sun">
+            <span class="wt-sun-item">
+              <span class="wt-sun-icon">↑</span>
+              <span>{{ mSunrise ?? '-' }}</span>
+            </span>
+            <span class="wt-sun-item">
+              <span class="wt-sun-icon">↓</span>
+              <span>{{ mSunset ?? '-' }}</span>
+            </span>
+          </div>
+        </template>
+
+        <!-- Prévisions horaires -->
+        <template v-if="mHourlySlots.length > 0">
+          <div class="wt-divider" />
+          <div class="wt-hourly">
+            <div
+              v-for="lSlot in mHourlySlots"
+              :key="lSlot.hour"
+              class="wt-hour-item"
+              :class="{ 'wt-hour-now': lSlot.isCurrent }"
+            >
+              <span class="wt-hour-time">{{ lSlot.hour }}</span>
+              <svg
+                width="12" height="12"
+                :viewBox="mIcons[lSlot.state].viewBox"
+                :stroke="mIcons[lSlot.state].stroke ?? 'currentColor'"
+                :fill="mIcons[lSlot.state].fill ?? 'none'"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path :d="mIcons[lSlot.state].path" />
+              </svg>
+              <span class="wt-hour-temp">{{ lSlot.temp }}°</span>
+            </div>
+          </div>
+        </template>
+
       </div>
     </Transition>
   </div>
@@ -226,7 +236,6 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 
 <style scoped>
 .weather-wrapper {
-  position: relative;
   cursor: pointer;
 }
 
@@ -245,24 +254,42 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   font-size: 0.78rem;
 }
 
-/* ─── Tooltip ────────────────────────────────────────────────────────────── */
+/* ─── Tooltip ─────────────────────────────────────────────────────────────── */
 
 .weather-tooltip {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: rgba(8, 10, 24, 0.96);
+  position: fixed;
+  top: calc(1.25rem + 52px);
+  right: 1.25rem;
+  background: rgba(8, 10, 24, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 10px 13px;
-  min-width: 180px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 50;
+  border-radius: 12px;
+  padding: 12px 14px;
+  width: 240px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 200;
   pointer-events: none;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
+
+@media (max-width: 900px) {
+  .weather-tooltip {
+    top: calc(0.85rem + 46px);
+    right: 0.85rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .weather-tooltip {
+    top: calc(0.65rem + 42px);
+    right: 0.65rem;
+    left: 0.65rem;
+    width: auto;
+  }
+}
+
+/* ─── Contenu tooltip ─────────────────────────────────────────────────────── */
 
 .wt-header {
   display: flex;
@@ -280,14 +307,14 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 
 .wt-location {
   font-size: 9px;
-  color: rgba(148, 163, 184, 0.55);
+  color: rgba(148, 163, 184, 0.5);
   white-space: nowrap;
 }
 
 .wt-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.07);
-  margin: 7px 0;
+  margin: 8px 0;
 }
 
 .wt-row {
@@ -299,9 +326,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   margin-bottom: 3px;
 }
 
-.wt-row:last-child {
-  margin-bottom: 0;
-}
+.wt-row:last-child { margin-bottom: 0; }
 
 .wt-lbl {
   color: rgba(148, 163, 184, 0.8);
@@ -309,17 +334,12 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   flex-shrink: 0;
 }
 
-.wt-val {
-  font-variant-numeric: tabular-nums;
-}
-
+.wt-val { font-variant-numeric: tabular-nums; }
 .wt-max { color: #fb923c; }
-.wt-sep { color: rgba(148, 163, 184, 0.5); }
+.wt-sep { color: rgba(148, 163, 184, 0.4); }
 .wt-min { color: #60a5fa; }
 
-.wt-row--sun {
-  gap: 16px;
-}
+.wt-row--sun { gap: 20px; }
 
 .wt-sun-item {
   display: flex;
@@ -329,12 +349,59 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   color: rgba(255, 255, 255, 0.7);
 }
 
-.wt-sun-icon {
-  color: #fbbf24;
-  font-size: 11px;
+.wt-sun-icon { color: #fbbf24; font-size: 11px; }
+
+/* ─── Bande horaire ───────────────────────────────────────────────────────── */
+
+.wt-hourly {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
 }
 
-/* Transition */
+.wt-hourly::-webkit-scrollbar { display: none; }
+
+.wt-hour-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 5px 4px;
+  border-radius: 7px;
+  min-width: 32px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.15s;
+}
+
+.wt-hour-now {
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.25);
+}
+
+.wt-hour-time {
+  font-size: 9px;
+  color: rgba(148, 163, 184, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+.wt-hour-now .wt-hour-time {
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+.wt-hour-temp {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Transitions ─────────────────────────────────────────────────────────── */
+
 .weather-tooltip-fade-enter-active,
 .weather-tooltip-fade-leave-active {
   transition: opacity 0.15s ease, transform 0.15s ease;

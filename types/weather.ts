@@ -59,6 +59,19 @@ export interface OpenMeteoDaily {
   sunset: string[]
 }
 
+export interface OpenMeteoHourly {
+  time: string[]
+  temperature_2m: number[]
+  weathercode: number[]
+}
+
+export interface HourlySlot {
+  hour: string
+  temp: number
+  state: WeatherState
+  isCurrent: boolean
+}
+
 export interface OpenMeteoResponse {
   latitude: number
   longitude: number
@@ -70,6 +83,7 @@ export interface OpenMeteoResponse {
   current_units: OpenMeteoCurrentUnits
   current: OpenMeteoCurrent
   daily?: OpenMeteoDaily
+  hourly?: OpenMeteoHourly
 }
 
 // ─── Store Pinia météo ────────────────────────────────────────────────────────
@@ -85,6 +99,7 @@ export interface WeatherStoreState {
   precipitationSum: number | null
   sunrise: string | null   // format "HH:MM"
   sunset: string | null    // format "HH:MM"
+  hourlySlots: HourlySlot[]
   timeOfDay: TimeOfDay
   season: Season
   loading: boolean
