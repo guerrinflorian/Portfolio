@@ -72,13 +72,13 @@ const mIcons: Record<WeatherState, WeatherIcon> = {
   cloudy: {
     viewBox: '0 0 24 24',
     path: 'M18 10a6 6 0 00-11.83-1.18A4 4 0 106 18h12a4 4 0 000-8z',
-    stroke: 'currentColor',
+    stroke: '#94a3b8',
     fill: 'none',
   },
   overcast: {
     viewBox: '0 0 24 24',
     path: 'M18 10a6 6 0 00-11.83-1.18A4 4 0 106 18h12a4 4 0 000-8zM3 20h18',
-    stroke: 'currentColor',
+    stroke: '#64748b',
     fill: 'none',
   },
   rain: {
@@ -102,7 +102,7 @@ const mIcons: Record<WeatherState, WeatherIcon> = {
   fog: {
     viewBox: '0 0 24 24',
     path: 'M3 10h18M5 14h14M7 18h10',
-    stroke: 'currentColor',
+    stroke: '#94a3b8',
     fill: 'none',
   },
 }
@@ -144,7 +144,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 
     <!-- Tooltip -->
     <Transition name="weather-tooltip-fade">
-      <div v-if="mHovered && !mLoading" class="weather-tooltip" role="tooltip">
+      <div v-if="mHovered && !mLoading" class="weather-tooltip" role="tooltip" @click.stop>
 
         <!-- En-tête -->
         <div class="wt-header">
@@ -215,9 +215,9 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
             >
               <span class="wt-hour-time">{{ lSlot.hour }}</span>
               <svg
-                width="12" height="12"
+                width="14" height="14"
                 :viewBox="mIcons[lSlot.state].viewBox"
-                :stroke="mIcons[lSlot.state].stroke ?? 'currentColor'"
+                :stroke="mIcons[lSlot.state].stroke ?? '#94a3b8'"
                 :fill="mIcons[lSlot.state].fill ?? 'none'"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 aria-hidden="true"
@@ -268,7 +268,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 200;
-  pointer-events: none;
+  pointer-events: auto;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
@@ -368,12 +368,12 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 5px 5px 4px;
+  gap: 4px;
+  padding: 6px 6px 5px;
   border-radius: 7px;
-  min-width: 32px;
+  min-width: 36px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   transition: background 0.15s;
 }
 
