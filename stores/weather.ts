@@ -192,7 +192,7 @@ export const useWeatherStore = defineStore('weather', {
       if (pData.hourly) {
         const lNowHour = new Date().getHours()
         const lSlots: HourlySlot[] = []
-        for (let lIdx = 0; lIdx < pData.hourly.time.length && lSlots.length < 12; lIdx++) {
+        for (let lIdx = 0; lIdx < pData.hourly.time.length; lIdx++) {
           const lRaw  = pData.hourly.time[lIdx] ?? ''
           const lHour = parseInt(lRaw.split('T')[1]?.split(':')[0] ?? '0', 10)
           if (lHour >= lNowHour) {

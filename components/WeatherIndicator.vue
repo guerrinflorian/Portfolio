@@ -355,14 +355,9 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 
 .wt-hourly {
   display: flex;
-  gap: 2px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 2px;
+  flex-wrap: wrap;
+  gap: 3px;
 }
-
-.wt-hourly::-webkit-scrollbar { display: none; }
 
 .wt-hour-item {
   display: flex;
