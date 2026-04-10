@@ -101,7 +101,11 @@ useHead({
         },
         description: 'Développeur full-stack basé à Tressange (Moselle), à 5 minutes de la frontière luxembourgeoise. Portfolio de projets web, applications métier et expérimentations créatives.',
         knowsAbout: ['Développement web', 'Applications métier', 'Front-end', 'Back-end', 'API REST', 'Infrastructure VPS'],
-        sameAs: ['https://github.com/guerrinflorian'],
+        sameAs: [
+          'https://github.com/guerrinflorian',
+          'https://linkedin.com/in/florian-guerrin-43a138295',
+          'https://www.lehubduweb.fr',
+        ],
       }),
     },
 
