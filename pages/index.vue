@@ -25,6 +25,7 @@ const CommitLog       = defineAsyncComponent(() => import('~/components/ui/Commi
 const StatusBar       = defineAsyncComponent(() => import('~/components/ui/StatusBar.vue'))
 const KeyboardHints   = defineAsyncComponent(() => import('~/components/ui/KeyboardHints.vue'))
 const CodeEcho        = defineAsyncComponent(() => import('~/components/ui/CodeEcho.vue'))
+const TerminalScan    = defineAsyncComponent(() => import('~/components/ui/TerminalScan.vue'))
 
 // ─── Modales - chargement asynchrone (code splitting) ────────────────────────
 
@@ -234,6 +235,11 @@ useHead({
     <!-- UI layer : raccourcis clavier -->
     <ClientOnly>
       <KeyboardHints />
+    </ClientOnly>
+
+    <!-- Terminal scan visiteur (PC uniquement, disparaît après ~10s) -->
+    <ClientOnly>
+      <TerminalScan />
     </ClientOnly>
 
     <!-- Modales (lazy-loaded) -->
