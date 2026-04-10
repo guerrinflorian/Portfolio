@@ -20,17 +20,17 @@ export default defineNuxtConfig({
   // Configuration app
   app: {
     head: {
-      title: 'Florian Guerrin - Developpeur Full-Stack Vue.js et TypeScript',
+      title: 'Florian Guerrin - Developpeur Full-Stack',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
           content:
-            'Portfolio de Florian Guerrin, developpeur full-stack Vue.js, TypeScript et SQL Server. Base a Bure / Tressange en Moselle, pres du Luxembourg. Specialiste applications intranet industrielles.',
+            'Portfolio de Florian Guerrin, developpeur full-stack base en Moselle, pres du Luxembourg. Applications web, projets creatifs et infrastructure.',
         },
         { name: 'author', content: 'Florian Guerrin' },
-        { name: 'keywords', content: 'Florian Guerrin, developpeur Vue.js, TypeScript, SQL Server, Moselle, Luxembourg, full-stack, portfolio' },
+        { name: 'keywords', content: 'Florian Guerrin, developpeur full-stack, Moselle, Luxembourg, portfolio, developpeur web' },
         { name: 'robots', content: 'index, follow' },
         { name: 'theme-color', content: '#1e90ff' },
 
@@ -38,11 +38,11 @@ export default defineNuxtConfig({
         { property: 'og:locale', content: 'fr_FR' },
         { property: 'og:site_name', content: 'Florian Guerrin' },
         { property: 'og:url', content: 'https://florian-guerrin.fr' },
-        { property: 'og:title', content: 'Florian Guerrin - Developpeur Full-Stack Vue.js et TypeScript' },
+        { property: 'og:title', content: 'Florian Guerrin - Developpeur Full-Stack' },
         {
           property: 'og:description',
           content:
-            'Developpeur full-stack specialise Vue.js, TypeScript et SQL Server. Base en Moselle, pres du Luxembourg. Applications intranet industrielles, infrastructure VPS, projets creatifs.',
+            'Developpeur full-stack base en Moselle, pres du Luxembourg. Applications web, infrastructure VPS, projets creatifs.',
         },
         { property: 'og:image', content: 'https://florian-guerrin.fr/og-image.png' },
         { property: 'og:image:width', content: '1200' },
@@ -50,11 +50,11 @@ export default defineNuxtConfig({
         { property: 'og:image:alt', content: 'Florian Guerrin - Developpeur Full-Stack' },
 
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: 'Florian Guerrin - Developpeur Full-Stack Vue.js et TypeScript' },
+        { name: 'twitter:title', content: 'Florian Guerrin - Developpeur Full-Stack' },
         {
           name: 'twitter:description',
           content:
-            'Developpeur full-stack specialise Vue.js, TypeScript et SQL Server. Base en Moselle, pres du Luxembourg.',
+            'Developpeur full-stack base en Moselle, pres du Luxembourg. Applications web et projets creatifs.',
         },
         { name: 'twitter:image', content: 'https://florian-guerrin.fr/og-image.png' },
       ],
