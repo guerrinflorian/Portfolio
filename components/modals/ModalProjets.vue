@@ -504,7 +504,7 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     categorie: 'perso',
     status: 'live',
     description:
-      'Ce portfolio. Arbre génératif, météo Open-Meteo temps réel, Canvas API, ciel jour/nuit/saisons, 7 modales GSAP. Nuxt 3 + TypeScript strict.',
+      'Ce site. Un arbre qui pousse selon la saison, la météo de chez moi en temps réel, de vrais avions qui passent au-dessus de la Moselle, un ciel qui change du matin au soir. Lighthouse 96/100.',
     tags: ['Nuxt 3', 'Vue 3', 'TypeScript', 'Canvas API', 'GSAP', 'Open-Meteo'],
     url: 'https://florian-guerrin.fr',
   },
@@ -583,7 +583,7 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     categorie: 'perso',
     status: 'live',
     description:
-      'This portfolio. Generative tree, real-time Open-Meteo weather, Canvas API, day/night/seasons sky, 7 GSAP modals. Nuxt 3 + strict TypeScript.',
+      'This site. A tree that grows with the seasons, live weather from my village, real planes flying over Moselle, a sky that shifts from dawn to dusk. Lighthouse 96/100.',
     tags: ['Nuxt 3', 'Vue 3', 'TypeScript', 'Canvas API', 'GSAP', 'Open-Meteo'],
     url: 'https://florian-guerrin.fr',
   },

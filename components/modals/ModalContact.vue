@@ -21,6 +21,7 @@ const GITHUB_URL   = 'https://github.com/guerrinflorian'
 const LINKEDIN_URL = 'https://linkedin.com/in/florian-guerrin-43a138295'
 const EMAIL        = 'guerrinflorian@yahoo.com'
 const PHONE        = '06 95 38 01 57'
+const CV_URL       = '/cv.html'
 </script>
 
 <template>
@@ -73,8 +74,26 @@ const PHONE        = '06 95 38 01 57'
       </a>
     </div>
 
+    <!-- CV -->
+    <a
+      :href="CV_URL"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="cv-link"
+      :aria-label="t('Voir le CV de Florian Guerrin', 'View Florian Guerrin\'s resume')"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      {{ t('Voir le CV', 'View Resume') }}
+    </a>
+
     <!-- Localisation -->
-    <p class="mt-5 text-xs opacity-45 text-center" style="color: var(--modal-text)">
+    <p class="mt-4 text-xs opacity-45 text-center" style="color: var(--modal-text)">
       {{ t('Bure / Tressange · Moselle · 57710 · Frontière Luxembourg', 'Bure / Tressange · Moselle · France · Luxembourg border') }}
     </p>
   </ModalBase>
@@ -106,6 +125,29 @@ const PHONE        = '06 95 38 01 57'
   opacity: 1;
   border-color: rgba(59, 130, 246, 0.4);
   background: rgba(59, 130, 246, 0.05);
+  transform: translateY(-1px);
+}
+
+.cv-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  margin-top: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(59, 130, 246, 0.9);
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.cv-link:hover {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.08);
   transform: translateY(-1px);
 }
 </style>
