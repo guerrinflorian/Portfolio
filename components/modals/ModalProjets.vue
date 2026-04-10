@@ -5,6 +5,7 @@
 import { ref, computed } from 'vue'
 import ModalBase from './ModalBase.vue'
 import Tag from '../ui/Tag.vue'
+import LighthouseBadge from '../ui/LighthouseBadge.vue'
 import { useModalStore } from '~/stores/modal'
 import { useLocale } from '~/composables/useLocale'
 import type { Project, ProjectStatus, ProjectCategorie } from '~/types/modal'
@@ -698,6 +699,11 @@ const mStatusConfig = computed<Record<ProjectStatus, StatusConfig>>(() => ({
                 <!-- Tags -->
                 <div class="flex flex-wrap gap-1.5">
                   <Tag v-for="lTag in lProjet.tags" :key="lTag" :label="lTag" small />
+                </div>
+
+                <!-- Badge Lighthouse pour le portfolio -->
+                <div v-if="lProjet.id === 'portfolio'" class="mt-3">
+                  <LighthouseBadge />
                 </div>
 
                 <!-- Bouton détail -->

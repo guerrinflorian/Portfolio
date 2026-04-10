@@ -4,6 +4,7 @@
 
 import { computed, ref, watch, nextTick } from 'vue'
 import ModalBase from './ModalBase.vue'
+import LighthouseBadge from '../ui/LighthouseBadge.vue'
 import { useModalStore } from '~/stores/modal'
 import { useLocale } from '~/composables/useLocale'
 import type { Skill, SkillCategory } from '~/types/modal'
@@ -144,27 +145,8 @@ watch(
     </div>
 
     <!-- Badge performance Lighthouse -->
-    <div class="perf-badge" :title="t('Score Lighthouse mesuré sur Google PageSpeed Insights', 'Score measured on Google PageSpeed Insights')">
-      <div class="perf-score">
-        <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
-          <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3" />
-          <circle
-            cx="18" cy="18" r="15"
-            fill="none"
-            stroke="#22c55e"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-dasharray="94.2"
-            stroke-dashoffset="5.7"
-            transform="rotate(-90 18 18)"
-          />
-          <text x="18" y="22" text-anchor="middle" font-size="9" font-weight="700" fill="#22c55e" font-family="monospace">96</text>
-        </svg>
-        <div class="perf-info">
-          <span class="perf-label">Lighthouse</span>
-          <span class="perf-desc">{{ t('Performance · malgré les animations, avions temps réel et canvas étoiles', 'Performance · despite animations, live planes & star canvas') }}</span>
-        </div>
-      </div>
+    <div class="perf-badge-wrapper">
+      <LighthouseBadge />
     </div>
   </ModalBase>
 </template>
@@ -200,37 +182,7 @@ watch(
 
 /* ─── Badge Lighthouse ──────────────────────────────────────────────────────── */
 
-.perf-badge {
+.perf-badge-wrapper {
   margin-top: 1.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(34, 197, 94, 0.06);
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  border-radius: 10px;
-  cursor: default;
-}
-
-.perf-score {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-}
-
-.perf-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.perf-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #22c55e;
-  letter-spacing: 0.04em;
-}
-
-.perf-desc {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.4;
 }
 </style>
