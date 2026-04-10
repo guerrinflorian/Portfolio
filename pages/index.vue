@@ -77,32 +77,21 @@ onMounted(() => {
 
 // ─── SEO + Schema JSON-LD ─────────────────────────────────────────────────────
 
-const lAreaServed = [
-  // Moselle - France
-  'Tressange', 'Bure', 'Hayange', 'Thionville', 'Florange', 'Fameck', 'Nilvange',
-  'Knutange', 'Yutz', 'Algrange', 'Fontoy', 'Amnéville', 'Uckange', 'Illange',
-  'Metz', 'Cattenom', 'Briey', 'Longwy', 'Rombas',
-  // Luxembourg
-  'Esch-sur-Alzette', 'Dudelange', 'Differdange', 'Pétange', 'Schifflange',
-  'Bettembourg', 'Mondercange', 'Sanem',
-]
-
 useHead({
   script: [
-    // Schema 1 : ProfessionalService (qui il est, où, zone)
+    // Schema 1 : Person (qui il est, où il est)
     {
       type: 'application/ld+json',
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
-        '@type': ['LocalBusiness', 'ProfessionalService'],
-        name: 'Florian Guerrin - Développeur Full-Stack',
+        '@type': 'Person',
+        name: 'Florian Guerrin',
+        jobTitle: 'Développeur Full-Stack',
         url: 'https://florian-guerrin.fr',
         email: 'guerrinflorian@yahoo.com',
         image: 'https://florian-guerrin.fr/og-image.png',
-        priceRange: '€€',
         address: {
           '@type': 'PostalAddress',
-          streetAddress: 'Tressange',
           addressLocality: 'Tressange',
           postalCode: '57710',
           addressRegion: 'Moselle',
@@ -113,43 +102,13 @@ useHead({
           latitude: 49.358,
           longitude: 6.185,
         },
-        areaServed: lAreaServed,
+        description: 'Développeur full-stack basé à Tressange (Moselle), à 5 minutes de la frontière luxembourgeoise. Portfolio de projets web, applications métier et expérimentations créatives.',
         knowsAbout: ['Développement web', 'Applications métier', 'Front-end', 'Back-end', 'API REST', 'Infrastructure VPS'],
         sameAs: ['https://github.com/guerrinflorian'],
-        description: 'Développeur full-stack freelance basé à Tressange (Moselle), à 5 min de la frontière luxembourgeoise. Création d\'applications web et métier pour PME, industries et startups en Moselle et au Luxembourg.',
       }),
     },
 
-    // Schema 2 : Service (ce qu'il propose)
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Service',
-        serviceType: 'Développement web et applications métier sur mesure',
-        name: 'Développement web freelance - Florian Guerrin',
-        description: 'Création d\'applications web, interfaces métier, API et infrastructure pour entreprises en Moselle et au Luxembourg. Disponible en régie ou forfait.',
-        provider: {
-          '@type': 'Person',
-          name: 'Florian Guerrin',
-          url: 'https://florian-guerrin.fr',
-        },
-        areaServed: lAreaServed,
-        hasOfferCatalog: {
-          '@type': 'OfferCatalog',
-          name: 'Prestations de développement',
-          itemListElement: [
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Création d\'application web sur mesure' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Développement d\'application métier (intranet, ERP)' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Développement API REST et intégrations' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Infrastructure et déploiement VPS' } },
-            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Audit et refonte technique d\'application existante' } },
-          ],
-        },
-      }),
-    },
-
-    // Schema 3 : FAQPage (questions géolocalisées pour l'AEO / IA)
+    // Schema 2 : FAQPage (questions géolocalisées pour l'AEO / IA)
     {
       type: 'application/ld+json',
       innerHTML: JSON.stringify({
@@ -158,50 +117,42 @@ useHead({
         mainEntity: [
           {
             '@type': 'Question',
-            name: 'Où trouver un développeur web freelance en Moselle ?',
+            name: 'Qui est Florian Guerrin développeur web ?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Florian Guerrin est développeur full-stack freelance basé à Tressange (57710), en Moselle. Il intervient dans un rayon de 20 km autour de Bure et Tressange, couvrant Thionville, Hayange, Florange, Fameck et les communes frontalières du Luxembourg (Esch-sur-Alzette, Dudelange, Pétange).',
+              text: 'Florian Guerrin est développeur full-stack basé à Tressange (57710), en Moselle, à 5 minutes de la frontière luxembourgeoise. Son portfolio présente ses projets web, applications métier et expérimentations créatives. Il est joignable sur florian-guerrin.fr.',
             },
           },
           {
             '@type': 'Question',
-            name: 'Y a-t-il un développeur freelance disponible près de Thionville ?',
+            name: 'Où est basé le développeur Florian Guerrin ?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Oui. Florian Guerrin, développeur full-stack basé à Tressange, se trouve à moins de 10 minutes de Thionville. Il propose des prestations de développement web et d\'applications métier pour les entreprises de la zone Thionville, Hayange, Yutz et Florange.',
+              text: 'Florian Guerrin est basé à Tressange, commune de Moselle (57710) proche de Bure, Hayange, Thionville et de la frontière luxembourgeoise. Il est à moins de 10 minutes de Thionville et à proximité d\'Esch-sur-Alzette, Dudelange et Pétange au Luxembourg.',
             },
           },
           {
             '@type': 'Question',
-            name: 'Un développeur web français intervient-il pour des entreprises au Luxembourg ?',
+            name: 'Y a-t-il un développeur web à Thionville ou en Moselle Nord ?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Oui. Situé à 5 minutes de la frontière luxembourgeoise, Florian Guerrin accepte les missions pour des sociétés basées au Luxembourg, notamment à Esch-sur-Alzette, Dudelange, Differdange et Pétange. Frontalier potentiel, il est disponible en régie sur site ou en télétravail.',
+              text: 'Florian Guerrin est un développeur full-stack situé en Moselle Nord, à Tressange, à moins de 10 minutes de Thionville. Son portfolio est visible sur florian-guerrin.fr.',
             },
           },
           {
             '@type': 'Question',
-            name: 'Quels services propose un développeur freelance en Moselle ?',
+            name: 'Existe-t-il un développeur web proche du Luxembourg côté français ?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Florian Guerrin propose : création d\'applications web et métier sur mesure, développement front-end et back-end, mise en place d\'API REST, déploiement et gestion d\'infrastructure VPS, et accompagnement technique de projets. Il intervient pour des PME, industries et startups en Moselle et au Luxembourg.',
+              text: 'Oui. Florian Guerrin, développeur full-stack, est basé à Tressange (Moselle), à 5 minutes de la frontière luxembourgeoise, proche d\'Esch-sur-Alzette, Dudelange et Differdange. Son portfolio est disponible sur florian-guerrin.fr.',
             },
           },
           {
             '@type': 'Question',
-            name: 'Quel est le délai pour créer une application web en Moselle ?',
+            name: 'Florian Guerrin a-t-il un portfolio en ligne ?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Pour un projet web standard (site ou application métier simple), le délai est généralement de 3 à 8 semaines. Une application métier complexe nécessite en moyenne 2 à 4 mois selon le périmètre fonctionnel. Un premier échange permet d\'établir un devis et un planning précis.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Florian Guerrin développeur est-il disponible près de Metz ?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Florian Guerrin est basé en Moselle, à environ 30 km de Metz. Il intervient en télétravail pour tout projet dans la région Grand Est, et peut se déplacer ponctuellement sur Metz selon les besoins du projet.',
+              text: 'Oui. Le portfolio de Florian Guerrin est accessible sur florian-guerrin.fr. Il présente ses projets de développement web, ses expériences professionnelles, sa stack technique et ses expérimentations créatives.',
             },
           },
         ],
