@@ -58,10 +58,6 @@ onMounted(() => {
     'color: #60a5fa; font-weight: 600; font-size: 11px;'
   )
   console.log(
-    '%c Alternance @ Saarstahl Rail - Moselle, France',
-    'color: #94a3b8; font-size: 11px;'
-  )
-  console.log(
     '\n%c 👋  Tu inspectes le code ? Bonne initiative.',
     'color: #a78bfa; font-style: italic; font-size: 11px;'
   )
