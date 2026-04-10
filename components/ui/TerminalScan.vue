@@ -3,17 +3,25 @@
 // Composant - terminal de scan visiteur (effet Mr. Robot, PC uniquement)
 
 import { ref, onMounted } from 'vue'
+import { useLocale } from '~/composables/useLocale'
 
 // ─── État ─────────────────────────────────────────────────────────────────────
 
 const mLines   = ref<string[]>([])
 const mVisible = ref(true)
+const { locale } = useLocale()
+
+// ─── Traductions ──────────────────────────────────────────────────────────────
+
+function tr(pFr: string, pEn: string): string {
+  return locale.value === 'fr' ? pFr : pEn
+}
 
 // ─── Utilitaires navigateur ───────────────────────────────────────────────────
 
 function calcOS(): string {
   const lUa = navigator.userAgent
-  if (/Windows NT 10/.test(lUa))  return 'Windows 10 / 11'
+  if (/Windows NT 10/.test(lUa))   return 'Windows 10 / 11'
   if (/Windows NT 6\.3/.test(lUa)) return 'Windows 8.1'
   if (/Windows NT 6\.1/.test(lUa)) return 'Windows 7'
   if (/Macintosh/.test(lUa)) {
@@ -22,7 +30,7 @@ function calcOS(): string {
   }
   if (/Android ([\d.]+)/.test(lUa)) return `Android ${RegExp.$1}`
   if (/Linux/.test(lUa)) return 'Linux'
-  return 'Système inconnu'
+  return tr('Système inconnu', 'Unknown OS')
 }
 
 function calcBrowser(): string {
@@ -33,15 +41,15 @@ function calcBrowser(): string {
   if (/Chrome\//.test(lUa))  return `Chrome ${lV(/Chrome\/([\d.]+)/)}`
   if (/Firefox\//.test(lUa)) return `Firefox ${lV(/Firefox\/([\d.]+)/)}`
   if (/Safari\//.test(lUa))  return 'Safari'
-  return 'Navigateur inconnu'
+  return tr('Navigateur inconnu', 'Unknown browser')
 }
 
 function calcGreeting(pHeure: number): string {
-  if (pHeure < 5)  return 'Bonne nuit'
-  if (pHeure < 12) return 'Bonjour'
-  if (pHeure < 18) return 'Bon après-midi'
-  if (pHeure < 22) return 'Bonne soirée'
-  return 'Bonne nuit'
+  if (pHeure < 5)  return tr('Bonne nuit',      'Good night')
+  if (pHeure < 12) return tr('Bonjour',          'Good morning')
+  if (pHeure < 18) return tr('Bon après-midi',   'Good afternoon')
+  if (pHeure < 22) return tr('Bonne soirée',     'Good evening')
+  return tr('Bonne nuit', 'Good night')
 }
 
 function calcTzOffset(): string {
@@ -56,18 +64,17 @@ function pause(pMs: number): Promise<void> {
 // ─── Séquence de scan ─────────────────────────────────────────────────────────
 
 async function runScan(): Promise<void> {
-  // Lancer le fetch IP en parallèle dès le début
   const lIpPromise = fetch('/api/visitor')
     .then(r => r.json())
     .catch(() => ({ ok: false }))
 
   await pause(300)
-  mLines.value.push('[INITIALISATION DE L\'ANALYSE...]')
+  mLines.value.push(tr('[INITIALISATION DE L\'ANALYSE...]', '[INITIALIZING SCAN...]'))
   await pause(500)
-  mLines.value.push('> Connexion établie')
+  mLines.value.push(tr('> Connexion établie', '> Connection established'))
   await pause(350)
 
-  // ── Données navigateur (synchrones) ────────────────────────────────────────
+  // ── Données navigateur (synchrones) ──────────────────────────────────────
   const lOs      = calcOS()
   const lBrowser = calcBrowser()
   const lW       = window.screen.width
@@ -81,68 +88,69 @@ async function runScan(): Promise<void> {
   const lCpus    = navigator.hardwareConcurrency
   const lMem     = (navigator as any).deviceMemory as number | undefined
 
-  mLines.value.push(`> Système : ${lOs}`)
-  await pause(300)
-  mLines.value.push(`> Navigateur : ${lBrowser}`)
-  await pause(300)
-  mLines.value.push(`> Résolution : ${lW} × ${lH} — ${lDepth} bits`)
-  await pause(300)
-  mLines.value.push(`> Langue : ${lLang}`)
-  await pause(300)
-  mLines.value.push(`> Heure locale : ${lTime} — ${calcGreeting(lHour)}`)
-  await pause(300)
-  mLines.value.push(`> Fuseau horaire : ${lTz} (${calcTzOffset()})`)
-  await pause(300)
-  mLines.value.push(`> Cœurs CPU : ${lCpus}`)
-  await pause(300)
+  mLines.value.push(`> ${tr('Système', 'OS')} : ${lOs}`)
+  await pause(320)
+  mLines.value.push(`> ${tr('Navigateur', 'Browser')} : ${lBrowser}`)
+  await pause(320)
+  mLines.value.push(`> ${tr('Résolution', 'Resolution')} : ${lW} × ${lH} — ${lDepth} bits`)
+  await pause(320)
+  mLines.value.push(`> ${tr('Langue système', 'System language')} : ${lLang}`)
+  await pause(320)
+  mLines.value.push(`> ${tr('Heure locale', 'Local time')} : ${lTime} — ${calcGreeting(lHour)}`)
+  await pause(320)
+  mLines.value.push(`> ${tr('Fuseau horaire', 'Timezone')} : ${lTz} (${calcTzOffset()})`)
+  await pause(320)
+  mLines.value.push(`> ${tr('Cœurs CPU', 'CPU cores')} : ${lCpus}`)
+  await pause(320)
 
   if (lMem) {
-    mLines.value.push(`> Mémoire appareil : ${lMem} Go`)
-    await pause(300)
+    mLines.value.push(`> ${tr('Mémoire appareil', 'Device memory')} : ${lMem} Go`)
+    await pause(320)
   }
 
-  // ── Batterie (async, Chrome uniquement) ────────────────────────────────────
+  // ── Batterie (Chrome uniquement) ─────────────────────────────────────────
   try {
     const lBatt = await (navigator as any).getBattery?.()
     if (lBatt) {
       const lPct    = Math.round(lBatt.level * 100)
-      const lStatus = lBatt.charging ? '⚡ en charge' : 'non branché'
-      mLines.value.push(`> Batterie : ${lPct}% — ${lStatus}`)
-      await pause(300)
+      const lStatus = lBatt.charging
+        ? tr('⚡ en charge', '⚡ charging')
+        : tr('non branché', 'unplugged')
+      mLines.value.push(`> ${tr('Batterie', 'Battery')} : ${lPct}% — ${lStatus}`)
+      await pause(320)
     }
-  } catch { /* API indisponible sur ce navigateur */ }
+  } catch { /* indisponible */ }
 
-  // ── Type de connexion (Chrome uniquement) ──────────────────────────────────
+  // ── Connexion (Chrome uniquement) ─────────────────────────────────────────
   const lConn = (navigator as any).connection
   if (lConn?.effectiveType) {
     const lType = (lConn.effectiveType as string).toUpperCase()
     const lDown = lConn.downlink ? ` — ${lConn.downlink} Mbps` : ''
-    mLines.value.push(`> Connexion : ${lType}${lDown}`)
-    await pause(300)
+    mLines.value.push(`> ${tr('Connexion', 'Connection')} : ${lType}${lDown}`)
+    await pause(320)
   }
 
-  // ── Données IP (résultat du fetch lancé au début) ──────────────────────────
+  // ── Données IP ────────────────────────────────────────────────────────────
   const lIp = await lIpPromise as Record<string, unknown>
 
   if (lIp['ok']) {
-    mLines.value.push(`> Adresse IP : ${lIp['ip']}`)
-    await pause(300)
-    mLines.value.push(`> Localisation : ${lIp['city']}, ${lIp['region']}, ${lIp['country']}`)
-    await pause(300)
-    mLines.value.push(`> Fournisseur : ${lIp['isp']}`)
-    await pause(350)
+    mLines.value.push(`> ${tr('Adresse IP', 'IP address')} : ${lIp['ip']}`)
+    await pause(320)
+    mLines.value.push(`> ${tr('Localisation', 'Location')} : ${lIp['city']}, ${lIp['region']}, ${lIp['country']}`)
+    await pause(320)
+    mLines.value.push(`> ${tr('Fournisseur', 'ISP')} : ${lIp['isp']}`)
+    await pause(400)
   }
 
-  mLines.value.push('[ANALYSE TERMINÉE — ACCÈS AUTORISÉ]')
+  mLines.value.push(tr('[ANALYSE TERMINÉE — ACCÈS AUTORISÉ]', '[SCAN COMPLETE — ACCESS GRANTED]'))
 
-  // ── Afficher 4 secondes puis disparaître ───────────────────────────────────
-  await pause(4000)
+  await pause(7000)
   mVisible.value = false
 }
 
 onMounted(() => {
   if (!import.meta.client) return
-  if (window.innerWidth < 768) return   // PC uniquement
+  if (window.innerWidth < 768) return
   runScan()
 })
 </script>
@@ -151,7 +159,12 @@ onMounted(() => {
   <Transition name="terminal-fade">
     <div v-if="mVisible" class="terminal-scan" aria-hidden="true">
       <TransitionGroup name="line-appear" tag="div">
-        <p v-for="(lLine, lIdx) in mLines" :key="lIdx" class="terminal-line" :class="{ 'terminal-line--header': lLine.startsWith('[') }">
+        <p
+          v-for="(lLine, lIdx) in mLines"
+          :key="lIdx"
+          class="terminal-line"
+          :class="{ 'terminal-line--header': lLine.startsWith('[') }"
+        >
           {{ lLine }}
         </p>
       </TransitionGroup>
@@ -165,14 +178,14 @@ onMounted(() => {
   bottom: 5rem;
   left: 1.75rem;
   z-index: 1;
-  opacity: 0.5;
+  opacity: 0.75;
   pointer-events: none;
   font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
-  font-size: 0.68rem;
-  line-height: 1.7;
+  font-size: 0.72rem;
+  line-height: 1.8;
   color: #4ade80;
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
-  max-width: 340px;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+  max-width: 380px;
   user-select: none;
 }
 
@@ -182,23 +195,21 @@ onMounted(() => {
 }
 
 .terminal-line--header {
-  color: #86efac;
+  color: #bbf7d0;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
-/* Apparition de chaque ligne */
 .line-appear-enter-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .line-appear-enter-from {
   opacity: 0;
-  transform: translateX(-6px);
+  transform: translateX(-8px);
 }
 
-/* Disparition du bloc entier */
 .terminal-fade-leave-active {
-  transition: opacity 1s ease;
+  transition: opacity 1.5s ease;
 }
 .terminal-fade-leave-to {
   opacity: 0;
