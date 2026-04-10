@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Auteur : GUERRINF - Florian Guerrin
-// Composant - avions en temps réel (OpenSky) - couche unique z-index 5
+// Composant - avions en temps réel (OpenSky) - couche unique z-index 2
 // Profondeur visuelle uniquement via scale/opacité selon distance
 
 import { ref, computed } from 'vue'
@@ -290,7 +290,7 @@ function calcSquawkLabel(pSquawk: string): { label: string; emergency: boolean }
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 2;
 }
 
 .plane-item {
