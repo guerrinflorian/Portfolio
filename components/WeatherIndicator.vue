@@ -219,7 +219,7 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
               v-for="lSlot in mHourlySlots"
               :key="lSlot.hour"
               class="wt-hour-item"
-              :class="{ 'wt-hour-now': lSlot.isCurrent }"
+              :class="{ 'wt-hour-now': lSlot.isCurrent, 'wt-hour-past': lSlot.isPast }"
             >
               <span class="wt-hour-time">{{ lSlot.hour }}</span>
               <svg
@@ -407,6 +407,10 @@ const mCurrentIcon = computed(() => mIcons[mState.value])
 .wt-hour-now {
   background: rgba(96, 165, 250, 0.12);
   border: 1px solid rgba(96, 165, 250, 0.25);
+}
+
+.wt-hour-past {
+  opacity: 0.35;
 }
 
 .wt-hour-time {

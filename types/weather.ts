@@ -70,6 +70,7 @@ export interface HourlySlot {
   temp: number
   state: WeatherState
   isCurrent: boolean
+  isPast: boolean
 }
 
 export interface OpenMeteoResponse {

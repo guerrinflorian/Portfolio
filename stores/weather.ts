@@ -195,14 +195,13 @@ export const useWeatherStore = defineStore('weather', {
         for (let lIdx = 0; lIdx < pData.hourly.time.length; lIdx++) {
           const lRaw  = pData.hourly.time[lIdx] ?? ''
           const lHour = parseInt(lRaw.split('T')[1]?.split(':')[0] ?? '0', 10)
-          if (lHour >= lNowHour) {
-            lSlots.push({
-              hour:      `${lHour}h`,
-              temp:      Math.round(pData.hourly.temperature_2m[lIdx] ?? 0),
-              state:     mapWmoCode(pData.hourly.weathercode[lIdx] ?? 0),
-              isCurrent: lHour === lNowHour,
-            })
-          }
+          lSlots.push({
+            hour:      `${lHour}h`,
+            temp:      Math.round(pData.hourly.temperature_2m[lIdx] ?? 0),
+            state:     mapWmoCode(pData.hourly.weathercode[lIdx] ?? 0),
+            isCurrent: lHour === lNowHour,
+            isPast:    lHour < lNowHour,
+          })
         }
         this.hourlySlots = lSlots
       }
