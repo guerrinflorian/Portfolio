@@ -4,7 +4,6 @@
 
 import { computed, ref, watch, nextTick } from 'vue'
 import ModalBase from './ModalBase.vue'
-import LighthouseBadge from '../ui/LighthouseBadge.vue'
 import { useModalStore } from '~/stores/modal'
 import { useLocale } from '~/composables/useLocale'
 import type { Skill, SkillCategory } from '~/types/modal'
@@ -144,10 +143,6 @@ watch(
       </div>
     </div>
 
-    <!-- Badge performance Lighthouse -->
-    <div class="perf-badge-wrapper">
-      <LighthouseBadge />
-    </div>
   </ModalBase>
 </template>
 
@@ -180,9 +175,5 @@ watch(
 .skill-name  { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
 .skill-level { font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
-/* ─── Badge Lighthouse ──────────────────────────────────────────────────────── */
 
-.perf-badge-wrapper {
-  margin-top: 1.5rem;
-}
 </style>
