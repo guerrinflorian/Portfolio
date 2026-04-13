@@ -7,11 +7,13 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { CSSProperties } from 'vue'
 import { usePlanes } from '~/composables/usePlanes'
 import { useWeatherStore } from '~/stores/weather'
+import { useModalStore } from '~/stores/modal'
 import type { Plane } from '~/composables/usePlanes'
 
 // ─── Stores & données ─────────────────────────────────────────────────────────
 
 const mWeatherStore = useWeatherStore()
+const mModalStore   = useModalStore()
 const { mPlanes, mDetails } = usePlanes()
 
 // ─── Constantes géographiques ─────────────────────────────────────────────────
@@ -169,6 +171,7 @@ function calcPlaneViewportPos(pPlane: Plane): { x: number; y: number } {
 }
 
 function onDocMouseMove(pEvt: MouseEvent): void {
+  if (mModalStore.anyOpen) { mHovered.value = null; return }
   let lClosest: Plane | null = null
   let lMinDist = HOVER_RADIUS
   for (const lPlane of mFilteredPlanes.value) {
