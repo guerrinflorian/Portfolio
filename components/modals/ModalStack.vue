@@ -143,6 +143,13 @@ watch(
       </div>
     </div>
 
+    <p class="stack-note">
+      {{ t(
+        'Cette liste ne reflète pas tout ce que je connais. J\'aime apprendre, découvrir de nouvelles technos et relever de nouveaux défis. Je serais ravi d\'en discuter.',
+        'This list doesn\'t cover everything I know. I love learning, exploring new technologies and taking on new challenges. Happy to chat about it.'
+      ) }}
+    </p>
+
   </ModalBase>
 </template>
 
@@ -175,5 +182,16 @@ watch(
 .skill-name  { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
 .skill-level { font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
-
+.stack-note {
+  margin-top: 1.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.05);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--modal-text);
+  opacity: 0.7;
+  font-style: italic;
+}
 </style>
