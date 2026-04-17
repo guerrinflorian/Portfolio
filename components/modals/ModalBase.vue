@@ -19,9 +19,17 @@ const mEmits = defineEmits<{
 
 // ─── Refs DOM ─────────────────────────────────────────────────────────────────
 
-const mOverlayRef       = ref<HTMLElement | null>(null)
-const mPanelRef         = ref<HTMLElement | null>(null)
+const mOverlayRef        = ref<HTMLElement | null>(null)
+const mPanelRef          = ref<HTMLElement | null>(null)
 const mFirstFocusableRef = ref<HTMLButtonElement | null>(null)
+
+// ─── API publique ─────────────────────────────────────────────────────────────
+
+function scrollToTop(): void {
+  if (mPanelRef.value) mPanelRef.value.scrollTop = 0
+}
+
+defineExpose({ scrollToTop })
 
 // ─── Fermeture ────────────────────────────────────────────────────────────────
 
@@ -76,7 +84,8 @@ async function onEnter(_el: Element, done: () => void): Promise<void> {
 
   const { gsap } = await import('gsap')
 
-  // État initial
+  // État initial + remise à zéro du scroll
+  mPanelRef.value.scrollTop = 0
   gsap.set(mOverlayRef.value, { opacity: 0 })
   gsap.set(mPanelRef.value,   { opacity: 0, scale: 0.92, y: 8 })
 

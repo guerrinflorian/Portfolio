@@ -81,7 +81,8 @@ const mScores: Score[] = [
 
 .lh-score-label {
   font-size: 0.58rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--modal-text);
+  opacity: 0.5;
   font-family: var(--font-mono, monospace);
   white-space: nowrap;
 }
@@ -101,7 +102,8 @@ const mScores: Score[] = [
 
 .lh-desc {
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--modal-text);
+  opacity: 0.45;
   line-height: 1.4;
 }
 </style>

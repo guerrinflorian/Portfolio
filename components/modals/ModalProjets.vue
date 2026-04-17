@@ -2,7 +2,7 @@
 // Auteur : GUERRINF - Florian Guerrin
 // Modale - Projets personnels avec vue détail intégrée
 
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import ModalBase from './ModalBase.vue'
 import Tag from '../ui/Tag.vue'
 import LighthouseBadge from '../ui/LighthouseBadge.vue'
@@ -56,15 +56,18 @@ const vTilt = {
 
 // ─── Vue détail active ────────────────────────────────────────────────────────
 
-const mDetailId = ref<string | null>(null)
+const mModalBaseRef = ref<InstanceType<typeof ModalBase> | null>(null)
+const mDetailId     = ref<string | null>(null)
 
 function mOuvrirDetail(lId: string): void {
   mDetailId.value = lId
+  nextTick(() => mModalBaseRef.value?.scrollToTop())
 }
 
 function mRetourListe(): void {
-  mDetailId.value = null
+  mDetailId.value    = null
   mLightboxIndex.value = null
+  nextTick(() => mModalBaseRef.value?.scrollToTop())
 }
 
 // Titre dynamique selon la vue
@@ -651,7 +654,7 @@ const mStatusConfig = computed<Record<ProjectStatus, StatusConfig>>(() => ({
 </script>
 
 <template>
-  <ModalBase v-model="mOuverte" :title="mTitreModal" @keydown="mOnKeydown">
+  <ModalBase ref="mModalBaseRef" v-model="mOuverte" :title="mTitreModal" @keydown="mOnKeydown">
 
     <!-- ── VUE LISTE ──────────────────────────────────────────────────────────── -->
     <Transition name="slide" mode="out-in">
