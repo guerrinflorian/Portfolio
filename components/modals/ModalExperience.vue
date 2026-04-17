@@ -46,9 +46,8 @@ const mExperiencesFR = [
     location: 'Bure / Tressange, Moselle',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker', 'Supabase', 'VPS'],
     points: [
-      'Développement de sites web et applications métier sur-mesure pour divers clients, dont deux exemples parmi d\'autres :',
-      'Site vitrine pour un caviste : présentation du point de vente, catalogue produits avec fiches détaillées, section accords mets & vins',
-      'Site web complet pour un centre de bien-être au Luxembourg : interface admin, gestion des cours et des équipes, affichage des calendriers, intégration du widget de réservation connecté à leur back-end sur VPS Supabase self-hosted',
+      'Conception et développement de sites web et applications métier sur-mesure pour des clients variés',
+      'Sites vitrines, interfaces d\'administration, intégrations back-end, déploiements sur VPS',
       'Missions menées en parallèle de l\'alternance Saarstahl Rail',
     ],
     url: 'https://www.lehubduweb.fr',
@@ -81,9 +80,8 @@ const mExperiencesEN = [
     location: 'Bure / Tressange, Moselle, France',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker', 'Supabase', 'VPS'],
     points: [
-      'Building custom websites and business applications for various clients, two examples among others:',
-      'Tailored website for a wine merchant: shop presentation, product catalogue with detailed descriptions, and a food & wine pairing section',
-      'Full website for a wellness centre in Luxembourg: admin interface, course and team management, calendar display, booking widget integrated with their self-hosted Supabase back-end on VPS',
+      'Design and development of custom websites and business applications for various clients',
+      'Landing pages, admin interfaces, back-end integrations, VPS deployments',
       'Projects carried out alongside the Saarstahl Rail apprenticeship',
     ],
     url: 'https://www.lehubduweb.fr',
