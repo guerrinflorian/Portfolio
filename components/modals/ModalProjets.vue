@@ -455,6 +455,18 @@ const mDetailCourant = computed<ProjectDetail | null>(() => {
 // ─── Projets réels (réactifs à la locale) ─────────────────────────────────────
 
 const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
+  // ── Pro ──────────────────────────────────────────────────────────────────
+  {
+    id: 'lehubduweb',
+    titre: 'lehubduweb.fr',
+    type: 'Micro-entreprise',
+    categorie: 'pro',
+    status: 'live',
+    description:
+      'Ma structure freelance. Sites vitrines, applications métier avec interface admin, back-ends Supabase self-hosted sur VPS, intégrations sur-mesure... Je ne détaille pas toutes mes réalisations ici, mais les projets sont nombreux.',
+    tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Supabase', 'Docker', 'VPS'],
+    url: 'https://www.lehubduweb.fr',
+  },
   // ── École ────────────────────────────────────────────────────────────────
   {
     id: 'bricoloc',
@@ -534,6 +546,18 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     detail: 'tower-defense',
   },
 ] : [
+  // ── Pro ──────────────────────────────────────────────────────────────────
+  {
+    id: 'lehubduweb',
+    titre: 'lehubduweb.fr',
+    type: 'Freelance',
+    categorie: 'pro',
+    status: 'live',
+    description:
+      'My freelance business. Custom websites, business apps with admin dashboards, self-hosted Supabase back-ends on VPS, bespoke integrations... I don\'t detail every project here, but there are quite a few.',
+    tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Supabase', 'Docker', 'VPS'],
+    url: 'https://www.lehubduweb.fr',
+  },
   // ── School ───────────────────────────────────────────────────────────────
   {
     id: 'bricoloc',
@@ -624,6 +648,12 @@ interface ProjetGroupe {
 }
 
 const mGroupes = computed<ProjetGroupe[]>(() => [
+  {
+    label: t('Projets professionnels', 'Professional Projects'),
+    icon: '💼',
+    accentClass: 'groupe--pro',
+    projets: mProjets.value.filter(lP => lP.categorie === 'pro'),
+  },
   {
     label: t('Projets d\'école', 'School Projects'),
     icon: '🎓',
@@ -944,6 +974,8 @@ const mStatusConfig = computed<Record<ProjectStatus, StatusConfig>>(() => ({
 }
 
 /* Accent couleur gauche selon catégorie */
+.groupe--pro   .groupe-label   { color: #f59e0b; opacity: 0.85; }
+.groupe--pro   .groupe-header  { border-color: rgba(245, 158, 11, 0.2); }
 .groupe--ecole .groupe-label   { color: #a78bfa; opacity: 0.85; }
 .groupe--ecole .groupe-header  { border-color: rgba(167, 139, 250, 0.2); }
 .groupe--perso .groupe-label   { color: #22d3ee; opacity: 0.85; }

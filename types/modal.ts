@@ -55,7 +55,7 @@ export interface Diplome {
 // ─── Projet personnel ─────────────────────────────────────────────────────────
 
 export type ProjectStatus = 'dev' | 'ongoing' | 'live' | 'archived'
-export type ProjectCategorie = 'ecole' | 'perso'
+export type ProjectCategorie = 'ecole' | 'perso' | 'pro'
 
 export interface Project {
   id: string
