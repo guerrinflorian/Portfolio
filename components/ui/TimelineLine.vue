@@ -14,6 +14,7 @@ interface TimelineItem {
   points?: string[]
   description?: string
   url?: string
+  links?: { label: string; href: string }[]
 }
 
 defineProps<{
@@ -54,8 +55,20 @@ defineProps<{
           <p class="text-sm font-semibold opacity-75" style="color: var(--modal-text)">
             {{ lItem.subtitle }}
           </p>
+          <div v-if="lItem.links?.length" class="flex flex-wrap gap-3 mt-1">
+            <a
+              v-for="lLink in lItem.links"
+              :key="lLink.href"
+              :href="lLink.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs text-blue-500 hover:underline transition-colors inline-block"
+            >
+              {{ lLink.label }}
+            </a>
+          </div>
           <a
-            v-if="lItem.url"
+            v-else-if="lItem.url"
             :href="lItem.url"
             target="_blank"
             rel="noopener noreferrer"

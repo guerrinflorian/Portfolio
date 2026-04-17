@@ -50,7 +50,10 @@ const mExperiencesFR = [
       'Sites vitrines, interfaces d\'administration, intégrations back-end, déploiements sur VPS',
       'Missions menées en parallèle de l\'alternance Saarstahl Rail',
     ],
-    url: 'https://www.lehubduweb.fr',
+    links: [
+      { label: 'lehubduweb.fr',     href: 'https://www.lehubduweb.fr' },
+      { label: 'florian-guerrin.fr', href: 'https://florian-guerrin.fr' },
+    ],
   },
 ]
 
@@ -84,7 +87,10 @@ const mExperiencesEN = [
       'Landing pages, admin interfaces, back-end integrations, VPS deployments',
       'Projects carried out alongside the Saarstahl Rail apprenticeship',
     ],
-    url: 'https://www.lehubduweb.fr',
+    links: [
+      { label: 'lehubduweb.fr',     href: 'https://www.lehubduweb.fr' },
+      { label: 'florian-guerrin.fr', href: 'https://florian-guerrin.fr' },
+    ],
   },
 ]
 </script>
