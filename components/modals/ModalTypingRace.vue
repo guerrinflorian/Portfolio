@@ -99,12 +99,12 @@ const mBotTimeFmt    = computed(() => mBotTime.value.toFixed(1) + 's')
 function planifierProchainChar(): void {
   if (mBotPos.value >= mTexte.value.length) return
 
-  // Vitesse : 65-115ms par caractère soit ~9-15 chars/sec
-  let lDelay = 65 + Math.random() * 50
+  // Vitesse : 85-145ms par caractère soit ~7-12 chars/sec
+  let lDelay = 85 + Math.random() * 60
 
   // Hésitation occasionnelle toutes les 22-38 lettres
   if (mBotPos.value > 0 && mBotPos.value % (22 + Math.floor(Math.random() * 16)) === 0) {
-    lDelay += 180 + Math.random() * 280
+    lDelay += 200 + Math.random() * 320
   }
 
   mBotTimeoutId = setTimeout(() => {
@@ -244,7 +244,7 @@ onUnmounted(() => effacerTimers())
         <span class="bot-avatar">🧑‍💻</span>
         <div>
           <p class="bot-name">Florian · Bot</p>
-          <p class="bot-speed">~{{ t('5-7 caractères / seconde', '5-7 chars / second') }} · {{ t('hésitations aléatoires', 'random hesitations') }}</p>
+          <p class="bot-speed">~{{ t('7-12 caractères / seconde', '7-12 chars / second') }} · {{ t('hésitations aléatoires', 'random hesitations') }}</p>
         </div>
       </div>
       <button class="btn-start" @click="demarrer">
