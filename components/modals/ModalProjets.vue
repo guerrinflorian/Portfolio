@@ -462,18 +462,20 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'Micro-entreprise',
     categorie: 'pro',
     status: 'live',
+    date: '2025',
     description:
       'Ma structure freelance. Sites vitrines, applications métier avec interface admin, back-ends Supabase self-hosted sur VPS, intégrations sur-mesure... Je ne détaille pas toutes mes réalisations ici, mais les projets sont nombreux.',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Supabase', 'Docker', 'VPS'],
     url: 'https://www.lehubduweb.fr',
   },
-  // ── École ────────────────────────────────────────────────────────────────
+  // ── École (du plus récent au plus ancien) ────────────────────────────────
   {
     id: 'bricoloc',
     titre: 'BricoLoc - Refonte SI',
     type: 'Architecture SI - Bac+5 CESI',
     categorie: 'ecole',
     status: 'archived',
+    date: '2026',
     description:
       'Modernisation complète du SI d\'une plateforme de location d\'outils fictive. Diagnostic du monolithe existant, décomposition en 8 microservices, plan de migration Strangler Fig, matrices de choix technologiques.',
     tags: ['AWS', 'Spring Boot 3', 'Next.js 14', 'PostgreSQL', 'Kafka'],
@@ -485,6 +487,7 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'Projet CESI Bac+3',
     categorie: 'ecole',
     status: 'live',
+    date: '2024/2025',
     description:
       'Application de bureau hors-ligne complète pour la gestion de tournois de Nippon Kempo. Félicitée par le jury CESI, utilisée en production par la vraie association sportive.',
     tags: ['Vue 3', 'Electron', 'IndexedDB', 'ApexCharts', 'Vuestic UI'],
@@ -496,42 +499,35 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'Projet CESI Bac+2',
     categorie: 'ecole',
     status: 'archived',
+    date: '2023',
     description:
       'Application de bureau de gestion complète d\'un stock de vins. Familles, fournisseurs, commandes, inventaires, dashboard avec graphiques. Projet de fin de Bac+2.',
     tags: ['Quasar 2', 'Vue 3', 'Electron', 'Axios', 'ApexCharts'],
     detail: 'negosud',
   },
-  // ── Perso ────────────────────────────────────────────────────────────────
-  {
-    id: 'vps',
-    titre: 'Infrastructure VPS OVH',
-    type: 'Projet personnel',
-    categorie: 'perso',
-    status: 'live',
-    description:
-      'VPS OVH entièrement dockerisé, accès VPN WireGuard. En production pour usage personnel : intranet famille, stockage photos, gestionnaire de mots de passe OTP, Supabase self-hosted, monitoring Prometheus + Grafana.',
-    tags: ['Docker', 'WireGuard', 'Nginx', 'Supabase', 'Prometheus', 'Grafana'],
-  },
+  // ── Perso (du plus récent au plus ancien) ────────────────────────────────
   {
     id: 'portfolio',
     titre: 'florian-guerrin.fr',
     type: 'Portfolio',
     categorie: 'perso',
     status: 'live',
+    date: '2025/2026',
     description:
       'Ce site. Un arbre qui pousse selon la saison, la météo de chez moi en temps réel, de vrais avions qui passent au-dessus de la Moselle, un ciel qui change du matin au soir. Lighthouse 96/100.',
     tags: ['Nuxt 3', 'Vue 3', 'TypeScript', 'Canvas API', 'GSAP', 'Open-Meteo'],
     url: 'https://florian-guerrin.fr',
   },
   {
-    id: 'messagerie',
-    titre: 'Messagerie chiffrée E2E',
+    id: 'vps',
+    titre: 'Infrastructure VPS OVH',
     type: 'Projet personnel',
     categorie: 'perso',
-    status: 'archived',
+    status: 'live',
+    date: '2025',
     description:
-      'Projet de test personnel (2023) pour comprendre et implémenter le chiffrement bout en bout : échanges de clés, chiffrement des messages, WebSocket temps réel. But : apprendre, pas mise en production.',
-    tags: ['Node.js', 'WebSocket', 'Cryptographie', 'Vue 3'],
+      'VPS OVH entièrement dockerisé, accès VPN WireGuard. En production pour usage personnel : intranet famille, stockage photos, gestionnaire de mots de passe OTP, Supabase self-hosted, monitoring Prometheus + Grafana.',
+    tags: ['Docker', 'WireGuard', 'Nginx', 'Supabase', 'Prometheus', 'Grafana'],
   },
   {
     id: 'tower-defense',
@@ -539,11 +535,23 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'Projet personnel',
     categorie: 'perso',
     status: 'live',
+    date: '2025',
     description:
       'Jeu web Tower Defense multijoueur développé en Vue 3 avec Phaser.js. Déployé sur Vercel, jouable en ligne. Authentification, 8+ maps, vagues d\'ennemis progressives, système d\'upgrade du héros.',
     tags: ['Vue 3', 'Phaser.js', 'PostgreSQL', 'Node.js'],
     url: 'https://last-outpost.vercel.app/',
     detail: 'tower-defense',
+  },
+  {
+    id: 'messagerie',
+    titre: 'Messagerie chiffrée E2E',
+    type: 'Projet personnel',
+    categorie: 'perso',
+    status: 'archived',
+    date: '2024',
+    description:
+      'Projet de test personnel pour comprendre et implémenter le chiffrement bout en bout : échanges de clés, chiffrement des messages, WebSocket temps réel. But : apprendre, pas mise en production.',
+    tags: ['Node.js', 'WebSocket', 'Cryptographie', 'Vue 3'],
   },
 ] : [
   // ── Pro ──────────────────────────────────────────────────────────────────
@@ -553,18 +561,20 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'Freelance',
     categorie: 'pro',
     status: 'live',
+    date: '2025',
     description:
       'My freelance business. Custom websites, business apps with admin dashboards, self-hosted Supabase back-ends on VPS, bespoke integrations... I don\'t detail every project here, but there are quite a few.',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Supabase', 'Docker', 'VPS'],
     url: 'https://www.lehubduweb.fr',
   },
-  // ── School ───────────────────────────────────────────────────────────────
+  // ── School (most recent first) ───────────────────────────────────────────
   {
     id: 'bricoloc',
     titre: 'BricoLoc - IS Overhaul',
     type: 'IS Architecture - Master Level CESI',
     categorie: 'ecole',
     status: 'archived',
+    date: '2026',
     description:
       'Complete overhaul of a fictitious tool rental company\'s information system. Diagnosis of the existing monolith, decomposition into 8 microservices, Strangler Fig migration plan, technology decision matrices.',
     tags: ['AWS', 'Spring Boot 3', 'Next.js 14', 'PostgreSQL', 'Kafka'],
@@ -576,6 +586,7 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'CESI Bachelor\'s Year 3 Project',
     categorie: 'ecole',
     status: 'live',
+    date: '2024/2025',
     description:
       'Complete offline desktop application for managing Nippon Kempo tournaments. Praised by the CESI jury, used in production by the real sports association.',
     tags: ['Vue 3', 'Electron', 'IndexedDB', 'ApexCharts', 'Vuestic UI'],
@@ -587,42 +598,35 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'CESI Bachelor\'s Year 2 Project',
     categorie: 'ecole',
     status: 'archived',
+    date: '2023',
     description:
       'Complete desktop application for wine stock management. Families, suppliers, orders, inventories, dashboard with charts. End-of-Bachelor\'s-year-2 project.',
     tags: ['Quasar 2', 'Vue 3', 'Electron', 'Axios', 'ApexCharts'],
     detail: 'negosud',
   },
-  // ── Personal ─────────────────────────────────────────────────────────────
-  {
-    id: 'vps',
-    titre: 'OVH VPS Infrastructure',
-    type: 'Personal Project',
-    categorie: 'perso',
-    status: 'live',
-    description:
-      'Fully Dockerized OVH VPS, WireGuard VPN access. In production for personal use: family intranet, photo storage, OTP password manager, self-hosted Supabase, Prometheus + Grafana monitoring.',
-    tags: ['Docker', 'WireGuard', 'Nginx', 'Supabase', 'Prometheus', 'Grafana'],
-  },
+  // ── Personal (most recent first) ─────────────────────────────────────────
   {
     id: 'portfolio',
     titre: 'florian-guerrin.fr',
     type: 'Portfolio',
     categorie: 'perso',
     status: 'live',
+    date: '2025/2026',
     description:
       'This site. A tree that grows with the seasons, live weather from my village, real planes flying over Moselle, a sky that shifts from dawn to dusk. Lighthouse 96/100.',
     tags: ['Nuxt 3', 'Vue 3', 'TypeScript', 'Canvas API', 'GSAP', 'Open-Meteo'],
     url: 'https://florian-guerrin.fr',
   },
   {
-    id: 'messagerie',
-    titre: 'E2E Encrypted Messaging',
+    id: 'vps',
+    titre: 'OVH VPS Infrastructure',
     type: 'Personal Project',
     categorie: 'perso',
-    status: 'archived',
+    status: 'live',
+    date: '2025',
     description:
-      'Personal test project (2023) to understand and implement end-to-end encryption: key exchanges, message encryption, real-time WebSocket. Goal: learn, not deploy to production.',
-    tags: ['Node.js', 'WebSocket', 'Cryptography', 'Vue 3'],
+      'Fully Dockerized OVH VPS, WireGuard VPN access. In production for personal use: family intranet, photo storage, OTP password manager, self-hosted Supabase, Prometheus + Grafana monitoring.',
+    tags: ['Docker', 'WireGuard', 'Nginx', 'Supabase', 'Prometheus', 'Grafana'],
   },
   {
     id: 'tower-defense',
@@ -630,11 +634,23 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     type: 'Personal Project',
     categorie: 'perso',
     status: 'live',
+    date: '2025',
     description:
       'Multiplayer web Tower Defense game built with Vue 3 and Phaser.js. Deployed on Vercel, playable online. Authentication, 8+ maps, progressive enemy waves, hero upgrade system.',
     tags: ['Vue 3', 'Phaser.js', 'PostgreSQL', 'Node.js'],
     url: 'https://last-outpost.vercel.app/',
     detail: 'tower-defense',
+  },
+  {
+    id: 'messagerie',
+    titre: 'E2E Encrypted Messaging',
+    type: 'Personal Project',
+    categorie: 'perso',
+    status: 'archived',
+    date: '2024',
+    description:
+      'Personal test project to understand and implement end-to-end encryption: key exchanges, message encryption, real-time WebSocket. Goal: learn, not deploy to production.',
+    tags: ['Node.js', 'WebSocket', 'Cryptography', 'Vue 3'],
   },
 ])
 
@@ -711,8 +727,9 @@ const mStatusConfig = computed<Record<ProjectStatus, StatusConfig>>(() => ({
                 <!-- En-tête carte -->
                 <div class="flex items-start justify-between gap-3 mb-2.5">
                   <div class="flex-1">
-                    <div class="mb-0.5">
+                    <div class="mb-0.5 flex items-center gap-2">
                       <span class="project-type">{{ lProjet.type }}</span>
+                      <span v-if="lProjet.date" class="project-date">{{ lProjet.date }}</span>
                     </div>
                     <h3 class="font-bold text-base leading-tight" style="color: var(--modal-text)">
                       {{ lProjet.titre }}
@@ -998,6 +1015,20 @@ const mStatusConfig = computed<Record<ProjectStatus, StatusConfig>>(() => ({
   font-weight: 600;
   opacity: 0.4;
   color: var(--modal-text);
+}
+
+.project-date {
+  font-size: 0.64rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--modal-text);
+  opacity: 0.38;
+  background: rgba(128, 128, 128, 0.1);
+  border: 1px solid rgba(128, 128, 128, 0.14);
+  border-radius: 4px;
+  padding: 0.1rem 0.38rem;
+  line-height: 1.4;
 }
 
 .project-link {

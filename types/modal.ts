@@ -65,6 +65,7 @@ export interface Project {
   status: ProjectStatus
   description: string
   tags: string[]
+  date?: string
   url?: string
   detail?: string  // slug de la page /projets/[detail]
 }
