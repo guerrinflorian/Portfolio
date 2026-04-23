@@ -40,6 +40,7 @@ const mCompetences = computed<Skill[]>(() => [
   // DevOps & Outils - tri decroissant
   { name: 'GitHub / Git',           level: 60, category: 'outils',  context: 'prod'   },
   { name: 'TFS / TFVC',             level: 60, category: 'outils',  context: 'prod'   },
+  { name: t('IA générative (Claude, Copilot)', 'Generative AI (Claude, Copilot)'), level: 75, category: 'outils', context: 'prod' },
   { name: 'Docker / Compose',       level: 40, category: 'outils',  context: 'prod'   },
   { name: t('SEO / Réf. moteurs IA', 'SEO / AI Search'), level: 40, category: 'outils', context: 'projet' },
   { name: 'Linux / Nginx',          level: 30, category: 'outils',  context: 'prod'   },
