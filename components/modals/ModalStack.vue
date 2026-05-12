@@ -38,11 +38,11 @@ const mCompetences = computed<Skill[]>(() => [
   { name: 'Testing / Vitest',       level: 35, category: 'back',    context: 'projet' },
 
   // DevOps & Outils - tri decroissant
+  { name: t('IA générative (Claude, Copilot)', 'Generative AI (Claude, Copilot)'), level: 75, category: 'outils', context: 'prod' },
+  { name: t('SEO / Réf. moteurs', 'SEO / Search Rankings'), level: 75, category: 'outils', context: 'projet' },
   { name: 'GitHub / Git',           level: 60, category: 'outils',  context: 'prod'   },
   { name: 'TFS / TFVC',             level: 60, category: 'outils',  context: 'prod'   },
-  { name: t('IA générative (Claude, Copilot)', 'Generative AI (Claude, Copilot)'), level: 75, category: 'outils', context: 'prod' },
   { name: 'Docker / Compose',       level: 40, category: 'outils',  context: 'prod'   },
-  { name: t('SEO / Réf. moteurs IA', 'SEO / AI Search'), level: 40, category: 'outils', context: 'projet' },
   { name: 'Linux / Nginx',          level: 30, category: 'outils',  context: 'prod'   },
   { name: 'WireGuard VPN',          level: 25, category: 'outils',  context: 'prod'   },
 
