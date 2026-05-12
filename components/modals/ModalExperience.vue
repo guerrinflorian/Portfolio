@@ -44,10 +44,11 @@ const mExperiencesFR = [
     subtitle: 'Auto-entrepreneur',
     period: 'Septembre 2025 → Aujourd\'hui',
     location: 'Bure / Tressange, Moselle',
-    tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker', 'Supabase', 'VPS'],
+    tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker', 'Supabase', 'VPS', 'SEO'],
     points: [
       'Conception et développement de sites web et applications métier sur-mesure pour des clients variés',
       'Sites vitrines, interfaces d\'administration, intégrations back-end, déploiements sur VPS',
+      'SEO avancé : backlinks, domaines référents, stratégie de mots-clés ciblés — positionnement Google obtenu de façon efficace et économique, avec des résultats notables',
       'Missions menées en parallèle de l\'alternance Saarstahl Rail',
     ],
     links: [
@@ -81,10 +82,11 @@ const mExperiencesEN = [
     subtitle: 'Freelance',
     period: 'September 2025 → Present',
     location: 'Bure / Tressange, Moselle, France',
-    tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker', 'Supabase', 'VPS'],
+    tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Node.js', 'Docker', 'Supabase', 'VPS', 'SEO'],
     points: [
       'Design and development of custom websites and business applications for various clients',
       'Landing pages, admin interfaces, back-end integrations, VPS deployments',
+      'Advanced SEO: backlinks, referring domains, keyword strategy — achieving notable Google rankings efficiently and cost-effectively',
       'Projects carried out alongside the Saarstahl Rail apprenticeship',
     ],
     links: [
