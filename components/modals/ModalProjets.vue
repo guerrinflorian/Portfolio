@@ -464,7 +464,7 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     status: 'live',
     date: '2025',
     description:
-      'Ma structure freelance. Sites vitrines, applications métier avec interface admin, back-ends Supabase self-hosted sur VPS, intégrations sur-mesure... Je ne détaille pas toutes mes réalisations ici, mais les projets sont nombreux. SEO avancé : backlinks, domaines référents, stratégie de mots-clés — des résultats notables obtenus de façon efficace et économique.',
+      'Ma structure freelance. Sites vitrines, applications métier avec interface admin, back-ends Supabase self-hosted sur VPS, intégrations sur-mesure... Je ne détaille pas toutes mes réalisations ici, mais les projets sont nombreux. SEO avancé : backlinks, domaines référents, stratégie de mots-clés, des résultats notables obtenus de façon efficace et économique.',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Supabase', 'Docker', 'VPS', 'SEO'],
     url: 'https://www.lehubduweb.fr',
   },
@@ -563,7 +563,7 @@ const mProjets = computed<Project[]>(() => mLocale.value === 'fr' ? [
     status: 'live',
     date: '2025',
     description:
-      'My freelance business. Custom websites, business apps with admin dashboards, self-hosted Supabase back-ends on VPS, bespoke integrations... I don\'t detail every project here, but there are quite a few. Advanced SEO: backlinks, referring domains, keyword strategy — achieving notable Google rankings in an efficient and cost-effective way.',
+      'My freelance business. Custom websites, business apps with admin dashboards, self-hosted Supabase back-ends on VPS, bespoke integrations... I don\'t detail every project here, but there are quite a few. Advanced SEO: backlinks, referring domains, keyword strategy, achieving notable Google rankings in an efficient and cost-effective way.',
     tags: ['Vue 3', 'Nuxt 3', 'TypeScript', 'Supabase', 'Docker', 'VPS', 'SEO'],
     url: 'https://www.lehubduweb.fr',
   },
